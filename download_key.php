@@ -10,17 +10,14 @@ $format = $_GET['format'] ?? 'txt';
 $clientsData = xui_api_request('/panel/api/inbounds/list');
 $clientVlessKey = '';
 
-if ($clientsData && isset($clientsData['obj'])) {
+if ($clientsData && isset($clientsData['obj']) && is_array($clientsData['obj'])) {
     foreach ($clientsData['obj'] as $inbound) {
-        $settings = is_string($inbound['settings']) ? json_decode($inbound['settings'], true) : $inbound['settings'];
-        if (isset($settings['clients'])) {
-            foreach ($settings['clients'] as $c) {
-                if (isset($c['email']) && strtolower(trim($c['email'])) === $email) {
-                    $streamSettings = is_string($inbound['streamSettings']) ? json_decode($inbound['streamSettings'], true) : $inbound['streamSettings'];
-                    $network = isset($streamSettings['network']) ? $streamSettings['network'] : 'tcp';
-                    $clientVlessKey = "vless://" . $c['id'] . "@" . parse_url(XUI_HOST, PHP_URL_HOST) . ":" . $inbound['port'] . "?type=" . $network . "#" . urlencode($c['email']);
-                    break 2;
-                }
+        $settings = is_string($inbound['settings'] ?? null) ? json_decode($inbound['settings'], true) : ($inbound['settings'] ?? []);
+        if (!is_array($settings) || !isset($settings['clients']) || !is_array($settings['clients'])) continue;
+        foreach ($settings['clients'] as $client) {
+            if (isset($client['email']) && strtolower(trim($client['email'])) === $email) {
+                $clientVlessKey = build_vless_share_uri($inbound, $client);
+                break 2;
             }
         }
     }
