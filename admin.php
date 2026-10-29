@@ -118,6 +118,7 @@ $apps = $db->query("SELECT * FROM apps ORDER BY id DESC")->fetchAll(PDO::FETCH_A
 </head>
 <body class="py-4">
 <?php renderServerHeaderStatus(); ?>
+<div class="container mb-3"><a class="btn btn-primary btn-sm" href="/admin/wallet-page.php">Заявки на пополнение и тарифы</a></div>
 <div class="container" style="max-width: 960px;">
     <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
         <h4 class="fw-bold mb-0" style="color: #0f172a;">Панель администратора</h4>
