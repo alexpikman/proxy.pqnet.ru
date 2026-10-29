@@ -6,20 +6,23 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 function admin_wallet_reply(int $status,array $body): never { http_response_code($status); echo json_encode($body,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); exit; }
 if (empty($_SESSION['is_admin'])) admin_wallet_reply(401,['success'=>false,'message'=>'Требуется вход администратора.']);
-$expected=(string)($_SESSION['csrf_token']??''); $provided=(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'');
-if ($expected===''||$provided===''||!hash_equals($expected,$provided)) admin_wallet_reply(403,['success'=>false,'message'=>'Проверка безопасности не пройдена.']);
-try { wallet_ensure_schema($db); } catch(Throwable $e) { error_log('Admin wallet schema failed: '.get_class($e)); admin_wallet_reply(500,['success'=>false,'message'=>'Кошелёк временно недоступен.']); }
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 $method=$_SERVER['REQUEST_METHOD']??'GET';
 $action=(string)($_GET['action']??'');
+if ($method === 'POST') {
+    $expected=(string)($_SESSION['csrf_token']??''); $provided=(string)($_SERVER['HTTP_X_CSRF_TOKEN']??'');
+    if ($expected===''||$provided===''||!hash_equals($expected,$provided)) admin_wallet_reply(403,['success'=>false,'message'=>'Проверка безопасности не пройдена.']);
+}
+try { wallet_ensure_schema($db); } catch(Throwable $e) { error_log('Admin wallet schema failed: '.get_class($e)); admin_wallet_reply(500,['success'=>false,'message'=>'Кошелёк временно недоступен.']); }
 if($method==='GET'&&$action==='requests'){
     $status=(string)($_GET['status']??'pending');
     if(!in_array($status,['pending','approved','rejected','all'],true)) admin_wallet_reply(422,['success'=>false,'message'=>'Некорректный статус.']);
     if($status==='all') $stmt=$db->query('SELECT * FROM topup_requests ORDER BY id DESC LIMIT 500');
     else { $stmt=$db->prepare('SELECT * FROM topup_requests WHERE status = ? ORDER BY id DESC LIMIT 500'); $stmt->execute([$status]); }
-    admin_wallet_reply(200,['success'=>true,'requests'=>$stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    admin_wallet_reply(200,['success'=>true,'requests'=>$stmt->fetchAll(PDO::FETCH_ASSOC),'csrf_token'=>$_SESSION['csrf_token']]);
 }
 if($method==='GET'&&$action==='settings'){
-    admin_wallet_reply(200,['success'=>true,'coins_per_ruble'=>(int)wallet_setting($db,'coins_per_ruble','1'),'price_per_day'=>(int)wallet_setting($db,'price_per_day','10')]);
+    admin_wallet_reply(200,['success'=>true,'coins_per_ruble'=>(int)wallet_setting($db,'coins_per_ruble','1'),'price_per_day'=>(int)wallet_setting($db,'price_per_day','10'),'csrf_token'=>$_SESSION['csrf_token']]);
 }
 if($method!=='POST'){header('Allow: GET, POST');admin_wallet_reply(405,['success'=>false,'message'=>'Метод не поддерживается.']);}
 $input=json_decode((string)file_get_contents('php://input'),true);
