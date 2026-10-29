@@ -105,7 +105,25 @@ $needsPasswordChange = ($userData['password_changed'] ?? 0) == 0;
             transform: translateY(-1px);
             box-shadow: 0 4px 6px rgba(14, 165, 233, 0.35);
         }
-    </style>
+    
+/* PQNET v2 visual layer */
+:root{color-scheme:dark;--pq-bg:#080d19;--pq-panel:#10192b;--pq-line:#26344b;--pq-text:#f3f6fc;--pq-muted:#9aa8bd;--pq-accent:#6ee7d2}
+body{background:radial-gradient(ellipse at 12% 0%,#153044 0,transparent 36%),var(--pq-bg)!important;color:var(--pq-text)!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.container{max-width:1040px!important}
+.card,.card-light,.bg-white,.login-card{background:rgba(16,25,43,.92)!important;color:var(--pq-text)!important;border:1px solid var(--pq-line)!important;border-radius:18px!important;box-shadow:0 16px 44px #0002!important}
+.border-bottom,.border,.table td,.table th{border-color:var(--pq-line)!important}
+.text-muted,.text-secondary,.small.text-muted{color:var(--pq-muted)!important}
+.form-control,.form-select,input,textarea,select{background:#0b1322!important;color:var(--pq-text)!important;border:1px solid #2c3a51!important;border-radius:10px!important}
+.form-control:focus,input:focus,textarea:focus,select:focus{border-color:#4cb6f5!important;box-shadow:0 0 0 3px #4cb6f51b!important}
+.btn-primary,.btn-gradient-blue,button[type=submit]{background:linear-gradient(100deg,#6ee7d2,#83d9ff)!important;color:#071320!important;border:0!important;border-radius:10px!important;font-weight:750!important}
+.btn-outline-primary,.btn-outline-secondary{border-radius:10px!important}
+.table{color:var(--pq-text)!important;--bs-table-bg:transparent;--bs-table-color:var(--pq-text);--bs-table-border-color:var(--pq-line)}
+.table-light-custom th,.table-light th{background:#152238!important;color:#aab8ca!important}
+a{color:#79d9f2}a:hover{color:var(--pq-accent)}
+.alert{border-radius:12px!important}
+@media(max-width:576px){body{padding-top:1rem!important}.container{padding-left:14px;padding-right:14px}.card,.card-light{padding:16px!important}}
+
+</style>
 </head>
 <body class="py-5">
 <?php renderServerHeaderStatus(); ?>
