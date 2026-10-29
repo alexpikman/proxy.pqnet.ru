@@ -276,6 +276,7 @@ $apps = $db->query("SELECT * FROM apps ORDER BY id DESC")->fetchAll(PDO::FETCH_A
         </div>
     </div>
 </div>
+<div class="container my-3"><a class="btn btn-outline-primary" href="/admin/notifications.php">Уведомления пользователям</a> <a class="btn btn-outline-secondary" href="/admin/telegram-broadcast.php">Telegram-рассылка</a></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
