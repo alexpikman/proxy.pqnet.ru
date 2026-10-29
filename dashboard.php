@@ -205,6 +205,7 @@ body .alert-danger{background:#fef3f2!important;color:#b42318!important}
   body .container .btn{font-size:13px}
 }
 </style>
+    <link rel="stylesheet" href="pqnet-theme.css?v=1">
 </head>
 <body class="py-5">
 <?php renderServerHeaderStatus(); ?>
