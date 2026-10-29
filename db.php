@@ -88,14 +88,12 @@ function build_vless_share_uri(array $inbound, array $client) {
     if (!$host || !$port || !$uuid) return '';
     $decode = static function ($v) { if (is_string($v)) $v = json_decode($v, true); return is_array($v) ? $v : []; };
     $s = $decode($inbound['streamSettings'] ?? []); $net = (string)($s['network'] ?? 'tcp'); $sec = (string)($s['security'] ?? 'none');
-    $q = ['encryption' => 'none']; if (!empty($client['flow'])) $q['flow'] = (string)$client['flow'];
-    if ($sec === 'reality') { $r = $decode($s['realitySettings'] ?? []); $rs = $decode($r['settings'] ?? []); $q['security']='reality'; $q['fp']=(string)($rs['fingerprint'] ?? 'firefox'); $names=$r['serverNames'] ?? []; if (is_array($names) && !empty($names[0])) $q['sni']=(string)$names[0]; elseif (!empty($r['serverName'])) $q['sni']=(string)$r['serverName']; $pbk=$rs['publicKey'] ?? ($r['publicKey'] ?? ''); if ($pbk!=='') $q['pbk']=(string)$pbk; $ids=$r['shortIds'] ?? []; if (is_array($ids) && !empty($ids[0])) $q['sid']=(string)$ids[0]; $spx=$rs['spiderX'] ?? ($r['spiderX'] ?? ''); if ($spx!=='') $q['spx']=(string)$spx; }
+    $q = ['type' => $net, 'encryption' => 'none']; if (!empty($client['flow'])) $q['flow'] = (string)$client['flow'];
+    if ($sec === 'reality') { $r = $decode($s['realitySettings'] ?? []); $rs = $decode($r['settings'] ?? []); $q['security']='reality'; $q['fp']=(string)($rs['fingerprint'] ?? 'chrome'); $names=$r['serverNames'] ?? []; if (is_array($names) && !empty($names[0])) $q['sni']=(string)$names[0]; elseif (!empty($r['serverName'])) $q['sni']=(string)$r['serverName']; $pbk=$rs['publicKey'] ?? ($r['publicKey'] ?? ''); if ($pbk!=='') $q['pbk']=(string)$pbk; $ids=$r['shortIds'] ?? []; if (is_array($ids) && !empty($ids[0])) $q['sid']=(string)$ids[0]; $spx=$rs['spiderX'] ?? ($r['spiderX'] ?? ''); if ($spx!=='') $q['spx']=(string)$spx; }
     elseif ($sec === 'tls') { $t=$decode($s['tlsSettings'] ?? []); $q['security']='tls'; if (!empty($t['serverName'])) $q['sni']=(string)$t['serverName']; if (!empty($t['fingerprint'])) $q['fp']=(string)$t['fingerprint']; if (!empty($t['alpn']) && is_array($t['alpn'])) $q['alpn']=implode(',', $t['alpn']); }
     if ($net === 'ws') { $w=$decode($s['wsSettings'] ?? []); if (!empty($w['path'])) $q['path']=(string)$w['path']; if (!empty($w['headers']['Host'])) $q['host']=(string)$w['headers']['Host']; }
     elseif ($net === 'grpc') { $g=$decode($s['grpcSettings'] ?? []); if (!empty($g['serviceName'])) $q['serviceName']=(string)$g['serviceName']; if (!empty($g['authority'])) $q['authority']=(string)$g['authority']; if (!empty($g['mode'])) $q['mode']=(string)$g['mode']; }
     elseif ($net === 'tcp') { $t=$decode($s['tcpSettings'] ?? []); $h=$decode($t['header'] ?? []); if (!empty($h['type']) && $h['type']!=='none') $q['headerType']=(string)$h['type']; }
     elseif ($net === 'httpupgrade') { $u=$decode($s['httpupgradeSettings'] ?? []); if (!empty($u['path'])) $q['path']=(string)$u['path']; if (!empty($u['host'])) $q['host']=(string)$u['host']; }
-    // Keep the share URI in the same conventional shape as the Xray Reality example.
-    $q['type'] = $net;
     $label=(string)($client['email'] ?? 'PQNET'); return 'vless://' . rawurlencode($uuid) . '@' . $host . ':' . $port . '?' . http_build_query($q, '', '&', PHP_QUERY_RFC3986) . '#' . rawurlencode($label);
 }
