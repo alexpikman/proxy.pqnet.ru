@@ -395,7 +395,7 @@ body .alert-danger{background:#fef3f2!important;color:#b42318!important}
 </div>
 <script>
     new QRCode(document.getElementById("qrcode-modal"), {
-        text: "<?= $clientVlessKey ?>",
+        text: <?= json_encode($clientVlessKey, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>,
         width: 160,
         height: 160
     });
