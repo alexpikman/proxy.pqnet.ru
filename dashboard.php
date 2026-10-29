@@ -328,6 +328,7 @@ $needsPasswordChange = ($userData['password_changed'] ?? 0) == 0;
 </script>
 <?php endif; ?>
 
+<div class="container my-3"><a class="btn btn-outline-primary" href="/notifications.php">Центр уведомлений</a> <a class="btn btn-outline-secondary" href="/wallet-page.php">Баланс и подписка</a></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('phoneInput').addEventListener('input', function (e) {
