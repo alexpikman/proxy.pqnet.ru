@@ -133,6 +133,29 @@ a{color:#79d9f2}a:hover{color:var(--pq-accent)}
 @media(max-width:576px){body{padding-top:1rem!important}.container{padding-left:14px;padding-right:14px}.card,.card-light{padding:16px!important}}
 
 </style>
+<style>
+:root{color-scheme:light!important;--bg:#f4f7fb!important;--panel:#ffffff!important;--text:#172033!important;--muted:#667085!important;--line:#e3e8f0!important;--accent:#0f766e!important;--accent2:#0284c7!important;--pq-bg:#f4f7fb!important;--pq-panel:#ffffff!important;--pq-text:#172033!important;--pq-muted:#667085!important;--pq-line:#e3e8f0!important;--pq-accent:#0f766e!important}
+html,body{background:#f4f7fb!important;color:#172033!important;color-scheme:light!important}
+body{background:linear-gradient(135deg,#f8fafc,#edf4fb)!important;color:#172033!important}
+.shell,.intro,.login,.card,.card-light,.bg-white,.login-card,.container .card,.modal-content,.dropdown-menu{background:#fff!important;color:#172033!important;border-color:#e3e8f0!important;box-shadow:0 12px 36px rgba(15,23,42,.07)!important}
+.intro{background:linear-gradient(145deg,#f0fdfa,#eff6ff)!important;border-color:#e3e8f0!important}
+.intro h1,.intro h2,.login h2,h1,h2,h3,h4,h5,h6,label,.form-label,.modal-title{color:#172033!important}
+.sub,.text-muted,.text-secondary,.small.text-muted,.secure,.foot,.feature{color:#667085!important}
+input,textarea,select,.form-control,.form-select{background:#fff!important;color:#172033!important;border:1px solid #d5deea!important}
+input::placeholder,textarea::placeholder{color:#98a2b3!important}
+input:focus,textarea:focus,select:focus,.form-control:focus,.form-select:focus{border-color:#0f9b8e!important;box-shadow:0 0 0 3px rgba(15,155,142,.12)!important}
+button,.btn-primary,.btn-gradient-blue,button[type=submit]{background:linear-gradient(100deg,#0f9b8e,#0284c7)!important;color:#fff!important;border:0!important}
+.btn-outline-primary{color:#0369a1!important;border-color:#93c5fd!important;background:#fff!important}
+.btn-outline-secondary{color:#475467!important;border-color:#d0d5dd!important;background:#fff!important}
+.table{color:#344054!important;--bs-table-bg:transparent;--bs-table-color:#344054;--bs-table-border-color:#e3e8f0}
+.table-light-custom th,.table-light th,thead th{background:#f1f5f9!important;color:#475467!important}
+.table td,.table th,.border,.border-bottom{border-color:#e3e8f0!important}
+a{color:#087f8c!important}a:hover{color:#0369a1!important}
+.alert{background:#fff7ed!important;color:#9a3412!important;border-color:#fed7aa!important}
+.badge{color:inherit}
+.modal-header,.modal-footer{border-color:#e3e8f0!important}
+@media(prefers-color-scheme:dark){html,body{color-scheme:light!important;background:#f4f7fb!important;color:#172033!important}}
+</style>
 </head>
 <body class="py-4">
 <?php renderServerHeaderStatus(); ?>
