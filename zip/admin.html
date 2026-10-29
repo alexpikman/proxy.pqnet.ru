@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора PQService</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400,500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-cog"></i> Панель администратора | PQService</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-info" id="userInfo">Загрузка...</div>
+            <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Выход</button>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="local"><i class="fas fa-users"></i> Локальные пользователи</button>
+        <button class="tab-btn" data-tab="sync"><i class="fas fa-cloud-upload-alt"></i> Пользователи 3X-UI</button>
+        <button class="tab-btn" data-tab="settings"><i class="fas fa-sliders-h"></i> Настройки сервера</button>
+        <button class="tab-btn" data-tab="monitoring"><i class="fas fa-chart-line"></i> Статистика и мониторинг</button>
+    </div>
+
+    <!-- Вкладка локальных пользователей -->
+    <div id="local-tab" class="tab-content active">
+        <div style="margin-bottom: 1rem;">
+            <button id="massActionBtn" class="btn-submit" style="background: #ff9800;"><i class="fas fa-tasks"></i> Массовая обработка</button>
+        </div>
+        <button id="syncToXuiBtn" class="btn-submit" style="background: #2c9e6e; margin-bottom: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Выгрузить все даты в 3X</button>
+        <div class="table-wrapper">
+            <table id="users-table">
+                <thead>
+                    <tr><th>№</th><th>Логин</th><th>Email</th><th>Статус</th><th>Осталось дней</th><th>Дата окончания</th><th>Монеты</th><th>Цена/день</th><th>VIP</th><th>Действия</th></tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка синхронизации 3X-UI -->
+    <div id="sync-tab" class="tab-content">
+        <div class="inbound-selector">
+            <div class="form-group" style="flex:2">
+                <label><i class="fas fa-plug"></i> Подключение (Inbound) из 3X-UI</label>
+                <select id="inboundSelect"><option value="">-- Загрузка списка --</option></select>
+            </div>
+            <button id="loadClientsBtn" class="btn-submit"><i class="fas fa-sync-alt"></i> Загрузить клиентов</button>
+        </div>
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem; gap: 0.5rem;">
+            <label style="font-size:0.8rem;"><input type="checkbox" id="hideRegisteredCheckbox"> Не показывать зарегистрированных</label>
+        </div>
+        <div id="clientsTableContainer" class="table-wrapper" style="display:none;">
+            <table id="clients-table">
+                <thead><tr><th>№</th><th>Email</th><th>Статус</th><th>Подписка</th><th>Expiry Time</th><th>Действия</th></tr></thead>
+                <tbody id="clients-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка настройки -->
+    <div id="settings-tab" class="tab-content">
+        <div class="settings-panel">
+        <div class="settings-panel" style="margin-top: 1rem;">
+            <h3><i class="fas fa-coins"></i> Глобальные настройки</h3>
+            <div id="globalPrice" style="background: #f0f4f8; padding: 0.8rem; border-radius: 1rem; margin-top: 0.5rem;">Загрузка...</div>
+        </div>
+            <h3><i class="fas fa-database"></i> Backup</h3>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button id="createBackupBtn" class="btn-submit" style="background: #2c9e6e;"><i class="fas fa-save"></i> Создать бэкап</button>
+                <button id="restoreBackupBtn" class="btn-submit" style="background: #ff9800;"><i class="fas fa-undo"></i> Восстановить</button>
+            </div>
+            <div id="backupList" style="margin-top: 1rem;">
+                <h4>Список бэкапов:</h4>
+                <ul id="backupFilesList" style="list-style: none; padding-left: 0;"></ul>
+            </div>
+        </div>
+        
+        <div class="settings-panel" style="margin-top: 1rem;">
+            <h3><i class="fas fa-power-off"></i> Управление сервером</h3>
+            <button id="restartServiceBtn" class="btn-submit" style="background:#ff9800;"><i class="fas fa-sync-alt"></i> Перезапустить сервер</button>
+            <div id="lastRestartTime" style="margin-top: 0.8rem; font-size: 0.8rem; color: #5b6f82;">Последний запуск: загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Вкладка мониторинг -->
+    <div id="monitoring-tab" class="tab-content">
+        <div class="system-info" id="systemInfo">Загрузка...</div>
+    </div>
+
+    <div class="footer">
+        <a href="/logs.html?log=error.log"><i class="fas fa-exclamation-triangle"></i> Лог ошибок</a>
+        <a href="/logs.html?log=out.log"><i class="fas fa-terminal"></i> Лог вывода</a>
+        <a href="/logs.html?log=nginx-error.log"><i class="fas fa-server"></i> Nginx ошибки</a>
+        <a href="/logs.html?log=syslog"><i class="fas fa-info-circle"></i> Системный журнал</a>
+    </div>
+</div>
+
+<!-- Модальное окно массовой обработки -->
+<div id="massModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <span>Массовая обработка пользователей</span>
+            <button class="modal-close" onclick="closeMassModal()">&times;</button>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="selectAllUsers"> Выбрать всех
+            </label>
+        </div>
+        <div id="usersChecklist" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid #eef2f8; border-radius: 1rem; padding: 0.5rem;">
+            <!-- Список пользователей с чекбоксами -->
+        </div>
+        <div class="form-group">
+            <label>Количество монет</label>
+            <input type="number" id="massCoins" placeholder="Оставить пустым - не менять">
+        </div>
+        <div class="form-group">
+            <label>Дата окончания</label>
+            <input type="datetime-local" id="massExpiryDate">
+        </div>
+        <button id="applyMassBtn" class="btn-submit">Применить</button>
+    </div>
+</div>
+
+<!-- Модальное окно -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalTitle">Редактирование пользователя</span>
+            <button class="modal-close" onclick="closeUserModal()">&times;</button>
+        </div>
+        <form id="userForm">
+            <input type="hidden" id="userUuid">
+            <input type="hidden" id="xuiEmail">
+            <input type="hidden" id="xuiInboundId">
+            <input type="hidden" id="xuiClientId">
+            <input type="hidden" id="userSubId">
+            <input type="hidden" id="userSubId">
+            
+            <div class="form-row">
+                <div class="form-group"><label>Логин</label><input type="text" id="userLogin" required></div>
+                <div class="form-group"><label>Пароль</label><input type="password" id="userPassword" placeholder="Оставьте пустым"></div>
+            </div>
+            <div class="form-row-three">
+                <div class="form-group"><label>VIP</label><input type="number" id="userVip" value="0"></div>
+                <div class="form-group"><label>Монеты</label><input type="number" id="userCoins" value="0"></div>
+                <div class="form-group"><label>Цена за день</label><input type="number" id="userPricePerDay" placeholder="монет"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Статус</label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label class="toggle-switch-status">
+                            <input type="checkbox" id="userStatusToggle">
+                            <span class="slider-status"></span>
+                        </label>
+                        <span id="statusLabel">Активен</span>
+                    </div>
+                </div>
+                <div class="form-group"><label>Email</label><input type="text" id="userEmail"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Телефон</label><input type="text" id="userPhone"></div>
+                <div class="form-group"><label>Цена за день</label><input type="number" id="userPricePerDay" placeholder="монет"></div>
+            </div>
+            
+            <!-- Дата окончания -->
+            <div class="form-group">
+                <label>Дата окончания (timestamp)</label>
+                <input type="number" id="userExpiryDate" placeholder="0 — бессрочно">
+                <div id="userExpiryDateHint" style="font-size:0.7rem; color:#6c757d;">(0 - бессрочно)</div>
+            </div>
+            
+            <!-- Блок для админа -->
+            <div style="background: #f0f4f8; padding: 0.8rem; border-radius: 1rem; margin: 1rem 0;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #2c6e9e;">📅 Управление сроком подписки</div>
+                <div id="expiryDatePreview" style="font-size: 0.8rem; margin-bottom: 0.5rem; color: #5b6f82;"></div>
+                <div id="daysLeftPreview" style="font-size: 0.8rem; margin-bottom: 0.8rem; font-weight: 500;"></div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <button type="button" id="add1DayBtn" class="btn-submit" style="background: #2c9e6e; padding: 0.3rem 0.8rem;">+1 день</button>
+                    <button type="button" id="add30DayBtn" class="btn-submit" style="background: #2c9e6e; padding: 0.3rem 0.8rem;">+30 дней</button>
+                    <div style="display: flex; gap: 0.3rem;">
+                        <input type="number" id="customDaysInput" placeholder="дней" style="width: 80px; padding: 0.3rem 0.5rem; border-radius: 40px; border: 1px solid #dce5ec;">
+                        <button type="button" id="addCustomDaysBtn" class="btn-submit" style="background: #ff9800; padding: 0.3rem 0.8rem;">Добавить</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+
+<script src="/admin.js"></script>
+<script src="/admin-tabs.js"></script>
+<script src="/admin-users.js"></script>
+<script src="/admin-xui.js"></script>
+<script src="/admin-settings.js"></script>
+</body>
+</html>

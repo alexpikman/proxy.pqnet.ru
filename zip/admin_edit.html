@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование пользователя - Админка PQService</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #2c6e9e;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .profile-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            padding: 1.8rem;
+        }
+        .avatar-section { text-align: center; margin-bottom: 1.5rem; }
+        .avatar {
+            font-size: 3rem;
+            background: #eef2fa;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 0.8rem auto;
+            color: #2c6e9e;
+        }
+        .avatar-section h2 { font-size: 1.5rem; font-weight: 600; color: #1e2f3c; }
+        .role-badge {
+            background: #eef2fa;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2c6e9e;
+            display: inline-block;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1rem 0 1.5rem;
+            text-align: center;
+        }
+        .stat-item { flex: 1; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #2c6e9e; }
+        .stat-label { font-size: 0.7rem; color: #5b6f82; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-section {
+            margin-top: 1rem;
+            border-top: 1px solid #eef2f8;
+            padding-top: 1rem;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1e2f3c;
+            font-size: 1rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .info-label {
+            color: #5b6f82;
+            font-size: 0.85rem;
+            font-weight: 500;
+            min-width: 120px;
+        }
+        .info-value {
+            font-weight: 500;
+            background: #f8fafc;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+        }
+        .edit-input {
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #dce5ec;
+            font-size: 0.85rem;
+            width: 220px;
+        }
+        .edit-select {
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #dce5ec;
+            font-size: 0.85rem;
+            background: white;
+            width: 220px;
+        }
+        .status-select, .date-input, .coins-input {
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #dce5ec;
+            font-size: 0.85rem;
+            background: white;
+        }
+        .status-select { min-width: 120px; }
+        .date-input { width: 220px; }
+        .coins-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .coins-input { width: 100px; text-align: center; }
+        .btn-small {
+            background: #2c9e6e;
+            color: white;
+            border: none;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-small:hover { background: #1e7a5a; }
+        .btn-save {
+            background: #2c6e9e;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 1.5rem;
+            font-weight: 500;
+        }
+        .btn-save:hover { background: #1e5a7d; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2f3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/admin.html" class="back-link"><i class="fas fa-arrow-left"></i> Назад в админку</a>
+    
+    <div class="profile-card">
+        <div class="avatar-section">
+            <div class="avatar"><i class="fas fa-user-edit"></i></div>
+            <h2 id="userLogin">—</h2>
+            <div class="role-badge">Редактирование</div>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-value" id="coinsStat">0</div>
+                <div class="stat-label">PQcoins</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="daysStat">—</div>
+                <div class="stat-label">Осталось дней</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">📋 ДАННЫЕ ПОЛЬЗОВАТЕЛЯ</div>
+            <div class="info-row">
+                <span class="info-label">Логин</span>
+                <input type="text" id="editLogin" class="edit-input">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <input type="email" id="editEmail" class="edit-input">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Телефон</span>
+                <input type="text" id="editPhone" class="edit-input" placeholder="+7...">
+            </div>
+            <div class="info-row">
+                <span class="info-label">VIP статус</span>
+                <select id="editVip" class="edit-select">
+                    <option value="0">Нет</option>
+                    <option value="1">Да</option>
+                </select>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Цена за день</span>
+                <input type="number" id="editPricePerDay" class="edit-input" placeholder="0 - стандартная">
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">💰 УПРАВЛЕНИЕ МОНЕТАМИ</div>
+            <div class="info-row">
+                <span class="info-label">Добавить коины</span>
+                <div class="coins-group">
+                    <input type="number" id="addCoinsAmount" class="coins-input" placeholder="количество" value="100">
+                    <button id="addCoinsBtn" class="btn-small"><i class="fas fa-plus"></i> Добавить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">⚙️ УПРАВЛЕНИЕ ПОДПИСКОЙ</div>
+            <div class="info-row">
+                <span class="info-label">Статус</span>
+                <select id="statusSelect" class="status-select">
+                    <option value="active">Активен</option>
+                    <option value="disabled">Заблокирован</option>
+                </select>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Дата окончания</span>
+                <input type="datetime-local" id="expiryDatePicker" class="date-input">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Текущая дата</span>
+                <span id="currentExpiryDate" class="info-value">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Осталось дней</span>
+                <span id="daysLeftValue" class="info-value">—</span>
+            </div>
+        </div>
+
+        <button id="saveBtn" class="btn-save"><i class="fas fa-save"></i> Сохранить изменения</button>
+    </div>
+</div>
+
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+
+<script>
+    let userId = null;
+    
+    function showMsg(text, isErr = false) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = text;
+        toast.style.background = isErr ? '#b91c1c' : '#1e2f3c';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    
+    async function fetchJson(url, options = {}) {
+        const r = await fetch(url, options);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+    
+    function timestampToDatetimeLocal(timestamp) {
+        if (!timestamp || timestamp === 0) return '';
+        const date = new Date(timestamp * 1000);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    async function loadUser(uuid) {
+        try {
+            const user = await fetchJson('/admin/user/' + uuid);
+            userId = user.uuid;
+            
+            document.getElementById('userLogin').innerText = user.login;
+            document.getElementById('editLogin').value = user.login;
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editVip').value = user.vip || 0;
+            document.getElementById('editPricePerDay').value = user.price_per_day || '';
+            document.getElementById('coinsStat').innerText = user.coins;
+            
+            document.getElementById('statusSelect').value = user.localstatus === 'active' ? 'active' : 'disabled';
+            
+            const expiryDate = user.expiry_date || 0;
+            document.getElementById('currentExpiryDate').innerText = expiryDate ? new Date(expiryDate * 1000).toLocaleString() : 'Бессрочно';
+            document.getElementById('expiryDatePicker').value = timestampToDatetimeLocal(expiryDate);
+            
+            if (expiryDate > 0) {
+                const now = Math.floor(Date.now() / 1000);
+                const daysLeft = Math.ceil((expiryDate - now) / 86400);
+                if (daysLeft > 0) {
+                    document.getElementById('daysLeftValue').innerHTML = `<span style="color:#2c9e6e;">${daysLeft} дней</span>`;
+                    document.getElementById('daysStat').innerHTML = daysLeft;
+                } else {
+                    document.getElementById('daysLeftValue').innerHTML = `<span style="color:#b91c1c;">Истек</span>`;
+                    document.getElementById('daysStat').innerHTML = 0;
+                }
+            } else {
+                document.getElementById('daysLeftValue').innerHTML = 'Бессрочно';
+                document.getElementById('daysStat').innerHTML = '∞';
+            }
+        } catch (e) {
+            showMsg('Ошибка загрузки пользователя: ' + e.message, true);
+        }
+    }
+    
+    async function addCoins() {
+        const amount = parseInt(document.getElementById('addCoinsAmount').value);
+        if (!amount || amount <= 0) {
+            showMsg('Введите корректное количество монет', true);
+            return;
+        }
+        
+        try {
+            const user = await fetchJson('/admin/user/' + userId);
+            const newCoins = (user.coins || 0) + amount;
+            
+            const updateData = {
+                uuid: userId,
+                login: user.login,
+                coins: newCoins,
+                vip: user.vip,
+                localstatus: user.localstatus,
+                localexpire: user.localexpire || 0,
+                email: user.email,
+                phone: user.phone,
+                price_per_day: user.price_per_day,
+                expiry_date: user.expiry_date || 0
+            };
+            
+            await fetchJson('/admin/user/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            
+            document.getElementById('coinsStat').innerText = newCoins;
+            showMsg(`✅ Добавлено ${amount} монет. Баланс: ${newCoins}`);
+        } catch (e) {
+            showMsg('Ошибка добавления монет', true);
+        }
+    }
+    
+    async function saveUser() {
+        const newLogin = document.getElementById('editLogin').value.trim();
+        const newEmail = document.getElementById('editEmail').value.trim();
+        const newPhone = document.getElementById('editPhone').value.trim();
+        const newVip = parseInt(document.getElementById('editVip').value);
+        const newPricePerDay = document.getElementById('editPricePerDay').value ? parseInt(document.getElementById('editPricePerDay').value) : null;
+        const status = document.getElementById('statusSelect').value;
+        const pickerValue = document.getElementById('expiryDatePicker').value;
+        
+        let expiryTimestamp = 0;
+        if (pickerValue) {
+            expiryTimestamp = Math.floor(new Date(pickerValue).getTime() / 1000);
+        }
+        
+        if (!newLogin) {
+            showMsg('Логин не может быть пустым', true);
+            return;
+        }
+        
+        try {
+            const user = await fetchJson('/admin/user/' + userId);
+            
+            const updateData = {
+                uuid: userId,
+                login: newLogin,
+                coins: user.coins,
+                vip: newVip,
+                localstatus: status,
+                localexpire: user.localexpire || 0,
+                email: newEmail,
+                phone: newPhone,
+                price_per_day: newPricePerDay,
+                expiry_date: expiryTimestamp
+            };
+            
+            await fetchJson('/admin/user/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            
+            if (user.xui_client_id && user.xui_inbound_id) {
+                await fetchJson('/admin/user/sync-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uuid: userId, enable: status === 'active' })
+                });
+                
+                if (expiryTimestamp > 0) {
+                    await fetchJson('/admin/client/update-expiry', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            inboundId: parseInt(user.xui_inbound_id), 
+                            clientId: user.xui_client_id, 
+                            expiryDate: expiryTimestamp 
+                        })
+                    });
+                }
+            }
+            
+            showMsg('✅ Изменения сохранены');
+            setTimeout(() => { window.location.href = '/admin.html'; }, 1500);
+        } catch (e) {
+            showMsg('Ошибка сохранения: ' + e.message, true);
+        }
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const uuid = urlParams.get('uuid');
+    
+    if (uuid) {
+        loadUser(uuid);
+    } else {
+        showMsg('UUID пользователя не указан', true);
+    }
+    
+    document.getElementById('saveBtn').addEventListener('click', saveUser);
+    document.getElementById('addCoinsBtn').addEventListener('click', addCoins);
+</script>
+</body>
+</html>

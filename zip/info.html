@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Как подключиться - PQService</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
+            min-height: 100vh;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container { max-width: 580px; width:100%; margin:0; }
+        .info-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #2c6e9e;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e2f3c;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .info-block {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .info-block-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c6e9e;
+            margin-bottom: 0.5rem;
+        }
+        .info-block-desc {
+            font-size: 0.85rem;
+            color: #5b6f82;
+            line-height: 1.4;
+            margin-bottom: 0.8rem;
+        }
+        .info-block-image {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .info-block-image img {
+            max-width: 100%;
+            border-radius: 0.8rem;
+            background: white;
+            border: 1px solid #eef2f8;
+        }
+        .app-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .app-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #2c6e9e;
+            color: white;
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .app-link:hover {
+            background: #1e5a7d;
+        }
+        .app-link.android { background: #3ddc84; color: #1a1a1a; }
+        .app-link.ios { background: #000000; color: white; }
+        .footer {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #a0b3c9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="info-card">
+        <a href="/profile.html" class="back-link"><i class="fas fa-arrow-left"></i> Назад в профиль</a>
+        <div class="title"><i class="fas fa-question-circle"></i> Как подключиться?</div>
+        
+        <div class="info-block">
+            <div class="info-block-title">1. Скачайте приложение</div>
+            <div class="info-block-desc">Выберите вашу платформу и установите приложение:</div>
+            <div class="app-links">
+                <a href="https://play.google.com/store/apps/details?id=com.v2ray.client" target="_blank" class="app-link android">
+                    <i class="fab fa-android"></i> Android
+                </a>
+                <a href="https://apps.apple.com/gb/app/v2ray-client/id6747379524" target="_blank" class="app-link ios">
+                    <i class="fab fa-apple"></i> iOS
+                </a>
+            </div>
+        </div>
+        
+        <div class="info-block">
+            <div class="info-block-title">2. Скопируйте ссылку подписки</div>
+            <div class="info-block-desc">В личном кабинете нажмите "Копировать" в разделе "Подписка"</div>
+            <div class="info-block-image">
+                <img src="/copy-link.jpg" alt="Копировать ссылку подписки">
+            </div>
+        </div>
+        
+        <div class="info-block">
+            <div class="info-block-title">3. Импортируйте подписку в приложение</div>
+            <div class="info-block-desc">Вставьте скопированную ссылку в приложение и подключитесь</div>
+        </div>
+        
+        <div class="footer">
+            PQService © 2026
+        </div>
+    </div>
+</div>
+</body>
+</html>

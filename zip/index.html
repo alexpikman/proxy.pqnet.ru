@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PQService — Вход</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #03113e 0%, #0a1a4a 50%, #1a2a5a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(33,137,255,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(186,43,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(33,137,255,0.2);
+            padding: 2rem 1.8rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        .logo img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+        .sub {
+            background: linear-gradient(135deg, #2189ff, #0098ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.8rem;
+        }
+        .input-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2189ff;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px 14px 45px;
+            border-radius: 60px;
+            border: 1.5px solid #e0e8f0;
+            font-size: 0.95rem;
+            background: #f8fafd;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #2189ff;
+            box-shadow: 0 0 0 4px rgba(33,137,255,0.15);
+            background: white;
+        }
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #2189ff 0%, #0098ff 50%, #8c39fc 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            background-size: 200% auto;
+            box-shadow: 0 4px 15px rgba(33,137,255,0.3);
+        }
+        .btn-login:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33,137,255,0.4);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .error-message {
+            color: #ff4444;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255,68,68,0.1);
+            border-radius: 60px;
+            border: 1px solid rgba(255,68,68,0.3);
+            display: none;
+        }
+        .footer-block {
+            background: linear-gradient(135deg, rgba(33,137,255,0.05), rgba(186,43,255,0.05));
+            border-radius: 1rem;
+            padding: 0.8rem;
+            margin-top: 1.5rem;
+            font-size: 0.7rem;
+            color: #8c39fc;
+            text-align: center;
+            font-weight: 500;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #2189ff, #0098ff);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; }
+        
+        @media (max-width: 480px) {
+            .login-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-card">
+        <div class="logo">
+            <img src="/logo.png" alt="PQService">
+        </div>
+        <div class="sub">Вход в личный кабинет</div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="login" placeholder="Логин" required autofocus>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Пароль" required>
+            </div>
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </button>
+        </form>
+        
+        <div id="errorMsg" class="error-message"></div>
+        <div class="footer-block">
+            ✦ Мой надежный проводник ✦
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+
+<script>
+    function showMsg(text, isErr=false) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = text;
+        toast.style.background = isErr ? '#ff4444' : 'linear-gradient(135deg, #2189ff, #0098ff)';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.style.display = 'none';
+        errorDiv.innerText = '';
+        
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.success) {
+                showMsg('Вход выполнен, перенаправление...');
+                setTimeout(() => {
+                    if (data.role === 'admin') window.location.href = '/admin.html';
+                    else window.location.href = '/profile.html';
+                }, 800);
+            } else {
+                errorDiv.innerText = data.message || 'Неверный логин или пароль';
+                errorDiv.style.display = 'block';
+            }
+        } catch(err) {
+            errorDiv.innerText = 'Ошибка соединения';
+            errorDiv.style.display = 'block';
+            showMsg('Ошибка соединения', true);
+        }
+    });
+</script>
+</body>
+</html>

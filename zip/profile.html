@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PQService — Личный кабинет</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/profile.css">
+    <style>
+        .coins-panel {
+            padding: 1rem;
+            border-radius: 1.2rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .coins-panel.has-coins {
+            background: linear-gradient(165deg, #a277f508 20%, #eef8fc 100%);
+            border: 1px solid #e5e5e5;
+        }
+        .coins-panel.no-coins {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 1px solid #d7e0f34f;
+        }
+        .buy-days-section {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .buy-card {
+            background: white;
+            border-radius: 1.2rem;
+            padding: 0.8rem 0.2rem;
+            text-align: center;
+            min-width: 140px;
+            box-shadow: 6px 7px 12px 0px rgb(86 84 97 / 28%);
+        }
+        .buy-price {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0198ff;
+        }
+        .buy-label {
+            font-size: 1.5rem;
+            color: #505c69;
+            margin-bottom: 0.3rem;
+        }
+        .profile-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .profile-info-label {
+            color: #5b6f82;
+            font-size: 0.85rem;
+        }
+        .profile-info-value {
+            font-weight: 500;
+            background: #f8fafc;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+        }
+        .sub-link-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+        }
+        .transactions-table th, .transactions-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .transactions-table th {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+        .positive { color: #2c9e6e; font-weight: 600; }
+        .negative { color: #b91c1c; font-weight: 600; }
+        .btn {
+            border: none;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background: #eef2fa;
+        }
+        .btn-primary { background: #2c6e9e; color: white; }
+        .btn-green {
+            background: linear-gradient(160deg, #528fff, #8862b9e0);
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 9px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 80px;
+            font-weight: 550;
+        }
+        .bottom-menu { margin-top: 1.5rem; text-align: center; }
+        .logout-btn-bottom {
+            background: #eef2fa;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2c3e4e;
+            cursor: pointer;
+        }
+        .footer-block {
+            background: rgba(0,0,0,0.03);
+            border-radius: 1rem;
+            padding: 0.8rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #5b6f82;
+            text-align: center;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1e2f3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; }
+        .status-active { color: #2c9e6e; font-weight: 800; font-size: 0.9rem; }
+        .status-inactive { color: #b91c1c; font-weight: 800; font-size: 0.9rem; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .pagination button {
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
+            border: 1px solid #dce5ec;
+            background: white;
+            cursor: pointer;
+        }
+        .pagination button.active {linear-gradient(17deg, #77c6f50d 20%, #2773ab26 100%)
+            background: #2c6e9e;
+            color: white;
+            border-color: #2c6e9e;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="profile-card">
+        <div style="position: absolute; top: 1rem; right: 1rem;">
+            <div class="online-badge" id="onlineStatusTop">—</div>
+        </div>
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <img src="/logo.png" alt="logo" style="max-width: 100%; height: auto; background: transparent;">
+        </div>
+        <div class="avatar-section">
+            <div style="display: none;"></div>
+            <h2 id="userLogin">—</h2>
+            <div class="role-row">
+                <div class="role-badge" id="userRole">пользователь</div>
+            </div>
+        </div>
+        
+        <div style="background: #bad7f1;border-radius: 1.5rem;padding: 0.5rem;margin: 1rem 0 1.5rem;background: linear-gradient(1deg, #5c55c30f 20%, #65bee11c 72%);">
+            <table style="width: 100%; border: none; background: transparent;">
+                <tbody><tr>
+                    <td style="width: 50px; text-align: left; vertical-align: middle;">
+                        <i id="addCoinsBtn" class="fas fa-plus-circle" style="color: #2c9e6e; cursor: pointer; font-size: 1.8rem;"></i>
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <div class="stat-value" id="coinsStat" style="margin: 0;">1700</div>
+                        <div style="font-size: 0.8rem; color: #385c7f;">PQcoins</div>
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <div class="stat-value" id="daysStat" style="margin: 0;">45</div>
+                        <div style="font-size: 0.8rem; color: #5b6f82;">Осталось дней</div>
+                    </td>
+                </tr>
+            </tbody></table>
+        </div>
+        
+        <!-- Панель добавления подписки -->
+        <div id="vipImageBlock" style="display: none; text-align: center; margin: 1rem 0;">
+            <img src="/vip.png" alt="VIP статус" style="max-width: 100%; border-radius: 1rem;">
+        </div>
+        <div id="coinsPanel" class="coins-panel has-coins">
+            <div class="buy-days-section">
+                <div class="buy-card">
+                    <div class="buy-label">1 день</div>
+                    <div class="buy-price" id="price1Day">—</div>
+                    <button id="buy1DayBtn" class="btn-green" style="margin-top: 0.5rem;">Добавить</button>
+                </div>
+                <div class="buy-card">
+                    <div class="buy-label">30 дней</div>
+                    <div class="buy-price" id="price30Day">—</div>
+                    <button id="buy30DayBtn" class="btn-green" style="margin-top: 0.5rem;">Добавить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПРОФИЛЬ ПОДПИСКИ -->
+        <div style="margin-top: 1rem;">
+            <div class="profile-info-row">
+                <span class="profile-info-label">Статус подписки</span>
+                <span id="profileStatusText" class="profile-info-value status-active">—</span>
+            </div>
+            <div class="profile-info-row">
+                <span class="profile-info-label">Дата окончания</span>
+                <span id="expiryDate" class="profile-info-value">—</span>
+            </div>
+            <div class="profile-info-row">
+                <span class="profile-info-label">Email</span>
+                <span id="profileEmail" class="profile-info-value">—</span>
+            </div>
+            <div class="profile-info-row">
+                <span class="profile-info-label">Подписка</span>
+                <div class="sub-link-buttons">
+                    <button id="copySubProfileBtn" class="btn"><i class="fas fa-copy"></i> Копировать</button>
+                    <button id="openSubProfileBtn" class="btn"><i class="fas fa-external-link-alt"></i> Перейти</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 1rem 0;">
+            <a href="/info.html" class="btn" style="text-decoration: none; background: linear-gradient(135deg, #2189ff 0%, #0098ff 50%, #8c39fc 100%); color: white; padding: 0.7rem 1.5rem; border-radius: 40px; font-size: 0.9rem; display: inline-block; transition: all 0.3s ease; background-size: 200% auto; box-shadow: 0 4px 15px rgba(33,137,255,0.3);" onmouseover="this.style.backgroundPosition='right center'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(33,137,255,0.4)';" onmouseout="this.style.backgroundPosition='left center'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(33,137,255,0.3)';">
+                <i class="fas fa-question-circle"></i> Как подключиться?
+            </a>
+        </div>
+
+        <!-- БЛОК ТРАНЗАКЦИЙ -->
+        <div style="margin-top: 1rem;">
+            <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">📊 История транзакций</h3>
+            <div style="overflow-x:auto;">
+                <table class="transactions-table" id="transactionsTable">
+                    <thead>
+                        <tr><th>Дата</th><th>Тип</th><th>Сумма</th><th>Описание</th>
+                    </thead>
+                    <tbody id="transactionsTbody">
+                        <tr><td colspan="4">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="transactionsPagination" class="pagination" style="display: none;"></div>
+        </div>
+
+        <div class="bottom-menu">
+            <button id="logoutBottomBtn" class="logout-btn-bottom"><i class="fas fa-sign-out-alt"></i> Выход</button>
+        </div>
+        <div class="footer-block" id="footerText">Загрузка...</div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <p id="confirmText">Подтвердить транзакцию?</p>
+        <div class="modal-buttons">
+            <button id="modalConfirmBtn" class="btn btn-primary">ОК</button>
+            <button id="modalCancelBtn" class="btn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно пополнения -->
+<div id="topupModal" class="modal">
+    <div class="modal-content" style="max-width: 350px;">
+        <div class="modal-header">
+            <span id="modalTitle">💰 Пополнение баланса</span>
+            <button class="modal-close" onclick="closeTopupModal()">&times;</button>
+        </div>
+        <div style="text-align: center;">
+            <img src="/qr.jpg" alt="QR код" style="max-width: 200px; margin: 1rem 0;">
+            <p><strong>Логин:</strong> <span id="topupLogin"></span></p>
+            <p style="font-size: 0.8rem; color: #5b6f82;">Сканируйте QR код для оплаты</p>
+            <div class="modal-buttons" style="margin-top: 1rem;">
+                <button id="confirmTopupBtn" class="btn btn-primary">Оплачено</button>
+                <button onclick="closeTopupModal()" class="btn">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+
+<script src="/profile.js"></script>
+<script src="/profile-user.js"></script>
+<script src="/profile-buy.js"></script>
+<script src="/profile-transactions.js"></script>
+</body>
+</html>
