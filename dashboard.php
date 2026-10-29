@@ -147,6 +147,64 @@ a{color:#087f8c!important}a:hover{color:#0369a1!important}
 .modal-header,.modal-footer{border-color:#e3e8f0!important}
 @media(prefers-color-scheme:dark){html,body{color-scheme:light!important;background:#f4f7fb!important;color:#172033!important}}
 </style>
+<style id="pqnet-mobile-fix">
+/* Layout pass: light UI, fluid width, mobile-first controls */
+:root{color-scheme:light!important}
+html{width:100%;min-width:0;overflow-x:hidden}
+body{margin:0!important;padding:24px 0!important;background:#f4f7fb!important;color:#172033!important;overflow-x:hidden}
+body> .container{width:100%!important;max-width:760px!important;padding-left:20px!important;padding-right:20px!important;margin-left:auto!important;margin-right:auto!important;box-sizing:border-box}
+body .border-bottom{border-color:#e3e8f0!important}
+body .fw-bold.fs-5{color:#172033!important;overflow-wrap:anywhere}
+body .card-light{min-width:0;overflow:hidden;background:#fff!important;border:1px solid #e3e8f0!important;border-radius:18px!important;box-shadow:0 8px 28px rgba(15,23,42,.055)!important}
+body .card-light h5,body .card-light h6{color:#172033!important}
+body .text-secondary,body .text-muted,body .small.text-muted{color:#667085!important}
+body .form-control,body .form-select,body input,body textarea{min-width:0;max-width:100%;background:#fff!important;color:#172033!important;border-color:#d5deea!important}
+body .form-control:focus,body .form-select:focus,body input:focus,body textarea:focus{border-color:#0f9b8e!important;box-shadow:0 0 0 3px rgba(15,155,142,.12)!important}
+body .form-control-code{background:#f8fafc!important;color:#172033!important;overflow-wrap:anywhere;word-break:break-all}
+body .input-group{min-width:0;flex-wrap:nowrap}
+body #vlessKey{width:1%;flex:1 1 auto;min-width:0;font-size:12px}
+body .btn{white-space:normal;touch-action:manipulation}
+body .btn-primary,body .btn-gradient-blue{background:linear-gradient(100deg,#0f9b8e,#0284c7)!important;color:#fff!important;border:0!important}
+body .btn-outline-primary{background:#fff!important;color:#0369a1!important;border-color:#93c5fd!important}
+body .btn-outline-danger{color:#b42318!important;border-color:#fda29b!important}
+body .table{--bs-table-color:#344054;--bs-table-bg:transparent;--bs-table-border-color:#e3e8f0;color:#344054!important}
+body .table thead th{background:#f1f5f9!important;color:#475467!important;white-space:nowrap}
+body .table td{vertical-align:middle}
+body .modal-content{background:#fff!important;color:#172033!important;border:1px solid #e3e8f0!important;border-radius:18px!important}
+body .modal-content h6{color:#172033!important}
+body .alert-warning{background:#fffbeb!important;color:#92400e!important;border:1px solid #fde68a!important}
+body .alert-success{background:#ecfdf3!important;color:#027a48!important}
+body .alert-danger{background:#fef3f2!important;color:#b42318!important}
+@media(max-width:576px){
+  body{padding:12px 0!important}
+  body> .container{padding-left:12px!important;padding-right:12px!important}
+  body .container .d-flex.justify-content-between.align-items-center.mb-4{align-items:flex-start!important;gap:12px;flex-wrap:wrap}
+  body .container .d-flex.justify-content-between.align-items-center.mb-4> .d-flex:first-child{flex:1 1 100%;min-width:0;align-items:flex-start!important;flex-wrap:wrap}
+  body .container .d-flex.justify-content-between.align-items-center.mb-4> .d-flex:last-child{width:100%;justify-content:flex-end}
+  body .container .d-flex.justify-content-between.align-items-center.mb-4 .fs-5{font-size:1rem!important}
+  body .container .card-light{padding:16px!important;margin-bottom:14px!important;border-radius:15px!important}
+  body .container .input-group{display:flex;flex-wrap:wrap;gap:8px}
+  body .container .input-group #vlessKey{flex:1 1 100%;width:100%;border-radius:10px!important;min-height:44px}
+  body .container .input-group #vlessKey+button{flex:1 1 100%;width:100%;border-radius:10px!important;min-height:42px}
+  body .container .d-flex.justify-content-center.gap-2{flex-direction:column}
+  body .container .d-flex.justify-content-center.gap-2 .btn{width:100%;justify-content:center;min-height:42px}
+  body .container .row.g-2>[class*="col-"],body .container .row.g-3>[class*="col-"]{width:100%}
+  body .container .row.g-2 .btn,body .container .row.g-3 .btn{min-height:42px}
+  body #phoneInput{font-size:16px;min-height:42px}
+  body .table-responsive{margin:0 -4px}
+  body .table{font-size:13px}
+  body .table td,body .table th{padding:10px 8px}
+  body .table td:nth-child(2){min-width:120px;overflow-wrap:anywhere}
+  body .table td:nth-child(3){min-width:92px}
+  body .table td:nth-child(4){min-width:112px}
+  body .modal-dialog{margin:12px}
+}
+@media(max-width:360px){
+  body> .container{padding-left:8px!important;padding-right:8px!important}
+  body .container .card-light{padding:12px!important}
+  body .container .btn{font-size:13px}
+}
+</style>
 </head>
 <body class="py-5">
 <?php renderServerHeaderStatus(); ?>
@@ -244,7 +302,7 @@ a{color:#087f8c!important}a:hover{color:#0369a1!important}
                 <input type="hidden" name="change_password" value="1">
                 <div class="row g-2">
                     <div class="col-md-8">
-                        <input type="text" name="new_password" class="form-control form-control-sm" placeholder="Новый пароль" required>
+                        <input type="password" name="new_password" class="form-control form-control-sm" placeholder="Новый пароль" required>
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-warning btn-sm w-100 fw-medium">Сменить</button>
