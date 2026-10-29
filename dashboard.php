@@ -109,6 +109,7 @@ $needsPasswordChange = ($userData['password_changed'] ?? 0) == 0;
 </head>
 <body class="py-5">
 <?php renderServerHeaderStatus(); ?>
+<div class="container mb-3"><a class="btn btn-primary btn-sm" href="/wallet-page.php">Баланс и пополнение монет</a></div>
 <div class="container" style="max-width: 760px;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
@@ -327,6 +328,7 @@ $needsPasswordChange = ($userData['password_changed'] ?? 0) == 0;
 </script>
 <?php endif; ?>
 
+<div class="container my-3"><a class="btn btn-outline-primary" href="/notifications.php">Центр уведомлений</a> <a class="btn btn-outline-secondary" href="/wallet-page.php">Баланс и подписка</a></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('phoneInput').addEventListener('input', function (e) {
