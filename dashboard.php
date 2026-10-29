@@ -61,9 +61,7 @@ if ($clientsData && isset($clientsData['obj'])) {
                     if ($subId) {
                         $clientSubUrl = "https://144.31.126.125:2096/" . $subId;
                     }
-                    $streamSettings = is_string($inbound['streamSettings']) ? json_decode($inbound['streamSettings'], true) : $inbound['streamSettings'];
-                    $network = isset($streamSettings['network']) ? $streamSettings['network'] : 'tcp';
-                    $clientVlessKey = "vless://" . $c['id'] . "@" . parse_url(XUI_HOST, PHP_URL_HOST) . ":" . $inbound['port'] . "?type=" . $network . "#" . urlencode($realEmail);
+                    $clientVlessKey = build_vless_share_uri($inbound, $c);
                     break 2;
                 }
             }
@@ -266,7 +264,7 @@ body .alert-danger{background:#fef3f2!important;color:#b42318!important}
             <div class="mb-0">
                 <div class="input-group">
                     <input type="text" id="vlessKey" class="form-control form-control-code" value="<?= htmlspecialchars($clientVlessKey) ?>" readonly>
-                    <button class="btn btn-outline-primary btn-sm px-3" onclick="navigator.clipboard.writeText(document.getElementById('vlessKey').value)">Копировать</button>
+                    <button class="btn btn-outline-primary btn-sm px-3" onclick="copyVlessKey()">Копировать</button><span id="copyKeyStatus" class="small text-success align-self-center" role="status" aria-live="polite"></span>
                 </div>
             </div>
         <?php else: ?>
@@ -439,6 +437,18 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     if (x[5]) res += ' - ' + x[5];
     e.target.value = res;
 });
+</script>
+
+<script>
+async function copyVlessKey() {
+ const input=document.getElementById('vlessKey'), status=document.getElementById('copyKeyStatus');
+ if(!input)return;
+ try {
+   if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(input.value);
+   else { input.focus(); input.select(); input.setSelectionRange(0,input.value.length); if(!document.execCommand('copy')) throw new Error('copy failed'); }
+   if(status) status.textContent='Ключ скопирован';
+ } catch(e) { input.focus(); input.select(); if(status) status.textContent='Выделите ключ и скопируйте вручную'; }
+}
 </script>
 </body>
 </html>
