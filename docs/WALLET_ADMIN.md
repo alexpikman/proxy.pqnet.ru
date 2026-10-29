@@ -24,3 +24,10 @@ Wallet balance is stored separately from the legacy users table. Every balance m
 - Subscription purchases must be integrated with a verified 3X-UI client update workflow before enabling a purchase button. Do not deduct coins unless the subscription update can be completed safely.
 - PostgreSQL credentials and provider/API secrets should be stored in server environment variables or a secret manager. Do not store live credentials in the public repository or plain text in the database.
 - Add rate limits, audit logs, and tests before production use.
+
+## Pages added in the integration pass
+
+- `/wallet-page.php` — authenticated user page with balance, manual top-up request form, and transaction history.
+- `/admin/wallet-page.php` — admin page for reviewing top-up requests and editing the coin exchange rate and daily subscription price.
+
+The pages use same-origin session cookies and send the session CSRF token on mutating requests. They remain in this draft branch and have not been deployed or exercised against the production server. The pages currently use the SQLite connection from `db.php`; PostgreSQL migration/configuration remains separate.
