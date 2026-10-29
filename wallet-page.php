@@ -1,0 +1,21 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/db.php';
+if (empty($_SESSION['user'])) { header('Location: index.php'); exit; }
+?>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Баланс — PQNET</title>
+<style>
+:root{color-scheme:light}body{margin:0;background:#f3f6fb;color:#172033;font:16px system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:760px;margin:40px auto;padding:0 16px}.card{background:#fff;border:1px solid #e1e7f0;border-radius:16px;padding:22px;margin:14px 0;box-shadow:0 8px 30px #1b31500a}h1{font-size:26px;margin:0 0 8px}h2{font-size:19px;margin-top:0}.balance{font-size:36px;font-weight:750}.muted{color:#667085}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}input,button{font:inherit;padding:10px 12px;border-radius:9px;border:1px solid #cdd5e1}button{background:#185abd;color:white;border:0;cursor:pointer}button:disabled{opacity:.5}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px 5px;border-bottom:1px solid #edf0f5}#msg{margin-top:10px;white-space:pre-wrap}.positive{color:#087443}.negative{color:#b42318}</style></head><body><main class="wrap">
+<h1>Баланс и пополнение</h1><p class="muted">Аккаунт: <?= htmlspecialchars((string)$_SESSION['user'], ENT_QUOTES, 'UTF-8') ?></p>
+<section class="card"><div class="muted">Текущий баланс</div><div class="balance"><span id="coins">—</span> монет</div><div class="muted" id="price"></div></section>
+<section class="card"><h2>Запросить ручное пополнение</h2><p class="muted">После отправки заявки дождитесь подтверждения администратора. Монеты не зачисляются автоматически.</p><form id="topupForm" class="row"><label for="amount">Сумма, ₽</label><input id="amount" name="amount" type="number" min="1" max="100000" step="1" value="500" required><button id="submit" type="submit">Отправить заявку</button></form><div id="msg" role="status"></div></section>
+<section class="card"><h2>История операций</h2><table><thead><tr><th>Дата</th><th>Операция</th><th>Монеты</th></tr></thead><tbody id="history"><tr><td colspan="3">Загрузка…</td></tr></tbody></table></section>
+<p><a href="/dashboard.php">Вернуться в личный кабинет</a></p></main>
+<script>
+let csrf='';
+async function api(url,opts={}){const headers={'Accept':'application/json',...(opts.headers||{})};if(opts.body){headers['Content-Type']='application/json';headers['X-CSRF-Token']=csrf;}const r=await fetch(url,{credentials:'same-origin',...opts,headers});const d=await r.json();if(!r.ok||d.success===false)throw new Error(d.message||'Ошибка запроса');return d;}
+function cell(tr,text,cls=''){const td=document.createElement('td');td.textContent=text;if(cls)td.className=cls;tr.appendChild(td);}
+async function refresh(){const s=await api('/api/wallet.php?action=summary');csrf=s.csrf_token;document.getElementById('coins').textContent=s.coins;document.getElementById('price').textContent='Курс: '+s.coins_per_ruble+' монет за 1 ₽ · Цена подписки: '+s.price_per_day+' монет/день';const h=await api('/api/wallet.php?action=transactions');const body=document.getElementById('history');body.replaceChildren();if(!h.transactions.length){const tr=body.insertRow();const td=tr.insertCell();td.colSpan=3;td.textContent='Операций пока нет';}for(const x of h.transactions){const tr=body.insertRow();cell(tr,x.created_at||'');cell(tr,x.description||x.type);cell(tr,(x.coins_delta>0?'+':'')+x.coins_delta,x.coins_delta>0?'positive':'negative');}}
+document.getElementById('topupForm').addEventListener('submit',async e=>{e.preventDefault();const btn=document.getElementById('submit'),msg=document.getElementById('msg');btn.disabled=true;msg.textContent='';try{const d=await api('/api/wallet.php?action=request-topup',{method:'POST',body:JSON.stringify({amount_rub:Number(document.getElementById('amount').value)})});msg.textContent=d.message+' Номер заявки: '+d.request_id+'.';}catch(err){msg.textContent=err.message;}finally{btn.disabled=false;}});
+refresh().catch(e=>{document.getElementById('msg').textContent=e.message;});
+</script></body></html>
