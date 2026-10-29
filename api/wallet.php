@@ -16,6 +16,7 @@ function wallet_csrf(): void {
     if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) wallet_reply(403, ['success'=>false,'message'=>'Проверка безопасности не пройдена. Обновите страницу.']);
 }
 if (empty($_SESSION['user'])) wallet_reply(401, ['success'=>false,'message'=>'Необходимо войти в аккаунт.']);
+if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 try { wallet_ensure_schema($db); } catch (Throwable $e) { error_log('Wallet schema failed: '.get_class($e)); wallet_reply(500,['success'=>false,'message'=>'Кошелёк временно недоступен.']); }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -27,7 +28,8 @@ if ($method === 'GET' && $action === 'summary') {
         'success'=>true,
         'coins'=>wallet_balance($db,$email),
         'coins_per_ruble'=>(int) wallet_setting($db,'coins_per_ruble','1'),
-        'price_per_day'=>(int) wallet_setting($db,'price_per_day','10')
+        'price_per_day'=>(int) wallet_setting($db,'price_per_day','10'),
+        'csrf_token'=>$_SESSION['csrf_token']
     ]);
 }
 if ($method === 'GET' && $action === 'transactions') {
