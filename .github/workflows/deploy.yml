@@ -1,0 +1,57 @@
+name: Deploy proxy.pqnet.ru
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proxy-pqnet-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: 22
+          timeout: 30s
+          command_timeout: 5m
+          script: |
+            set -eu
+
+            TARGET="/var/www/proxy.pqnet.ru"
+            cd "$TARGET"
+
+            git fetch --quiet origin main
+
+            RELEASE="$(mktemp -d /tmp/proxy-pqnet-release.XXXXXX)"
+            trap 'rm -rf "$RELEASE"' EXIT
+
+            git archive --format=tar origin/main \
+              | tar --exclude=database.sqlite --exclude=.github -xf - -C "$RELEASE"
+
+            echo "Checking PHP syntax before deployment..."
+            find "$RELEASE" -type f -name '*.php' -print0 \
+              | xargs -0 -r -n 1 php -l
+
+            echo "Deploying repository files..."
+            cp -a "$RELEASE/." "$TARGET/"
+
+            # Keep the live SQLite database untouched and preserve the Git metadata.
+            find "$TARGET" -mindepth 1 -maxdepth 1 \
+              ! -name '.git' ! -name 'database.sqlite' \
+              -exec chown -R www-data:www-data -- {} +
+
+            echo "Deployment complete."
+            git rev-parse --short origin/main
