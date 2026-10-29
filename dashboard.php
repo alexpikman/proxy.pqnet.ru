@@ -109,6 +109,7 @@ $needsPasswordChange = ($userData['password_changed'] ?? 0) == 0;
 </head>
 <body class="py-5">
 <?php renderServerHeaderStatus(); ?>
+<div class="container mb-3"><a class="btn btn-primary btn-sm" href="/wallet-page.php">Баланс и пополнение монет</a></div>
 <div class="container" style="max-width: 760px;">
     
     <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
