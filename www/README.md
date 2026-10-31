@@ -42,3 +42,17 @@ Frontend ожидает серверные endpoints, перечисленные
 Каталог `www/` предполагается назначить document root сайта на сервере после подготовки и проверки backend, rewrite/маршрутов и безопасной конфигурации. Пока не переключайте production document root на этот каталог: текущий frontend ещё не подключён к рабочей серверной авторизации и API.
 
 Не размещайте в `www/` SQLite базы, конфигурацию 3x-ui, пароли, API-токены, резервные копии или другие секреты.
+
+
+## Visual system — ARCTIC SIGNAL
+
+The frontend visual layer follows **ARCTIC SIGNAL / Premium Light-Tech**.
+
+- Core palette: Arctic White `#F7FAFD`, Pure White `#FFFFFF`, Deep Navy `#10243D`.
+- Technology accents: Electric Blue `#2878E8`, Ice Cyan `#39C5E8`.
+- Energy accent: Cascade Orange `#FF913D`.
+- Neutral materials: Silver `#C8D2DF`, Slate `#63758B`.
+- Shared implementation: `assets/css/arctic-signal.css`, loaded after `assets/css/app.css`.
+- Motion: restrained transitions, reduced-motion support, no decorative animation that obscures application state.
+
+The visual layer must not change API contracts, authentication, roles, storage, server-side business rules, or 3x-ui synchronization. Existing markup hooks, element IDs, data attributes, and JavaScript handlers are application contracts and must be preserved during visual work.
