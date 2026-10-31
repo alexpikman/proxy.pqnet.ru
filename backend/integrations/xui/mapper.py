@@ -15,7 +15,6 @@ def normalize_client(client: dict[str, Any]) -> dict[str, Any]:
     email = client_email(client)
     return {
         "email": email,
-        "client_id": client_identity(client) or None,
         "enabled": bool(client.get("enable", True)),
         "expiry_time": client.get("expiryTime"),
         "total_gb": client.get("totalGB"),
@@ -45,7 +44,8 @@ def compare_clients(local_users: list[dict[str, Any]], remote_clients: list[dict
 
     for raw in remote_clients:
         remote = normalize_client(raw)
-        user = local_by_xui.get(remote["client_id"]) if remote["client_id"] else None
+        remote_identity = client_identity(raw)
+        user = local_by_xui.get(remote_identity) if remote_identity else None
         user = user or local_by_email.get(remote["email"].casefold())
         if not user:
             panel_only.append(remote)
@@ -59,7 +59,7 @@ def compare_clients(local_users: list[dict[str, Any]], remote_clients: list[dict
             "user_id": local_id,
             "login": user.get("login"),
             "email": remote["email"],
-            "identity_match": "client_id" if remote["client_id"] and user.get("xui_client_id") == remote["client_id"] else "email",
+            "identity_match": "client_id" if remote_identity and user.get("xui_client_id") == remote_identity else "email",
         })
 
     local_only = [
