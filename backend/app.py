@@ -15,7 +15,7 @@ from typing import Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -476,10 +476,10 @@ def admin_overview(admin: dict[str, Any] = Depends(require_admin)):
         counts = db.execute(
             """
             SELECT COUNT(*) AS total,
-              SUM(CASE WHEN status = 'active' AND role = 'user' THEN 1 ELSE 0 END) AS active,
-              SUM(CASE WHEN status <> 'active' AND role = 'user' THEN 1 ELSE 0 END) AS disabled,
-              COALESCE(SUM(CASE WHEN role = 'user' THEN coins ELSE 0 END), 0) AS coins
-            FROM users
+              SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS active,
+              SUM(CASE WHEN status <> 'active' THEN 1 ELSE 0 END) AS disabled,
+              COALESCE(SUM(coins), 0) AS coins
+            FROM users WHERE role = 'user'
             """
         ).fetchone()
         return {
@@ -494,7 +494,7 @@ def admin_overview(admin: dict[str, Any] = Depends(require_admin)):
 @app.get("/api/admin/users")
 def admin_users(
     search: str = "",
-    status_filter: str = "all",
+    status_filter: str = Query(default="all", alias="status"),
     source: str = "all",
     admin: dict[str, Any] = Depends(require_admin),
 ):
