@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from backend.integrations.xui.client import XuiConfig, XuiClient, XuiError
 from backend.integrations.xui.mapper import compare_clients, normalize_client
 from backend.integrations.xui.versioning import detect_capabilities, detect_panel_version
@@ -88,3 +90,37 @@ def test_openapi_schema_reports_panel_version_and_supported_routes():
     assert capabilities["client_update"] is True
     assert capabilities["client_attach"] is True
     assert capabilities["client_delete"] is False
+
+
+
+def test_legacy_client_list_falls_back_to_all_inbounds(monkeypatch):
+    client = XuiClient(XuiConfig("https://panel.example.test", "test-token"))
+
+    def fake_request(method, path, payload=None):
+        if path == "/panel/api/clients/list":
+            raise XuiError("not found", 404)
+        if path == "/panel/api/inbounds/list":
+            return {
+                "success": True,
+                "obj": [
+                    {
+                        "id": 10,
+                        "settings": json.dumps({
+                            "clients": [{"email": "legacy@example.test", "id": "legacy-uuid"}]
+                        }),
+                    },
+                    {
+                        "id": 12,
+                        "settings": {
+                            "clients": [{"email": "legacy@example.test", "id": "legacy-uuid"}]
+                        },
+                    },
+                ],
+            }
+        raise AssertionError(path)
+
+    monkeypatch.setattr(client, "request", fake_request)
+    clients = client.list_clients()
+    assert len(clients) == 1
+    assert clients[0]["email"] == "legacy@example.test"
+    assert clients[0]["inboundIds"] == [10, 12]
