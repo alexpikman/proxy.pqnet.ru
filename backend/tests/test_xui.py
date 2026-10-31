@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from backend.integrations.xui.client import XuiConfig, XuiClient, XuiError
 from backend.integrations.xui.mapper import compare_clients, normalize_client
+from backend.integrations.xui.versioning import detect_capabilities, detect_panel_version
 
 
 def test_xui_config_requires_both_server_side_values(monkeypatch):
@@ -69,3 +70,21 @@ def test_compare_clients_matches_by_email_when_external_id_is_missing():
     result = compare_clients(local, [{"email": "alice@example.test", "uuid": "uuid-1"}])
     assert result["counts"]["matched"] == 1
     assert result["matched"][0]["identity_match"] == "email"
+
+
+
+def test_openapi_schema_reports_panel_version_and_supported_routes():
+    schema = {
+        "info": {"version": "2.8.7"},
+        "paths": {
+            "/panel/api/clients/list": {},
+            "/panel/api/clients/update/{email}": {},
+            "/panel/api/clients/{email}/attach": {},
+        },
+    }
+    assert detect_panel_version(schema) == "2.8.7"
+    capabilities = detect_capabilities(schema)
+    assert capabilities["clients_list"] is True
+    assert capabilities["client_update"] is True
+    assert capabilities["client_attach"] is True
+    assert capabilities["client_delete"] is False
