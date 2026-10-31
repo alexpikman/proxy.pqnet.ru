@@ -16,7 +16,7 @@
       ? await response.json()
       : { message: await response.text() };
     if (!response.ok) {
-      const error = new Error(payload.message || payload.error || `Ошибка запроса (${response.status})`);
+      const error = new Error(payload.message || payload.error || payload.detail || `Ошибка запроса (${response.status})`);
       error.status = response.status;
       throw error;
     }
@@ -110,6 +110,50 @@
       } finally {
         button.disabled = false;
         button.innerHTML = 'Войти в кабинет <span>→</span>';
+      }
+    });
+  }
+
+  function initPasswordSetup() {
+    const form = $("#password-setup-form");
+    if (!form) return;
+    $("#year").textContent = new Date().getFullYear();
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) $("#setup-token").value = token;
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const message = $("#password-setup-message");
+      const button = $("#password-setup-submit");
+      const password = $("#setup-password").value;
+      const confirmation = $("#setup-password-confirm").value;
+      message.hidden = true;
+      if (password.length < 12 || password !== confirmation) {
+        message.textContent = password.length < 12
+          ? "Пароль должен содержать не менее 12 символов."
+          : "Пароли не совпадают.";
+        message.classList.add("form-message-error");
+        message.hidden = false;
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Сохраняем пароль…";
+      try {
+        await api("/set-password", {
+          method: "POST",
+          body: JSON.stringify({ token: $("#setup-token").value.trim(), password })
+        });
+        message.textContent = "Пароль установлен. Теперь можно войти в личный кабинет.";
+        message.classList.remove("form-message-error");
+        message.hidden = false;
+        form.reset();
+        $("#setup-token").value = "";
+      } catch (error) {
+        message.textContent = error.message || "Не удалось установить пароль.";
+        message.classList.add("form-message-error");
+        message.hidden = false;
+      } finally {
+        button.disabled = false;
+        button.innerHTML = 'Сохранить пароль <span>→</span>';
       }
     });
   }
@@ -583,6 +627,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     initLogin();
     initRegistration();
+    initPasswordSetup();
     initWorkspaceShell();
   });
 })();
