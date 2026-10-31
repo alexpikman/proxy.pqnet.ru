@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PQService — Вход</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .login-container { max-width: 340px; width:100%; }
+        .login-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+        }
+        .avatar {
+            font-size: 2.8rem;
+            background: #eef2fa;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 1rem auto;
+            color: #2c6e9e;
+        }
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; color:#1e2f3c; }
+        .sub { color:#5b6f82; font-size:0.75rem; margin-bottom:1.5rem; }
+        .input-group { margin-bottom:0.8rem; }
+        .input-group input {
+            width:100%; padding:10px 14px; border-radius:40px; border:1px solid #dce5ec;
+            font-size:0.85rem; background:white;
+        }
+        .input-group input:focus { outline:none; border-color:#2c6e9e; box-shadow:0 0 0 2px rgba(44,110,158,0.1); }
+        .btn-login {
+            width:100%; background:#2c6e9e; color:white; border:none; padding:10px;
+            border-radius:40px; font-size:0.9rem; font-weight:600; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-login:hover { background:#1e5a7d; transform:translateY(-1px); }
+        .error-message { color:#b91c1c; font-size:0.75rem; margin-top:0.8rem; display:none; }
+        .toast { position:fixed; bottom:20px; right:20px; background:#1e2f3c; color:white; padding:8px 16px; border-radius:40px; font-size:0.75rem; opacity:0; transition:0.2s; pointer-events:none; z-index:1000; }
+        .toast.show { opacity:1; }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-card">
+        <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+        <h1>PQService</h1>
+        <div class="sub">Вход в личный кабинет</div>
+        <form id="loginForm">
+            <div class="input-group"><input type="text" id="login" placeholder="Логин" required autofocus></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Пароль" required></div>
+            <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</button>
+        </form>
+        <div id="errorMsg" class="error-message"></div>
+    </div>
+</div>
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+<script>
+    function showMsg(text, isErr=false) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = text;
+        toast.style.background = isErr ? '#b91c1c' : '#1e2f3c';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.style.display = 'none';
+        errorDiv.innerText = '';
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showMsg('Вход выполнен, перенаправление...');
+                setTimeout(() => {
+                    if (data.role === 'admin') window.location.href = '/admin.html';
+                    else window.location.href = '/profile.html';
+                }, 800);
+            } else {
+                errorDiv.innerText = data.message || 'Неверный логин или пароль';
+                errorDiv.style.display = 'block';
+            }
+        } catch(err) {
+            errorDiv.innerText = 'Ошибка соединения';
+            errorDiv.style.display = 'block';
+            showMsg('Ошибка соединения', true);
+        }
+    });
+</script>
+</body>
+</html>

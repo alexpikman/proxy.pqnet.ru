@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора PQService</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f5f7fc 0%, #eef2f8 100%);
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .admin-container { max-width: 1400px; margin:0 auto; }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .admin-header h1 { font-size:1.6rem; font-weight:600; color:#1e2f3c; display:flex; align-items:center; gap:12px; }
+        .user-info {
+            background: #eef2fa;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .logout-btn { background:#eef2fa; border:none; padding:0.5rem 1.2rem; border-radius:40px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.8rem;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #5b6f82;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn.active { background: white; color: #1e5a7d; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .tab-content { display: none; animation: fadeIn 0.2s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+        .table-wrapper { overflow-x:auto; background:white; border-radius:1.5rem; box-shadow:0 4px 12px rgba(0,0,0,0.03); padding:0.5rem; margin-top:1rem; }
+        table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+        th, td { padding:0.8rem 0.6rem; text-align:left; border-bottom:1px solid #edf2f7; }
+        th { background:#f8fafd; font-weight:600; color:#2c3e4e; }
+        .btn-icon { background:none; border:none; cursor:pointer; font-size:1rem; color:#2c6e9e; padding:0.2rem 0.5rem; }
+        .btn-danger-icon { color:#b91c1c; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000; }
+        .modal.active { display:flex; }
+        .modal-content { background:white; border-radius:1.5rem; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; padding:1.5rem; }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; font-weight:600; }
+        .modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; }
+        .form-group { margin-bottom:1rem; }
+        .form-group label { display:block; font-size:0.8rem; font-weight:500; margin-bottom:0.3rem; color:#5b6f82; }
+        .form-group input, .form-group select { width:100%; padding:0.6rem 1rem; border-radius:60px; border:1px solid #dce5ec; }
+        .btn-submit { background:#2c6e9e; color:white; border:none; padding:0.6rem 1.2rem; border-radius:60px; cursor:pointer; }
+        .inbound-selector { margin-bottom:1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+        .toggle-switch { position:relative; display:inline-block; width:48px; height:24px; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#cbd5e1; border-radius:34px; }
+        .slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background-color:white; border-radius:50%; }
+        input:checked + .slider { background-color:#2c9e6e; }
+        .row-exists { background-color: rgba(0,200,0,0.1); }
+        .row-duplicate { background-color: rgba(255,0,0,0.1); }
+        .toast { position:fixed; bottom:20px; right:20px; background:#1e2f3c; color:white; padding:8px 16px; border-radius:40px; font-size:0.8rem; opacity:0; transition:0.2s; pointer-events:none; z-index:1100; }
+        .toast.show { opacity:1; }
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+        .footer a {
+            background: #eef2fa;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            color: #2c6e9e;
+        }
+        .settings-panel { background: #f8fafc; border-radius: 1rem; padding: 1rem; margin-top: 1rem; }
+        .system-info { background: #1e2f3c; color: white; border-radius: 1rem; padding: 1rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1><i class="fas fa-cog"></i> Панель администратора</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-info" id="userInfo">Загрузка...</div>
+            <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Выход</button>
+        </div>
+    </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="local"><i class="fas fa-users"></i> Локальные пользователи</button>
+        <button class="tab-btn" data-tab="sync"><i class="fas fa-cloud-upload-alt"></i> Синхронизация 3X-UI</button>
+        <button class="tab-btn" data-tab="settings"><i class="fas fa-sliders-h"></i> Настройки сервера</button>
+        <button class="tab-btn" data-tab="monitoring"><i class="fas fa-chart-line"></i> Статистика и мониторинг</button>
+    </div>
+
+    <!-- Вкладка локальных пользователей -->
+    <div id="local-tab" class="tab-content active">
+        <div class="table-wrapper">
+            <table id="users-table">
+                <thead><tr><th>Логин</th><th>Монеты</th><th>Статус</th><th>Истекает</th><th>VIP</th><th>Email</th><th>Телефон</th><th>Цена/день</th><th>Действия</th></tr></thead>
+                <tbody id="users-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Вкладка синхронизации 3X-UI -->
+    <div id="sync-tab" class="tab-content">
+        <div class="inbound-selector">
+            <label><i class="fas fa-server"></i> Подключение (Inbound):</label>
+            <select id="inboundSelect"><option value="">-- Загрузка списка --</option></select>
+        </div>
+        <div id="clientsTableContainer" class="table-wrapper" style="display:none;">
+            <table id="clients-table"><thead><tr><th>№</th><th>Email</th><th>Статус</th><th>UUID</th><th>Действия</th></tr></thead><tbody id="clients-tbody"></tbody></table>
+        </div>
+    </div>
+
+    <!-- Вкладка настройки сервера -->
+    <div id="settings-tab" class="tab-content">
+        <div class="settings-panel">
+            <h3>Настройки 3X-UI</h3>
+            <div class="form-group"><label>API URL (XUI_HOST)</label><input type="text" id="xuiHost" placeholder="https://proxy.pqnet.ru:1905"></div>
+            <div class="form-group"><label>Логин</label><input type="text" id="xuiUsername" placeholder="alexpq"></div>
+            <div class="form-group"><label>Пароль</label><input type="password" id="xuiPassword"></div>
+            <div class="form-group"><label>Порт подписок</label><input type="number" id="subPort" value="2096"></div>
+            <div class="form-group"><label>Путь подписок</label><input type="text" id="subPath" value="/sub/"></div>
+            <button id="saveSettingsBtn" class="btn-submit">Сохранить настройки</button>
+            <button id="restartServiceBtn" class="btn-submit" style="background:#ff9800; margin-top:1rem;">Перезапустить сервер</button>
+        </div>
+    </div>
+
+    <!-- Вкладка статистика и мониторинг -->
+    <div id="monitoring-tab" class="tab-content">
+        <div class="system-info" id="systemInfo">Загрузка...</div>
+    </div>
+
+    <div class="footer">
+        <a href="/logs.html?log=error.log"><i class="fas fa-exclamation-triangle"></i> Лог ошибок</a>
+        <a href="/logs.html?log=out.log"><i class="fas fa-terminal"></i> Лог вывода</a>
+        <a href="/logs.html?log=nginx-error.log"><i class="fas fa-server"></i> Nginx ошибки</a>
+        <a href="/logs.html?log=syslog"><i class="fas fa-info-circle"></i> Системный журнал</a>
+    </div>
+</div>
+
+<div id="userModal" class="modal"><div class="modal-content"><div class="modal-header"><span id="modalTitle">Редактирование пользователя</span><button class="modal-close" onclick="closeUserModal()">&times;</button></div>
+<form id="userForm"><input type="hidden" id="userUuid"><input type="hidden" id="xuiEmail"><input type="hidden" id="xuiInboundId"><input type="hidden" id="xuiClientId">
+<div class="form-group"><label>Логин</label><input type="text" id="userLogin" required></div>
+<div class="form-group"><label>Монеты</label><input type="number" id="userCoins" value="0"></div>
+<div class="form-group"><label>VIP</label><input type="number" id="userVip" value="0"></div>
+<div class="form-group"><label>Статус</label><select id="userStatus"><option value="active">Активен</option><option value="disabled">Заблокирован</option></select></div>
+<div class="form-group"><label>Истекает (timestamp)</label><input type="number" id="userExpire"></div>
+<div class="form-group"><label>Email</label><input type="text" id="userEmail"></div>
+<div class="form-group"><label>Телефон</label><input type="text" id="userPhone"></div>
+<div class="form-group"><label>Цена за день</label><input type="number" id="userPricePerDay"></div>
+<div class="form-group"><label>Пароль (при создании)</label><input type="password" id="userPassword"></div>
+<button type="submit" class="btn-submit">Сохранить</button></form></div></div>
+<div id="toast" class="toast"><i class="fas fa-check-circle"></i> <span></span></div>
+
+<script>
+    function showMsg(text, isErr=false) {
+        const toast = document.getElementById('toast');
+        toast.querySelector('span').innerText = text;
+        toast.style.background = isErr ? '#b91c1c' : '#1e2f3c';
+        toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'),2500);
+    }
+    async function fetchJson(url, options={}) {
+        const r = await fetch(url, options);
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+    }
+    async function loadLocalUsers() {
+        try {
+            const users = await fetchJson('/admin/users');
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '';
+            for (const u of users) {
+                const row = tbody.insertRow();
+                if (u.login && u.login.endsWith('_db')) row.classList.add('row-duplicate');
+                row.insertCell(0).innerText = u.login||'—';
+                row.insertCell(1).innerText = u.coins??0;
+                row.insertCell(2).innerText = u.localstatus==='active'?'Активен':'Заблокирован';
+                row.insertCell(3).innerText = u.localexpire?new Date(u.localexpire*1000).toLocaleDateString():'—';
+                row.insertCell(4).innerText = u.vip??0;
+                row.insertCell(5).innerText = u.email||'—';
+                row.insertCell(6).innerText = u.phone||'—';
+                row.insertCell(7).innerText = u.price_per_day?u.price_per_day+' мон.':'—';
+                const actions = row.insertCell(8);
+                actions.innerHTML = `<button class="btn-icon" onclick="editUser('${u.uuid}')"><i class="fas fa-edit"></i></button>
+                                     <button class="btn-icon btn-danger-icon" onclick="deleteUser('${u.uuid}')"><i class="fas fa-trash-alt"></i></button>`;
+            }
+        } catch(e) { showMsg('Ошибка загрузки пользователей',true); }
+    }
+    window.editUser = async function(uuid) {
+        try {
+            const u = await fetchJson('/admin/user/'+uuid);
+            document.getElementById('userUuid').value = u.uuid;
+            document.getElementById('userLogin').value = u.login;
+            document.getElementById('userCoins').value = u.coins;
+            document.getElementById('userVip').value = u.vip||0;
+            document.getElementById('userStatus').value = u.localstatus;
+            document.getElementById('userExpire').value = u.localexpire||'';
+            document.getElementById('userEmail').value = u.email||'';
+            document.getElementById('userPhone').value = u.phone||'';
+            document.getElementById('userPricePerDay').value = u.price_per_day||'';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('xuiEmail').value = u.xui_email||'';
+            document.getElementById('xuiInboundId').value = u.xui_inbound_id||'';
+            document.getElementById('xuiClientId').value = u.xui_client_id||'';
+            document.getElementById('modalTitle').innerText = 'Редактирование пользователя';
+            document.getElementById('userModal').classList.add('active');
+        } catch(e) { showMsg('Ошибка загрузки данных',true); }
+    };
+    window.deleteUser = async function(uuid) {
+        if(!confirm('Удалить пользователя?')) return;
+        await fetchJson('/admin/user/delete', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uuid})});
+        showMsg('Удалён');
+        loadLocalUsers();
+    };
+    document.getElementById('userForm').addEventListener('submit', async(e) => {
+        e.preventDefault();
+        const uuid = document.getElementById('userUuid').value;
+        let login = document.getElementById('userLogin').value.trim();
+        const coins = parseInt(document.getElementById('userCoins').value)||0;
+        const vip = parseInt(document.getElementById('userVip').value)||0;
+        const localstatus = document.getElementById('userStatus').value;
+        const localexpire = parseInt(document.getElementById('userExpire').value)||0;
+        const email = document.getElementById('userEmail').value;
+        const phone = document.getElementById('userPhone').value;
+        const price_per_day = parseInt(document.getElementById('userPricePerDay').value)||null;
+        const password = document.getElementById('userPassword').value;
+        const xui_email = document.getElementById('xuiEmail').value;
+        const xui_inbound_id = document.getElementById('xuiInboundId').value;
+        const xui_client_id = document.getElementById('xuiClientId').value;
+        if(!uuid) {
+            const users = await fetchJson('/admin/users');
+            if(users.some(u=>u.login===login)) login = login+'_db';
+        }
+        const payload = {login,coins,vip,localstatus,localexpire,email,phone,price_per_day,xui_email,xui_inbound_id,xui_client_id};
+        let url, method;
+        if(uuid) { payload.uuid=uuid; url='/admin/user/update'; method='POST'; }
+        else { url='/admin/user/create-from-xui'; method='POST'; if(!password) { showMsg('Укажите пароль',true); return; } payload.password=password; }
+        await fetchJson(url, {method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        showMsg(uuid?'Обновлён':'Создан');
+        closeUserModal();
+        loadLocalUsers();
+    });
+    function closeUserModal() {
+        document.getElementById('userModal').classList.remove('active');
+        document.getElementById('userForm').reset();
+        document.getElementById('userUuid').value='';
+    }
+    // синхронизация 3X-UI
+    let currentInbounds=[], localUsersList=[];
+    async function loadInbounds() {
+        try {
+            const inbounds = await fetchJson('/admin/inbounds');
+            currentInbounds = inbounds;
+            const sel = document.getElementById('inboundSelect');
+            sel.innerHTML = '<option value="">-- Выберите подключение --</option>';
+            for(const ib of inbounds) {
+                const opt = document.createElement('option');
+                opt.value = ib.id;
+                opt.textContent = `${ib.remark||ib.protocol||'Inbound'} (ID: ${ib.id}, порт: ${ib.port})`;
+                sel.appendChild(opt);
+            }
+            if(sel.value) loadClientsForInbound(sel.value);
+        } catch(e) { showMsg('Ошибка загрузки инбондов',true); }
+    }
+    async function loadClientsForInbound(inboundId) {
+        if(!inboundId) { document.getElementById('clientsTableContainer').style.display='none'; return; }
+        try {
+            const users = await fetchJson('/admin/users');
+            localUsersList = users;
+            const data = await fetchJson(`/admin/inbound-clients?inboundId=${inboundId}`);
+            const clients = data.clients||[];
+            renderClientsTable(clients, inboundId);
+            document.getElementById('clientsTableContainer').style.display='block';
+        } catch(e) { showMsg('Ошибка загрузки клиентов',true); }
+    }
+    function renderClientsTable(clients, inboundId) {
+        const tbody = document.getElementById('clients-tbody');
+        tbody.innerHTML = '';
+        if(!clients.length) { tbody.innerHTML='<tr><td colspan="5">Нет клиентов</td></tr>'; return; }
+        for(let i=0;i<clients.length;i++) {
+            const c = clients[i];
+            const row = tbody.insertRow();
+            const exists = localUsersList.some(u=>u.login===c.email||u.email===c.email);
+            if(exists) row.classList.add('row-exists');
+            row.insertCell(0).innerText = i+1;
+            row.insertCell(1).innerText = c.email||'—';
+            const sc = row.insertCell(2);
+            const en = c.enable===true;
+            sc.innerHTML = `<label class="toggle-switch"><input type="checkbox" ${en?'checked':''} data-client-id="${c.id}" data-inbound-id="${inboundId}" class="client-toggle"><span class="slider"></span></label>`;
+            row.insertCell(3).innerText = c.id||c.uuid||'—';
+            const ac = row.insertCell(4);
+            ac.innerHTML = `<button class="btn-submit" style="padding:0.3rem 0.8rem;" onclick="prepareAdd('${c.email}','${inboundId}','${c.id}')">Добавить</button>
+                            <button class="btn-submit" style="padding:0.3rem 0.8rem; background:#2c9e6e;" onclick="window.open('https://proxy.pqnet.ru:2096/sub/${c.id}','_blank')">Подписка</button>`;
+        }
+        document.querySelectorAll('.client-toggle').forEach(t=>{
+            t.addEventListener('change',async(e)=>{
+                const inboundId=e.target.dataset.inboundId;
+                const clientId=e.target.dataset.clientId;
+                const enable=e.target.checked;
+                e.target.disabled=true;
+                try{
+                    await fetchJson('/admin/client/update-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({inboundId,clientId,enable})});
+                    showMsg(`Статус изменён на ${enable?'активен':'отключён'}`);
+                } catch(err){ showMsg('Ошибка',true); e.target.checked=!enable; }
+                finally{ e.target.disabled=false; }
+            });
+        });
+    }
+    window.prepareAdd = function(email,inboundId,clientId){
+        document.getElementById('userUuid').value='';
+        document.getElementById('userLogin').value=email;
+        document.getElementById('userCoins').value=100;
+        document.getElementById('userVip').value=0;
+        document.getElementById('userStatus').value='active';
+        document.getElementById('userExpire').value='';
+        document.getElementById('userEmail').value=email;
+        document.getElementById('userPhone').value='';
+        document.getElementById('userPricePerDay').value='';
+        document.getElementById('userPassword').value='';
+        document.getElementById('xuiEmail').value=email;
+        document.getElementById('xuiInboundId').value=inboundId;
+        document.getElementById('xuiClientId').value=clientId;
+        document.getElementById('modalTitle').innerText='Создание пользователя из 3X-UI';
+        document.getElementById('userModal').classList.add('active');
+    };
+    document.getElementById('inboundSelect').addEventListener('change',(e)=>loadClientsForInbound(e.target.value));
+
+    // Настройки и мониторинг
+    async function loadSettings() {
+        try {
+            const cfg = await fetchJson('/admin/settings');
+            document.getElementById('xuiHost').value = cfg.XUI_HOST||'';
+            document.getElementById('xuiUsername').value = cfg.XUI_USERNAME||'';
+            document.getElementById('subPort').value = cfg.SUB_PORT||2096;
+            document.getElementById('subPath').value = cfg.SUB_PATH||'/sub/';
+        } catch(e){}
+    }
+    document.getElementById('saveSettingsBtn').addEventListener('click', async()=>{
+        const settings = {
+            XUI_HOST: document.getElementById('xuiHost').value,
+            XUI_USERNAME: document.getElementById('xuiUsername').value,
+            XUI_PASSWORD: document.getElementById('xuiPassword').value,
+            SUB_PORT: parseInt(document.getElementById('subPort').value),
+            SUB_PATH: document.getElementById('subPath').value
+        };
+        try{
+            await fetchJson('/admin/settings', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(settings)});
+            showMsg('Настройки сохранены');
+        } catch(e){ showMsg('Ошибка сохранения',true); }
+    });
+    document.getElementById('restartServiceBtn').addEventListener('click', async()=>{
+        if(!confirm('Перезапустить сервер?')) return;
+        try{
+            await fetchJson('/admin/restart-service', {method:'POST'});
+            showMsg('Сервер перезапущен, страница будет обновлена');
+            setTimeout(()=>location.reload(),2000);
+        } catch(e){ showMsg('Ошибка перезапуска',true); }
+    });
+    async function loadSystemInfo() {
+        try{
+            const info = await fetchJson('/admin/system-info');
+            document.getElementById('systemInfo').innerHTML = `
+                <strong>Хост:</strong> ${info.hostname}<br>
+                <strong>Платформа:</strong> ${info.platform} ${info.arch}<br>
+                <strong>CPU:</strong> ${info.cpus} ядер, ${info.cpuModel}<br>
+                <strong>Нагрузка:</strong> ${info.loadAvg['1min']}, ${info.loadAvg['5min']}, ${info.loadAvg['15min']}<br>
+                <strong>Память:</strong> ${(info.memory.used/1e9).toFixed(1)} GB / ${(info.memory.total/1e9).toFixed(1)} GB (${info.memory.percent}%)<br>
+                <strong>Аптайм:</strong> ${info.uptimeHuman}<br>
+            `;
+        } catch(e){ document.getElementById('systemInfo').innerHTML='Ошибка загрузки'; }
+    }
+    async function loadUserInfo() {
+        try{
+            const profile = await fetchJson('/api/profile');
+            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-shield"></i> ${profile.login} (${profile.role})`;
+        } catch(e){ document.getElementById('userInfo').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Ошибка'; }
+    }
+
+    // Вкладки
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+            btn.classList.add('active');
+            const tid = btn.dataset.tab;
+            document.getElementById(tid+'-tab').classList.add('active');
+            if(tid==='local') loadLocalUsers();
+            if(tid==='sync') { if(currentInbounds.length===0) loadInbounds(); else loadClientsForInbound(document.getElementById('inboundSelect').value); }
+            if(tid==='settings') loadSettings();
+            if(tid==='monitoring') loadSystemInfo();
+        });
+    });
+    document.getElementById('logoutBtn').addEventListener('click',async()=>{
+        await fetch('/api/logout',{method:'POST'});
+        window.location.href='/';
+    });
+    loadLocalUsers();
+    loadUserInfo();
+    loadInbounds();
+    loadSettings();
+</script>
+</body>
+</html>

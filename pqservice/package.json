@@ -1,0 +1,12 @@
+{
+  "name": "pqservice",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "better-sqlite3": "^9.4.0",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2"
+  }
+}
