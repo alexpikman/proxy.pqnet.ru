@@ -130,6 +130,8 @@
       history.replaceState(null, "", `#${view}`);
       $("#sidebar")?.classList.remove("sidebar-open");
       if (area === "account") loadAccountView(view);
+      if (area === "admin" && view === "users") loadAdminUsers();
+      if (area === "admin" && view === "programs") loadAdminPrograms();
     };
     $$("[data-view]").forEach(link => link.addEventListener("click", event => {
       event.preventDefault();
