@@ -8,6 +8,8 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
+from .versioning import detect_capabilities, detect_panel_version
+
 
 class XuiError(RuntimeError):
     def __init__(self, message: str, status_code: int | None = None):
@@ -143,24 +145,22 @@ class XuiClient:
                 raise
         info = schema.get("info") if isinstance(schema.get("info"), dict) else {}
         paths = schema.get("paths") if isinstance(schema.get("paths"), dict) else {}
-        required_paths = {
-            "client_get": "/panel/api/clients/get/{email}",
-            "client_create": "/panel/api/clients",
-            "client_update": "/panel/api/clients/update/{email}",
-            "client_delete": "/panel/api/clients/del/{email}",
-            "client_attach": "/panel/api/clients/{email}/attach",
-        }
-        capabilities = {
-            name: path in paths if schema_available else None
-            for name, path in required_paths.items()
-        }
+        capabilities = (
+            detect_capabilities(schema)
+            if schema_available
+            else {name: None for name in (
+                "clients_list", "inbounds_list", "client_get", "client_create",
+                "client_update", "client_delete", "client_attach",
+            )}
+        )
+        panel_version = detect_panel_version(schema) if schema_available else None
         return {
             "connected": True,
             "clients_count": len(clients),
             "inbounds_count": len(inbounds),
             "api_family": "clients-first",
-            "panel_version": info.get("version"),
+            "panel_version": panel_version,
             "openapi_available": schema_available,
             "capabilities": capabilities,
-            "version_detection": "Версия получена из OpenAPI info.version." if info.get("version") else "OpenAPI доступна, но info.version не указана." if schema_available else "Панель не предоставляет OpenAPI endpoint.",
+            "version_detection": "Версия получена из OpenAPI info.version." if panel_version else "OpenAPI доступна, но info.version не указана." if schema_available else "Панель не предоставляет OpenAPI endpoint.",
         }
