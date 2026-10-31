@@ -564,7 +564,7 @@
     const dialog = $("#entity-modal");
     $("#modal-kicker").textContent = kicker;
     $("#modal-title").textContent = title;
-    $("#modal-fields").innerHTML = fields.map(item => `<label class="modal-field">${escapeHtml(item.label)}<input class="input-control" name="${escapeHtml(item.name)}" type="${escapeHtml(item.type)}" value="${escapeHtml(item.value)}" ${item.readonly ? "readonly" : ""} required></label>`).join("");
+    $("#modal-fields").innerHTML = fields.map(item => `<label class="modal-field">${escapeHtml(item.label)}<input class="input-control" name="${escapeHtml(item.name)}" type="${escapeHtml(item.type)}" value="${escapeHtml(item.value)}" ${item.readonly ? "readonly" : ""}></label>`).join("");
     dialog.showModal();
     $("#entity-form").onsubmit = async event => {
       if (event.submitter?.value === "cancel") return;
