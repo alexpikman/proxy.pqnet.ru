@@ -37,6 +37,7 @@ jobs:
         run: node --check www/assets/js/app.js
       - name: Run backend API tests
         env:
+          PYTHONPATH: .
           PQ_COOKIE_SECURE: "false"
           PQ_SMTP_HOST: ""
         run: pytest -q backend/tests
