@@ -39,15 +39,25 @@ class XuiClient:
     def __init__(self, config: XuiConfig):
         self.config = config
 
-    def request(self, method: str, path: str) -> dict[str, Any]:
+    def request(
+        self,
+        method: str,
+        path: str,
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         url = f"{self.config.base_url}/{path.lstrip('/')}"
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8") if payload is not None else None
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self.config.api_token}",
+            "User-Agent": "PQService/1.0",
+        }
+        if body is not None:
+            headers["Content-Type"] = "application/json"
         request = urllib.request.Request(
             url,
-            headers={
-                "Accept": "application/json",
-                "Authorization": f"Bearer {self.config.api_token}",
-                "User-Agent": "PQService/1.0",
-            },
+            data=body,
+            headers=headers,
             method=method,
         )
         try:
@@ -87,6 +97,30 @@ class XuiClient:
         if not isinstance(payload, list):
             raise XuiError("3x-ui вернула неизвестную структуру списка inbound.")
         return [item for item in payload if isinstance(item, dict)]
+
+    def get_client(self, email: str) -> dict[str, Any]:
+        encoded = urllib.parse.quote(email, safe="")
+        return self.request("GET", f"/panel/api/clients/get/{encoded}")
+
+    def create_client(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.request("POST", "/panel/api/clients", payload)
+
+    def update_client(self, email: str, payload: dict[str, Any]) -> dict[str, Any]:
+        encoded = urllib.parse.quote(email, safe="")
+        return self.request("POST", f"/panel/api/clients/update/{encoded}", payload)
+
+    def delete_client(self, email: str, keep_traffic: bool = True) -> dict[str, Any]:
+        encoded = urllib.parse.quote(email, safe="")
+        suffix = "?keepTraffic=1" if keep_traffic else ""
+        return self.request("POST", f"/panel/api/clients/del/{encoded}{suffix}")
+
+    def attach_client(self, email: str, inbound_ids: list[int]) -> dict[str, Any]:
+        encoded = urllib.parse.quote(email, safe="")
+        return self.request(
+            "POST",
+            f"/panel/api/clients/{encoded}/attach",
+            {"inboundIds": inbound_ids},
+        )
 
     def probe(self) -> dict[str, Any]:
         clients = self.list_clients()
