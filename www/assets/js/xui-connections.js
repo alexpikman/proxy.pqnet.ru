@@ -154,7 +154,9 @@
         await loadConnections();
         notify("Активный сервер переключён.");
       } else if (action === "deactivate") {
-        notify("Чтобы переключить активный сервер, выберите другое подключение. Активный сервер сохраняется до переключения.");
+        await api("/" + encodeURIComponent(id) + "/deactivate", { method: "POST", body: "{}" });
+        await loadConnections();
+        notify("Активный сервер отключён.");
       } else if (action === "disable" || action === "enable") {
         await api("/" + encodeURIComponent(id) + "/" + action, { method: "POST", body: "{}" });
         await loadConnections();

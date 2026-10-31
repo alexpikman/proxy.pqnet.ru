@@ -232,6 +232,17 @@ def build_admin_router(
             audit(db, admin["id"], "xui.connection.activate", "xui_connection", connection_id)
             return {"success": True, "connection": public_connection(get_connection(db, connection_id))}
 
+    @router.post("/{connection_id}/deactivate")
+    def deactivate_connection(connection_id: str, admin: dict[str, Any] = Depends(require_admin)):
+        with database() as db:
+            get_connection(db, connection_id)
+            db.execute(
+                "UPDATE xui_connections SET is_active = 0, updated_at = ? WHERE id = ?",
+                (iso_now(), connection_id),
+            )
+            audit(db, admin["id"], "xui.connection.deactivate", "xui_connection", connection_id)
+            return {"success": True}
+
     @router.post("/{connection_id}/disable")
     def disable_connection(connection_id: str, admin: dict[str, Any] = Depends(require_admin)):
         with database() as db:

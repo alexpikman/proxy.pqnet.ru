@@ -41,7 +41,7 @@ jobs:
           grep -q '^User=www-data$' deploy/pqservice.service
           grep -q '^ExecStart=.*127.0.0.1 --port 8000' deploy/pqservice.service
       - name: Check frontend JavaScript
-        run: node --check www/assets/js/app.js
+        run: node --check www/assets/js/app.js && node --check www/assets/js/xui-connections.js
       - name: Run backend API tests
         env:
           PYTHONPATH: .
