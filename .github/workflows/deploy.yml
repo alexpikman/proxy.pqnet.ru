@@ -30,7 +30,7 @@ jobs:
           script: |
             set -eu
 
-            TARGET="/var/www/proxy.pqnet.ru"
+            TARGET="/var/WWW/proxy.pqnet.ru"
             cd "$TARGET"
 
             git fetch --quiet origin main
