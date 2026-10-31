@@ -213,6 +213,7 @@
       if (area === "account") loadAccountView(view);
       if (area === "admin" && view === "users") loadAdminUsers();
       if (area === "admin" && view === "requests") loadRegistrationRequests();
+      if (area === "admin" && view === "finance") loadAdminTransactions();
       if (area === "admin" && view === "programs") loadAdminPrograms();
     };
     $$("[data-view]").forEach(link => link.addEventListener("click", event => {
@@ -355,6 +356,7 @@
     bindAdminControls();
     const activeView = location.hash.slice(1);
     if (activeView === "requests") loadRegistrationRequests();
+    if (activeView === "finance") loadAdminTransactions();
     if (activeView === "users") loadAdminUsers();
     if (activeView === "programs") loadAdminPrograms();
   }
@@ -464,12 +466,37 @@
       comment: $("#credit-note").value.trim()
     };
     if (!payload.user || !Number.isInteger(payload.amount) || payload.amount <= 0) return toast("Проверьте пользователя и количество монет.", true);
+    const operation = $("#credit-operation")?.value || "credit";
+    if (operation === "debit" && !payload.comment) return toast("Для списания укажите причину.", true);
     try {
-      await api("/admin/coins/credit", { method: "POST", body: JSON.stringify(payload) });
+      await api(`/admin/coins/${operation}`, { method: "POST", body: JSON.stringify(payload) });
       event.currentTarget.reset();
-      toast("Монеты начислены.");
+      toast(operation === "debit" ? "Монеты списаны." : "Монеты начислены.");
       loadAdminOverview();
+      loadAdminTransactions();
     } catch (error) { toast(error.message, true); }
+  }
+
+  async function loadAdminTransactions() {
+    const body = $("#finance-transactions");
+    if (!body) return;
+    try {
+      const result = await api("/admin/transactions");
+      const items = Array.isArray(result) ? result : (result.items || []);
+      if (!items.length) {
+        body.innerHTML = '<tr><td colspan="5" class="empty-state">Финансовых операций пока нет.</td></tr>';
+        return;
+      }
+      body.innerHTML = items.map(item => `<tr>
+        <td>${escapeHtml(formatDate(item.created_at))}</td>
+        <td><b>${escapeHtml(item.login)}</b><small class="table-sub">${escapeHtml(item.email || "")}</small></td>
+        <td>${escapeHtml(item.operation)}</td>
+        <td class="${Number(item.amount) >= 0 ? "amount-positive" : "amount-negative"}">${Number(item.amount) > 0 ? "+" : ""}${formatNumber(item.amount)}</td>
+        <td>${escapeHtml(item.comment || "—")}</td>
+      </tr>`).join("");
+    } catch (error) {
+      body.innerHTML = `<tr><td colspan="5" class="empty-state">${escapeHtml(error.message)}</td></tr>`;
+    }
   }
 
   async function loadRegistrationRequests() {
