@@ -752,6 +752,53 @@ def admin_reject_registration(request_id: int, admin: dict[str, Any] = Depends(r
     return {"success": True}
 
 
+@app.post("/api/admin/coins/debit")
+def admin_debit(payload: dict[str, Any], admin: dict[str, Any] = Depends(require_admin)):
+    target = str(payload.get("user", "")).strip()
+    amount = payload.get("amount")
+    comment = str(payload.get("comment", "")).strip()[:500]
+    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
+        raise HTTPException(status_code=422, detail="Количество монет должно быть положительным целым числом.")
+    if not comment:
+        raise HTTPException(status_code=422, detail="Укажите причину списания.")
+    with database() as db:
+        db.execute("BEGIN IMMEDIATE")
+        row = db.execute(
+            "SELECT * FROM users WHERE (login = ? COLLATE NOCASE OR uuid = ?) AND role = 'user'",
+            (target, target),
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Пользователь не найден.")
+        if row["coins"] < amount:
+            raise HTTPException(status_code=409, detail="Недостаточно PQcoins на балансе.")
+        balance = row["coins"] - amount
+        db.execute("UPDATE users SET coins = ?, updated_at = ? WHERE id = ?", (balance, iso_now(), row["id"]))
+        db.execute(
+            """
+            INSERT INTO coin_transactions(user_id, amount, balance_after, operation, comment, actor_user_id, created_at)
+            VALUES (?, ?, ?, 'debit', ?, ?, ?)
+            """,
+            (row["id"], -amount, balance, comment, admin["id"], iso_now()),
+        )
+        audit(db, admin["id"], "coins.debit", "user", row["uuid"], f"amount={amount}")
+    return {"success": True, "balance": balance}
+
+
+@app.get("/api/admin/transactions")
+def admin_transactions(admin: dict[str, Any] = Depends(require_admin)):
+    with database() as db:
+        rows = db.execute(
+            """
+            SELECT t.id, t.amount, t.balance_after, t.operation, t.comment, t.created_at,
+                   u.login, u.email
+            FROM coin_transactions t
+            JOIN users u ON u.id = t.user_id
+            ORDER BY t.id DESC LIMIT 500
+            """
+        ).fetchall()
+        return {"items": [dict(row) for row in rows]}
+
+
 def create_admin() -> None:
     login_name = input("Admin login [admin]: ").strip() or "admin"
     email = input("Admin email: ").strip()
