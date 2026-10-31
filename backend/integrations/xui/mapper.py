@@ -26,7 +26,6 @@ def normalize_client(client: dict[str, Any]) -> dict[str, Any]:
             int(value) for value in (client.get("inboundIds") or [])
             if str(value).isdigit()
         }),
-        "raw": client,
     }
 
 
@@ -60,7 +59,6 @@ def compare_clients(local_users: list[dict[str, Any]], remote_clients: list[dict
             "user_id": local_id,
             "login": user.get("login"),
             "email": remote["email"],
-            "xui_client_id": remote["client_id"],
             "identity_match": "client_id" if remote["client_id"] and user.get("xui_client_id") == remote["client_id"] else "email",
         })
 
