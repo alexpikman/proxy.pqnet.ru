@@ -124,3 +124,18 @@ def test_legacy_client_list_falls_back_to_all_inbounds(monkeypatch):
     assert len(clients) == 1
     assert clients[0]["email"] == "legacy@example.test"
     assert clients[0]["inboundIds"] == [10, 12]
+
+
+
+def test_compare_clients_flags_uuid_email_identity_conflict():
+    local = [
+        {"id": 1, "login": "alice", "email": "alice@example.test", "xui_client_id": "uuid-1"},
+        {"id": 2, "login": "bob", "email": "bob@example.test", "xui_client_id": None},
+    ]
+    remote = [
+        {"email": "bob@example.test", "uuid": "uuid-1", "enable": True},
+    ]
+    result = compare_clients(local, remote)
+    assert result["counts"]["conflicts"] == 1
+    assert result["counts"]["matched"] == 0
+    assert "разные записи" in result["conflicts"][0]["reason"]
