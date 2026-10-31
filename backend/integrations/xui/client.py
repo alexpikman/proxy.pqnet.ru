@@ -42,6 +42,7 @@ class XuiConfig:
 class XuiClient:
     def __init__(self, config: XuiConfig):
         self.config = config
+        self._legacy_clients = False
 
     def request(
         self,
@@ -92,6 +93,7 @@ class XuiClient:
         except XuiError as exc:
             if exc.status_code != 404:
                 raise
+            self._legacy_clients = True
             return self._list_legacy_inbound_clients()
         if isinstance(payload, dict):
             payload = payload.get("clients", payload.get("items", []))
@@ -187,7 +189,7 @@ class XuiClient:
             "connected": True,
             "clients_count": len(clients),
             "inbounds_count": len(inbounds),
-            "api_family": "clients-first",
+            "api_family": "inbound-embedded" if self._legacy_clients else "clients-first",
             "panel_version": panel_version,
             "openapi_available": schema_available,
             "capabilities": capabilities,
