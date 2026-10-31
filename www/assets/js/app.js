@@ -385,8 +385,13 @@
   function bindAdminControls() {
     $("[data-sync-users]")?.addEventListener("click", async () => {
       try {
-        await api("/admin/xui/sync", { method: "POST", body: JSON.stringify({}) });
-        toast("Синхронизация запущена.");
+        const result = await api("/admin/xui/sync", { method: "POST", body: JSON.stringify({}) });
+        const counts = result.counts || {};
+        $("#xui-sync-details").textContent =
+          `Проверка завершена: совпадают — ${formatNumber(counts.matched)}, только в 3x-ui — ${formatNumber(counts.panel_only)}, только в PQService — ${formatNumber(counts.service_only)}, конфликтов — ${formatNumber(counts.conflicts)}. Изменения не применялись.`;
+        $("#xui-api-value").textContent = "Подключено";
+        $("#xui-inbounds-count").textContent = "—";
+        toast("Сверка завершена. Данные не изменялись.");
         loadAdminUsers();
       } catch (error) { toast(error.message, true); }
     });
