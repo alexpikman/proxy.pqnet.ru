@@ -19,15 +19,15 @@ FastAPI backend for the existing `www/` frontend.
 
 ## Install
 
-Run from the repository root on the server:
+After the repository has been updated on the server, run the installer as root:
 
 ```bash
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r backend/requirements.txt
-cp backend/.env.example backend/.env
+bash /var/WWW/proxy.pqnet.ru/deploy/install-backend.sh
 ```
+
+The installer creates a dedicated `www-data` systemd service, a Python virtual environment, and the private SQLite directory at `/var/lib/pqservice`. It listens only on `127.0.0.1:8000`. It creates `/etc/pqservice/pqservice.env` only when that file does not exist; existing settings are preserved.
+
+The production service installs only `backend/requirements.txt`. Test dependencies are kept separately in `backend/requirements-dev.txt`.
 
 Set the environment variables from `backend/.env.example` in the service manager. Keep the database outside the public web root. Do not commit `.env`, SQLite files, passwords or API credentials.
 
@@ -57,7 +57,7 @@ The API listens only on loopback. It must not bind to a public interface.
 
 ## Nginx integration
 
-Only after the backend has been installed and verified, add an `/api/` proxy location to the existing HTTPS server on port 4444:
+Only after the backend health check succeeds locally, add the contents of `deploy/nginx-api-location.conf` inside the existing HTTPS server block on port 4444:
 
 ```nginx
 location /api/ {
