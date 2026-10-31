@@ -21,6 +21,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from backend.integrations.xui.client import XuiClient, XuiConfig, XuiError
 from backend.integrations.xui.sync import build_sync_snapshot
+from backend.integrations.xui.admin import build_admin_router, init_connection_tables
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -195,6 +196,7 @@ def init_db() -> None:
 @app.on_event("startup")
 def startup() -> None:
     init_db()
+    init_connection_tables(database)
 
 
 @app.middleware("http")
@@ -276,6 +278,9 @@ def require_admin(user: dict[str, Any] = Depends(current_user)) -> dict[str, Any
     if user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Недостаточно прав.")
     return user
+
+
+app.include_router(build_admin_router(database, require_admin, audit, iso_now))
 
 
 class LoginPayload(BaseModel):
