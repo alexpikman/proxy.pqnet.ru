@@ -791,15 +791,17 @@ def admin_xui_status(admin: dict[str, Any] = Depends(require_admin)):
     try:
         client = configured_xui()
         result = client.probe()
-    except XuiError as exc:
+    except (XuiError, HTTPException) as exc:
         with database() as db:
             state = db.execute("SELECT last_sync_at FROM xui_sync_state WHERE id = 1").fetchone()
+        message = exc.detail if isinstance(exc, HTTPException) else str(exc)
         return {
             "connected": False,
+            "configured": bool(os.getenv("PQ_XUI_BASE_URL") and os.getenv("PQ_XUI_API_TOKEN")),
             "inbounds_count": 0,
             "clients_count": 0,
             "last_sync": state["last_sync_at"] if state else None,
-            "message": str(exc),
+            "message": str(message),
         }
     with database() as db:
         state = db.execute("SELECT last_sync_at FROM xui_sync_state WHERE id = 1").fetchone()
