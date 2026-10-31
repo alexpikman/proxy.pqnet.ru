@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "www/**"
       - ".github/workflows/backend-check.yml"
 
 permissions:
@@ -34,6 +35,11 @@ jobs:
         run: python -m compileall -q backend
       - name: Check frontend JavaScript
         run: node --check www/assets/js/app.js
+      - name: Run backend API tests
+        env:
+          PQ_COOKIE_SECURE: "false"
+          PQ_SMTP_HOST: ""
+        run: pytest -q backend/tests
       - name: Initialize isolated SQLite database
         env:
           PQ_DATABASE_PATH: /tmp/pqservice-ci.sqlite3
