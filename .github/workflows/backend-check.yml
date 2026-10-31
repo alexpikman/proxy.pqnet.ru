@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "deploy/**"
       - "www/**"
       - ".github/workflows/backend-check.yml"
   pull_request:
     branches: [main]
     paths:
       - "backend/**"
+      - "deploy/**"
       - "www/**"
       - ".github/workflows/backend-check.yml"
 
@@ -36,22 +38,7 @@ jobs:
       - name: Check deployment scripts
         run: |
           bash -n deploy/install-backend.sh
-          grep -q '^User=www-data
-      - name: Check frontend JavaScript
-        run: node --check www/assets/js/app.js
-      - name: Run backend API tests
-        env:
-          PYTHONPATH: .
-          PQ_COOKIE_SECURE: "false"
-          PQ_SMTP_HOST: ""
-        run: pytest -q backend/tests
-      - name: Initialize isolated SQLite database
-        env:
-          PQ_DATABASE_PATH: /tmp/pqservice-ci.sqlite3
-          PQ_COOKIE_SECURE: "false"
-        run: |
-          python -c "from backend.app import init_db; init_db(); print('SQLite schema initialized')"
- deploy/pqservice.service
+          grep -q '^User=www-data$' deploy/pqservice.service
           grep -q '^ExecStart=.*127.0.0.1 --port 8000' deploy/pqservice.service
       - name: Check frontend JavaScript
         run: node --check www/assets/js/app.js
