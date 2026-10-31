@@ -12,6 +12,8 @@ from backend import app as service
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(service, "DATABASE_PATH", tmp_path / "pqservice-test.sqlite3")
     monkeypatch.setattr(service, "COOKIE_SECURE", False)
+    monkeypatch.setattr(service, "TRUSTED_ORIGINS", {"https://testserver"})
+    monkeypatch.setattr(service.register_request, "_attempts", {})
     monkeypatch.setenv("PQ_SMTP_HOST", "")
     service.init_db()
 
@@ -35,6 +37,7 @@ def client(tmp_path, monkeypatch):
         )
 
     with TestClient(service.app) as test_client:
+        test_client.headers.update({"Origin": "https://testserver"})
         yield test_client
 
 
