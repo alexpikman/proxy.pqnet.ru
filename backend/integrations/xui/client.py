@@ -87,12 +87,41 @@ class XuiClient:
         return payload.get("obj", payload.get("data", payload))
 
     def list_clients(self) -> list[dict[str, Any]]:
-        payload = self.unwrap(self.request("GET", "/panel/api/clients/list"))
+        try:
+            payload = self.unwrap(self.request("GET", "/panel/api/clients/list"))
+        except XuiError as exc:
+            if exc.status_code != 404:
+                raise
+            return self._list_legacy_inbound_clients()
         if isinstance(payload, dict):
             payload = payload.get("clients", payload.get("items", []))
         if not isinstance(payload, list):
             raise XuiError("3x-ui вернула неизвестную структуру списка клиентов.")
         return [item for item in payload if isinstance(item, dict)]
+
+    def _list_legacy_inbound_clients(self) -> list[dict[str, Any]]:
+        merged: dict[str, dict[str, Any]] = {}
+        for inbound in self.list_inbounds():
+            settings = inbound.get("settings") or {}
+            if isinstance(settings, str):
+                try:
+                    settings = json.loads(settings)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(settings, dict):
+                continue
+            inbound_id = inbound.get("id")
+            for client in settings.get("clients") or []:
+                if not isinstance(client, dict) or not client.get("email"):
+                    continue
+                email = str(client["email"]).strip()
+                if not email:
+                    continue
+                existing = merged.setdefault(email.casefold(), dict(client))
+                inbound_ids = existing.setdefault("inboundIds", [])
+                if inbound_id is not None and inbound_id not in inbound_ids:
+                    inbound_ids.append(inbound_id)
+        return list(merged.values())
 
     def list_inbounds(self) -> list[dict[str, Any]]:
         payload = self.unwrap(self.request("GET", "/panel/api/inbounds/list"))
