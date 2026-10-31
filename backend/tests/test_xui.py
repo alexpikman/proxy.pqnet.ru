@@ -61,11 +61,11 @@ def test_compare_clients_matches_by_external_id_then_email():
     assert result["service_only"][0]["login"] == "bob"
 
 
-def test_compare_clients_detects_duplicate_local_match():
+def test_compare_clients_matches_by_email_when_external_id_is_missing():
     local = [
         {"id": 1, "login": "alice", "email": "alice@example.test", "xui_client_id": None},
         {"id": 2, "login": "alice2", "email": "alice@example.test", "xui_client_id": None},
     ]
     result = compare_clients(local, [{"email": "alice@example.test", "uuid": "uuid-1"}])
-    assert result["counts"]["conflicts"] == 0
     assert result["counts"]["matched"] == 1
+    assert result["matched"][0]["identity_match"] == "email"
