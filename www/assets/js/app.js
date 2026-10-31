@@ -156,7 +156,7 @@
     if (!area) return;
     const titles = {
       overview: "Обзор", subscription: "Подписка", coins: "PQcoins", programs: "Программы",
-      users: "Пользователи", finance: "PQcoins", promocodes: "Промокоды", xui: "3x-ui", system: "Система"
+      users: "Пользователи", requests: "Заявки", finance: "PQcoins", promocodes: "Промокоды", xui: "3x-ui", system: "Система"
     };
     const showView = view => {
       const target = $(`#view-${view}`);
@@ -168,6 +168,7 @@
       $("#sidebar")?.classList.remove("sidebar-open");
       if (area === "account") loadAccountView(view);
       if (area === "admin" && view === "users") loadAdminUsers();
+      if (area === "admin" && view === "requests") loadRegistrationRequests();
       if (area === "admin" && view === "programs") loadAdminPrograms();
     };
     $$("[data-view]").forEach(link => link.addEventListener("click", event => {
@@ -359,6 +360,13 @@
     $("#credit-form")?.addEventListener("submit", creditUser);
     $("#admin-program-search")?.addEventListener("input", loadAdminPrograms);
     $("#admin-program-platform")?.addEventListener("change", loadAdminPrograms);
+    $("[data-refresh-requests]")?.addEventListener("click", loadRegistrationRequests);
+    $("#registration-requests-list")?.addEventListener("click", async event => {
+      const approve = event.target.closest("[data-approve-request]");
+      const reject = event.target.closest("[data-reject-request]");
+      if (approve) await reviewRegistrationRequest(approve.dataset.approveRequest, "approve");
+      if (reject) await reviewRegistrationRequest(reject.dataset.rejectRequest, "reject");
+    });
   }
 
   async function loadAdminUsers() {
@@ -414,6 +422,53 @@
       toast("Монеты начислены.");
       loadAdminOverview();
     } catch (error) { toast(error.message, true); }
+  }
+
+  async function loadRegistrationRequests() {
+    const node = $("#registration-requests-list");
+    if (!node) return;
+    try {
+      const result = await api("/admin/registration-requests");
+      const items = Array.isArray(result) ? result : (result.items || []);
+      if (!items.length) {
+        node.innerHTML = '<div class="empty-panel">Заявок пока нет.</div>';
+        return;
+      }
+      node.innerHTML = items.map(item => {
+        const pending = item.status === "pending";
+        return `<article class="request-card">
+          <div class="request-content">
+            <div class="request-title"><b>${escapeHtml(item.login)}</b><span class="status-pill ${pending ? "status-soft" : "status-muted"}">${pending ? "Ожидает решения" : item.status === "approved" ? "Одобрена" : "Отклонена"}</span></div>
+            <a href="mailto:${escapeHtml(item.email)}">${escapeHtml(item.email)}</a>
+            <div class="request-contacts">${item.phone ? `Телефон: ${escapeHtml(item.phone)}` : "Телефон не указан"} · ${item.telegram ? `Telegram: ${escapeHtml(item.telegram)}` : "Telegram не указан"}</div>
+            <small>Поступила: ${escapeHtml(formatDate(item.created_at))}</small>
+          </div>
+          ${pending ? `<div class="request-actions"><button class="button button-primary button-small" type="button" data-approve-request="${item.id}">Одобрить</button><button class="button button-outline button-small" type="button" data-reject-request="${item.id}">Отклонить</button></div>` : ""}
+        </article>`;
+      }).join("");
+    } catch (error) {
+      node.innerHTML = `<div class="empty-panel">${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  async function reviewRegistrationRequest(requestId, action) {
+    if (action === "reject" && !window.confirm("Отклонить эту заявку?")) return;
+    try {
+      const result = await api(`/admin/registration-requests/${requestId}/${action}`, {
+        method: "POST",
+        body: JSON.stringify({})
+      });
+      if (action === "approve" && result.setup_token) {
+        showModal("ОДОБРЕНИЕ ЗАЯВКИ", "Код установки пароля", [
+          field("setup_token", "Передайте этот одноразовый код пользователю", result.setup_token, "text", true)
+        ], async () => {});
+      } else {
+        toast(action === "approve" ? "Заявка одобрена. Инструкция отправлена на почту." : "Заявка отклонена.");
+      }
+      loadRegistrationRequests();
+    } catch (error) {
+      toast(error.message, true);
+    }
   }
 
   async function loadAdminPrograms() {
