@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9fc">
+  <meta name="description" content="PQService — управление подключением и программами">
+  <title>PQService — ваш доступ, просто и удобно</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body class="public-page">
+  <header class="public-header">
+    <a class="brand" href="/"><span class="brand-mark">PQ</span><span>PQService</span></a>
+    <nav class="public-nav"><a href="#how">Как это работает</a><a href="#apps">Программы</a><a href="#help">Помощь</a></nav>
+    <a class="button button-primary button-small" href="/login.html">Личный кабинет <span aria-hidden="true">↗</span></a>
+  </header>
+  <main>
+    <section class="hero container">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Единый центр управления подключением</div>
+        <h1>Ваше подключение.<br><span>Под вашим контролем.</span></h1>
+        <p class="hero-lead">Управляйте подпиской, следите за балансом и находите нужные приложения в одном удобном месте.</p>
+        <div class="hero-actions"><a class="button button-primary" href="/login.html">Войти в кабинет <span aria-hidden="true">→</span></a><a class="button button-quiet" href="#how">Как начать</a></div>
+        <div class="hero-note"><span class="note-check">✓</span> Просто. Понятно. Без лишних действий.</div>
+      </div>
+      <div class="hero-art" aria-label="Иллюстрация личного кабинета">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="preview-card preview-main">
+          <div class="preview-top"><span class="preview-label">МОЯ ПОДПИСКА</span><span class="status-pill status-soft">● Под контролем</span></div>
+          <div class="preview-number">PQ<span>Service</span></div>
+          <div class="preview-divider"></div>
+          <div class="preview-stats"><div><small>Баланс</small><strong>Монеты</strong></div><div><small>Доступ</small><strong>Подписка</strong></div></div>
+          <div class="preview-line"><span></span></div>
+          <div class="preview-caption">Вся важная информация — в одном месте</div>
+        </div>
+        <div class="float-tile float-one"><span class="float-icon">↗</span><div><b>Удобное управление</b><small>Личный кабинет</small></div></div>
+        <div class="float-tile float-two"><span class="float-icon float-icon-blue">⌘</span><div><b>Нужные приложения</b><small>Каталог программ</small></div></div>
+        <div class="hero-glow"></div>
+      </div>
+    </section>
+    <section class="trust-strip"><div class="container trust-inner"><span>Всё необходимое для подключения</span><i></i><span>Баланс и история операций</span><i></i><span>Инструкции и приложения</span></div></section>
+    <section class="section container" id="how">
+      <div class="section-heading"><div><div class="eyebrow">ВСЁ ПРОСТО</div><h2>Начать можно за пару шагов</h2></div><p>Никаких сложных настроек в кабинете — только нужная информация и понятные действия.</p></div>
+      <div class="steps-grid">
+        <article class="step-card"><div class="step-index">01</div><div class="step-icon">↗</div><h3>Войдите в кабинет</h3><p>Используйте выданные вам логин и пароль, чтобы открыть личную страницу.</p></article>
+        <article class="step-card"><div class="step-index">02</div><div class="step-icon">◎</div><h3>Откройте подписку</h3><p>Скопируйте персональную ссылку или отсканируйте QR-код для приложения.</p></article>
+        <article class="step-card"><div class="step-index">03</div><div class="step-icon">⌘</div><h3>Установите приложение</h3><p>Выберите свою платформу в каталоге и следуйте короткой инструкции.</p></article>
+      </div>
+    </section>
+    <section class="apps-section" id="apps"><div class="container apps-inner"><div><div class="eyebrow">КАТАЛОГ ПРИЛОЖЕНИЙ</div><h2>Подходящее приложение<br>для вашего устройства</h2><p>В кабинете собраны программы и инструкции для разных платформ. Каталог обновляется администратором.</p><a class="text-link" href="/login.html">Перейти в личный кабинет <span>→</span></a></div><div class="platform-grid"><div class="platform-card"><span>▣</span><b>Windows</b><small>Компьютер</small></div><div class="platform-card"><span>◈</span><b>Android</b><small>Смартфон и планшет</small></div><div class="platform-card"><span>◉</span><b>iOS</b><small>iPhone и iPad</small></div><div class="platform-card"><span>⌘</span><b>macOS</b><small>Компьютер Apple</small></div></div></div></section>
+    <section class="help-banner container" id="help"><div class="help-mark">?</div><div><h2>Нужна помощь с подключением?</h2><p>Откройте инструкции в личном кабинете — там собраны основные шаги.</p></div><a class="button button-light" href="/login.html">Открыть кабинет <span>→</span></a></section>
+  </main>
+  <footer class="public-footer"><div class="container footer-inner"><a class="brand" href="/"><span class="brand-mark">PQ</span><span>PQService</span></a><span>Управление подключением — в одном месте.</span><span>© <span id="year"></span> PQService</span></div></footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
