@@ -778,7 +778,10 @@ def admin_xui_sync(admin: dict[str, Any] = Depends(require_admin)):
         "mode": "read_only_comparison",
         "last_sync": synced_at,
         "counts": comparison["counts"],
-        "matched": comparison["matched"],
+        "matched": [
+            {key: value for key, value in item.items() if key != "xui_client_id"}
+            for item in comparison["matched"]
+        ],
         "panel_only": [
             {key: value for key, value in item.items() if key != "client_id" and key != "raw"}
             for item in comparison["panel_only"]
