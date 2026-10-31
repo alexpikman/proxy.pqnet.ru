@@ -353,6 +353,10 @@
     $("#top-user-name").textContent = session.user?.login || session.login || "Администратор";
     await loadAdminOverview();
     bindAdminControls();
+    const activeView = location.hash.slice(1);
+    if (activeView === "requests") loadRegistrationRequests();
+    if (activeView === "users") loadAdminUsers();
+    if (activeView === "programs") loadAdminPrograms();
   }
 
   async function loadAdminOverview(showToast = false) {
@@ -503,8 +507,9 @@
         body: JSON.stringify({})
       });
       if (action === "approve" && result.setup_token) {
-        showModal("ОДОБРЕНИЕ ЗАЯВКИ", "Код установки пароля", [
-          field("setup_token", "Передайте этот одноразовый код пользователю", result.setup_token, "text", true)
+        const setupUrl = `${window.location.origin}/set-password.html?token=${encodeURIComponent(result.setup_token)}`;
+        showModal("ОДОБРЕНИЕ ЗАЯВКИ", "Персональная ссылка установки пароля", [
+          field("setup_url", "Передайте эту ссылку пользователю", setupUrl, "text", true)
         ], async () => {});
       } else {
         toast(action === "approve" ? "Заявка одобрена. Инструкция отправлена на почту." : "Заявка отклонена.");
