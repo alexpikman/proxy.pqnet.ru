@@ -759,8 +759,8 @@ def admin_xui_sync(admin: dict[str, Any] = Depends(require_admin)):
             """,
             (
                 synced_at,
-                len(snapshot["clients"]),
-                len(snapshot["inbounds"]),
+                snapshot["clients_count"],
+                snapshot["inbounds_count"],
                 json.dumps(comparison, ensure_ascii=False),
             ),
         )
