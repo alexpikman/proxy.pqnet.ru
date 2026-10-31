@@ -114,6 +114,43 @@
     });
   }
 
+  function initRegistration() {
+    const form = $("#registration-form");
+    if (!form) return;
+    $("#year").textContent = new Date().getFullYear();
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const message = $("#registration-message");
+      const button = $("#registration-submit");
+      message.hidden = true;
+      const payload = {
+        login: $("#request-login").value.trim(),
+        email: $("#request-email").value.trim(),
+        phone: $("#request-phone").value.trim() || null,
+        telegram: $("#request-telegram").value.trim() || null
+      };
+      button.disabled = true;
+      button.textContent = "Отправляем заявку…";
+      try {
+        const result = await api("/register-request", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        message.textContent = result.message || "Заявка отправлена. Дождитесь решения администратора.";
+        message.classList.remove("form-message-error");
+        message.hidden = false;
+        form.reset();
+      } catch (error) {
+        message.textContent = error.message || "Не удалось отправить заявку.";
+        message.classList.add("form-message-error");
+        message.hidden = false;
+      } finally {
+        button.disabled = false;
+        button.innerHTML = 'Отправить заявку <span>→</span>';
+      }
+    });
+  }
+
   function initWorkspaceShell() {
     const area = document.body.dataset.area;
     if (!area) return;
@@ -490,6 +527,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     initLogin();
+    initRegistration();
     initWorkspaceShell();
   });
 })();
