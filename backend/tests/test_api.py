@@ -29,7 +29,7 @@ def client(tmp_path, monkeypatch):
             (
                 secrets.token_hex(16),
                 "admin",
-                "admin@example.test",
+                "admin@example.com",
                 service.PASSWORDS.hash("Admin-test-password-2026"),
                 now,
                 now,
@@ -59,7 +59,7 @@ def test_registration_requires_admin_approval_and_password_setup(client: TestCli
         "/api/register-request",
         json={
             "login": "new-user",
-            "email": "new-user@example.test",
+            "email": "new-user@example.com",
             "phone": "+70000000000",
             "telegram": "@new_user",
         },
@@ -107,7 +107,7 @@ def test_regular_user_cannot_access_admin_api(client: TestClient) -> None:
             (
                 secrets.token_hex(16),
                 "ordinary-user",
-                "ordinary@example.test",
+                "ordinary@example.com",
                 service.PASSWORDS.hash("Ordinary-user-password-2026"),
                 now,
                 now,
@@ -122,10 +122,10 @@ def test_regular_user_cannot_access_admin_api(client: TestClient) -> None:
 def test_admin_can_manage_program_catalog(client: TestClient) -> None:
     login(client, "admin", "Admin-test-password-2026")
     payload = {
-        "icon_url": "https://example.test/icon.png",
+        "icon_url": "https://example.com/icon.png",
         "name": "Test Client",
         "platform": "windows",
-        "url": "https://example.test/download",
+        "url": "https://example.com/download",
         "description": "Test catalog entry",
         "version": "1.0",
         "coin_price": 25,
@@ -160,7 +160,7 @@ def test_coin_credit_and_debit_are_recorded(client: TestClient) -> None:
             (
                 user_uuid,
                 "coin-user",
-                "coin-user@example.test",
+                "coin-user@example.com",
                 service.PASSWORDS.hash("Coin-user-password-2026"),
                 now,
                 now,
