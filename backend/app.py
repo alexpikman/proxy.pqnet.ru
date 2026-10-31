@@ -169,6 +169,18 @@ def init_db() -> None:
                 comparison_json TEXT NOT NULL DEFAULT '{}'
             );
 
+            CREATE TABLE IF NOT EXISTS xui_client_snapshots (
+                email TEXT PRIMARY KEY COLLATE NOCASE,
+                enabled INTEGER NOT NULL DEFAULT 1,
+                expiry_time INTEGER,
+                total_gb REAL,
+                limit_ip INTEGER,
+                sub_id TEXT,
+                telegram_id TEXT,
+                inbound_ids_json TEXT NOT NULL DEFAULT '[]',
+                last_seen_at TEXT NOT NULL
+            );
+
             CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);
             CREATE INDEX IF NOT EXISTS idx_transactions_user_date
                 ON coin_transactions(user_id, created_at DESC);
@@ -528,6 +540,49 @@ def admin_users(
     source: str = "all",
     admin: dict[str, Any] = Depends(require_admin),
 ):
+    if source == "xui":
+        with database() as db:
+            rows = db.execute(
+                "SELECT * FROM xui_client_snapshots ORDER BY email COLLATE NOCASE"
+            ).fetchall()
+        items = []
+        for row in rows:
+            enabled = bool(row["enabled"])
+            if status_filter == "active" and not enabled:
+                continue
+            if status_filter == "disabled" and enabled:
+                continue
+            if search.strip() and search.strip().casefold() not in row["email"].casefold():
+                continue
+            expiry = row["expiry_time"]
+            expiry_date = None
+            days_left = None
+            if expiry:
+                try:
+                    timestamp = float(expiry) / 1000 if float(expiry) > 1000000000000 else float(expiry)
+                    expiry_date = datetime.fromtimestamp(timestamp, timezone.utc).isoformat()
+                    days_left = max(0, (datetime.fromtimestamp(timestamp, timezone.utc) - utc_now()).days)
+                except (ValueError, TypeError, OSError):
+                    pass
+            items.append({
+                "uuid": row["email"],
+                "login": row["email"],
+                "email": row["email"],
+                "status": "active" if enabled else "disabled",
+                "localstatus": 1 if enabled else 0,
+                "localexpire": expiry_date,
+                "days_left": days_left,
+                "coins": None,
+                "price_per_day": None,
+                "vip": False,
+                "source": "xui",
+                "inbound_ids": json.loads(row["inbound_ids_json"]),
+                "total_gb": row["total_gb"],
+                "limit_ip": row["limit_ip"],
+                "sub_id": row["sub_id"],
+            })
+        return {"items": items}
+
     clauses = ["role = 'user'"]
     values: list[Any] = []
     if search.strip():
@@ -540,8 +595,6 @@ def admin_users(
         clauses.append("status <> 'active'")
     elif status_filter == "unlinked":
         clauses.append("(xui_client_id IS NULL OR xui_client_id = '')")
-    if source == "xui":
-        return {"items": []}
     with database() as db:
         rows = db.execute(
             f"SELECT * FROM users WHERE {' AND '.join(clauses)} ORDER BY created_at DESC",
@@ -563,6 +616,32 @@ def admin_users(
                 "days_left": days_left,
                 "source": "local",
             })
+        if source == "all":
+            state = db.execute("SELECT comparison_json FROM xui_sync_state WHERE id = 1").fetchone()
+            if state:
+                comparison = json.loads(state["comparison_json"])
+                for remote in comparison.get("panel_only", []):
+                    email = str(remote.get("email") or "")
+                    if search.strip() and search.strip().casefold() not in email.casefold():
+                        continue
+                    if status_filter == "active" and not remote.get("enabled", True):
+                        continue
+                    if status_filter == "disabled" and remote.get("enabled", True):
+                        continue
+                    result.append({
+                        "uuid": email,
+                        "login": email,
+                        "email": email,
+                        "status": "active" if remote.get("enabled", True) else "disabled",
+                        "localstatus": 1 if remote.get("enabled", True) else 0,
+                        "localexpire": remote.get("expiry_time"),
+                        "days_left": None,
+                        "coins": None,
+                        "price_per_day": None,
+                        "vip": False,
+                        "source": "xui",
+                        "inbound_ids": remote.get("inbound_ids", []),
+                    })
         return {"items": result}
 
 
@@ -764,6 +843,39 @@ def admin_xui_sync(admin: dict[str, Any] = Depends(require_admin)):
                 json.dumps(comparison, ensure_ascii=False),
             ),
         )
+        for remote in snapshot["clients"]:
+            if not remote["email"]:
+                continue
+            db.execute(
+                """
+                INSERT INTO xui_client_snapshots(
+                    email, enabled, expiry_time, total_gb, limit_ip, sub_id,
+                    telegram_id, inbound_ids_json, last_seen_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(email) DO UPDATE SET
+                    enabled = excluded.enabled,
+                    expiry_time = excluded.expiry_time,
+                    total_gb = excluded.total_gb,
+                    limit_ip = excluded.limit_ip,
+                    sub_id = excluded.sub_id,
+                    telegram_id = excluded.telegram_id,
+                    inbound_ids_json = excluded.inbound_ids_json,
+                    last_seen_at = excluded.last_seen_at
+                """,
+                (
+                    remote["email"],
+                    int(remote["enabled"]),
+                    remote["expiry_time"],
+                    remote["total_gb"],
+                    remote["limit_ip"],
+                    str(remote["sub_id"]) if remote["sub_id"] is not None else None,
+                    str(remote["telegram_id"]) if remote["telegram_id"] is not None else None,
+                    json.dumps(remote["inbound_ids"]),
+                    synced_at,
+                ),
+            )
+        db.execute("DELETE FROM xui_client_snapshots WHERE last_seen_at <> ?", (synced_at,))
         audit(
             db,
             admin["id"],
