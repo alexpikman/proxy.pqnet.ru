@@ -15,7 +15,18 @@ FastAPI backend for the existing `www/` frontend.
 - Admin-managed application catalog: icon URL, title, platform, URL, description, version, PQCoins price, order and publication state.
 - Audit log for security-sensitive changes.
 
-3x-ui sync is intentionally not implemented yet. The API reports that the integration is not configured and rejects sync requests rather than pretending that a sync succeeded.
+## 3x-ui integration
+
+The adapter lives in `backend/integrations/xui/` and is isolated from the core user/account logic.
+
+Configure these variables only in the server environment file (production: `/etc/pqservice/pqservice.env`):
+
+- `PQ_XUI_BASE_URL`: panel origin and optional URL prefix, without credentials or query string.
+- `PQ_XUI_API_TOKEN`: Bearer API token created in the 3x-ui panel. It has full administrator permissions; never commit it or send it through the browser.
+
+The administrator endpoints `/api/admin/xui/status`, `/api/admin/xui/sync`, and `/api/admin/xui/sync-state` test connectivity, compare local users with panel clients, and retain the last comparison summary. The current sync action is deliberately read-only: it does not create, update, disable, or delete clients. The adapter has isolated client CRUD and inbound-attachment methods, but write operations remain gated until the installed panel version and its exact API schema are confirmed.
+
+Matching order is the stored 3x-ui client identifier, then email. A client can have multiple inbound attachments; the integration never assumes a fixed inbound ID. Client credentials are not included in the comparison response. No direct access to the 3x-ui SQLite database is used.
 
 ## Install
 
