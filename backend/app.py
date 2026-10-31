@@ -288,7 +288,7 @@ def send_setup_email(email: str, login: str, token: str) -> bool:
         "Здравствуйте!\n\n"
         "Ваша заявка на доступ к PQService одобрена.\n"
         f"Логин: {login}\n"
-        "Откройте страницу https://proxy.pqnet.ru:4444/set-password.html и введите одноразовый код ниже.\n"
+        f"Откройте страницу {os.getenv('PQ_PUBLIC_BASE_URL', 'https://proxy.pqnet.ru:4444').rstrip('/')}/set-password.html и введите одноразовый код ниже.\n"
         f"Одноразовый код установки пароля: {token}\n\n"
         "Код действует ограниченное время и может быть использован один раз.\n"
     )
@@ -402,6 +402,7 @@ def register_request(payload: RegistrationPayload):
 @app.post("/api/set-password")
 def set_password(payload: PasswordSetupPayload):
     with database() as db:
+        db.execute("BEGIN IMMEDIATE")
         token_row = db.execute(
             """
             SELECT * FROM password_setup_tokens
