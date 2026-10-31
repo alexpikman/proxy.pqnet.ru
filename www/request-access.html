@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f7f9fc">
+  <title>Заявка на доступ — PQService</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body class="login-page">
+  <a class="login-back" href="/login.html">← Ко входу</a>
+  <main class="login-layout">
+    <section class="login-aside">
+      <a class="brand brand-light" href="/"><span class="brand-mark">PQ</span><span>PQService</span></a>
+      <div class="login-aside-content">
+        <div class="eyebrow eyebrow-light">ЗАКРЫТЫЙ ДОСТУП</div>
+        <h1>Доступ по личному приглашению.</h1>
+        <p>Оставьте заявку. Администратор рассмотрит её и сообщит результат на указанную почту.</p>
+        <div class="aside-decoration"><div class="aside-ring"></div><div class="aside-chip">PQ <span>Service</span></div><div class="aside-small-chip">● Ручное подтверждение</div></div>
+      </div>
+      <div class="aside-footer">Просто управлять. Удобно пользоваться.</div>
+    </section>
+    <section class="login-main">
+      <div class="login-card">
+        <div class="login-mobile-brand"><span class="brand-mark">PQ</span><b>PQService</b></div>
+        <div class="login-heading">
+          <div class="eyebrow">ЗАПРОС ДОСТУПА</div>
+          <h2>Оставить заявку</h2>
+          <p>Поля со звёздочкой обязательны для заполнения.</p>
+        </div>
+        <form id="registration-form">
+          <label class="field-label" for="request-login">Желаемый логин *</label>
+          <div class="input-wrap"><span class="input-icon">♙</span><input id="request-login" name="login" autocomplete="username" minlength="3" maxlength="80" pattern="[A-Za-z0-9_.-]+" placeholder="Например, alex" required></div>
+          <label class="field-label" for="request-email">Электронная почта *</label>
+          <div class="input-wrap"><span class="input-icon">＠</span><input id="request-email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="name@example.com" required></div>
+          <label class="field-label" for="request-phone">Телефон (необязательно)</label>
+          <div class="input-wrap"><span class="input-icon">＋</span><input id="request-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" placeholder="+7 …"></div>
+          <label class="field-label" for="request-telegram">Telegram (необязательно)</label>
+          <div class="input-wrap"><span class="input-icon">↗</span><input id="request-telegram" name="telegram" maxlength="80" placeholder="@username"></div>
+          <div class="form-message" id="registration-message" role="status" hidden></div>
+          <button class="button button-primary button-wide" type="submit" id="registration-submit">Отправить заявку <span>→</span></button>
+        </form>
+        <p class="login-footnote">Отправка заявки не создаёт активный аккаунт. Доступ появится только после одобрения администратором.</p>
+      </div>
+      <div class="login-copyright">© <span id="year"></span> PQService</div>
+    </section>
+  </main>
+  <script src="/assets/js/app.js" defer></script>
+</body>
+</html>
