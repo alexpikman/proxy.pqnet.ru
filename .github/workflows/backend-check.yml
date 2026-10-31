@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "www/**"
       - ".github/workflows/backend-check.yml"
   pull_request:
     branches: [main]
@@ -31,6 +32,8 @@ jobs:
           pip install -r backend/requirements.txt
       - name: Compile backend
         run: python -m compileall -q backend
+      - name: Check frontend JavaScript
+        run: node --check www/assets/js/app.js
       - name: Initialize isolated SQLite database
         env:
           PQ_DATABASE_PATH: /tmp/pqservice-ci.sqlite3
