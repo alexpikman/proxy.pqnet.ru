@@ -26,7 +26,7 @@ Configure these variables only in the server environment file (production: `/etc
 
 The administrator endpoints `/api/admin/xui/status`, `/api/admin/xui/sync`, and `/api/admin/xui/sync-state` test connectivity, compare local users with panel clients, and retain the last comparison summary. The current sync action is deliberately read-only: it does not create, update, disable, or delete clients. The adapter has isolated client CRUD and inbound-attachment methods, but write operations remain gated until the installed panel version and its exact API schema are confirmed.
 
-Matching order is the stored 3x-ui client identifier, then email. A client can have multiple inbound attachments; the integration never assumes a fixed inbound ID. Client credentials are not included in the comparison response. No direct access to the 3x-ui SQLite database is used.
+Matching order is the stored 3x-ui client identifier, then email; conflicting identity matches are reported instead of linked automatically. The adapter detects the installed panel version and route capabilities through `/panel/api/openapi.json` when available. It supports both first-class client records and a legacy fallback that aggregates clients from every inbound without assuming a fixed inbound ID. A client can have multiple inbound attachments. Client credentials are not included in the comparison response. No direct access to the 3x-ui SQLite database is used.
 
 ## Install
 
