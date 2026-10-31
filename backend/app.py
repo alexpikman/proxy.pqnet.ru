@@ -175,9 +175,17 @@ def startup() -> None:
 
 @app.middleware("http")
 async def enforce_trusted_origin(request: Request, call_next):
-    if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-        origin = request.headers.get("origin")
-        if origin and TRUSTED_ORIGINS and origin.rstrip("/") not in TRUSTED_ORIGINS:
+    if request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.url.path.startswith("/api/"):
+        origin = request.headers.get("origin", "").rstrip("/")
+        public_mutations = {
+            "/api/login",
+            "/api/register-request",
+            "/api/set-password",
+        }
+        if request.url.path in public_mutations:
+            if origin and origin not in TRUSTED_ORIGINS:
+                return Response(status_code=status.HTTP_403_FORBIDDEN)
+        elif not origin or origin not in TRUSTED_ORIGINS:
             return Response(status_code=status.HTTP_403_FORBIDDEN)
     return await call_next(request)
 
@@ -373,7 +381,16 @@ def logout(request: Request, response: Response):
 
 
 @app.post("/api/register-request", status_code=202)
-def register_request(payload: RegistrationPayload):
+def register_request(payload: RegistrationPayload, request: Request):
+    address = request.client.host if request.client else "unknown"
+    now = utc_now()
+    attempts = getattr(register_request, "_attempts", {})
+    recent = [stamp for stamp in attempts.get(address, []) if now - stamp < timedelta(hours=1)]
+    if len(recent) >= 5:
+        raise HTTPException(status_code=429, detail="Слишком много заявок с этого адреса. Попробуйте позже.")
+    recent.append(now)
+    attempts[address] = recent
+    register_request._attempts = attempts
     with database() as db:
         duplicate = db.execute(
             "SELECT id FROM users WHERE login = ? COLLATE NOCASE OR email = ? COLLATE NOCASE",
@@ -509,6 +526,10 @@ def admin_users(
         clauses.append("status = 'active'")
     elif status_filter == "disabled":
         clauses.append("status <> 'active'")
+    elif status_filter == "unlinked":
+        clauses.append("(xui_client_id IS NULL OR xui_client_id = '')")
+    if source == "xui":
+        return {"items": []}
     with database() as db:
         rows = db.execute(
             f"SELECT * FROM users WHERE {' AND '.join(clauses)} ORDER BY created_at DESC",
