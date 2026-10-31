@@ -191,3 +191,47 @@ def test_coin_credit_and_debit_are_recorded(client: TestClient) -> None:
     transactions = client.get("/api/admin/transactions")
     assert transactions.status_code == 200
     assert [item["amount"] for item in transactions.json()["items"]] == [-35, 100]
+
+
+
+def test_xui_sync_caches_panel_clients_without_mutating_users(client: TestClient, monkeypatch) -> None:
+    login(client, "admin", "Admin-test-password-2026")
+
+    class FakeXui:
+        def list_clients(self):
+            return [
+                {
+                    "email": "panel-only@example.test",
+                    "uuid": "private-client-uuid",
+                    "enable": True,
+                    "expiryTime": 0,
+                    "totalGB": 20,
+                    "limitIp": 2,
+                    "subId": "subscription-1",
+                    "tgId": "123456",
+                    "inboundIds": [4, 9],
+                }
+            ]
+
+        def list_inbounds(self):
+            return [{"id": 4}, {"id": 9}]
+
+    monkeypatch.setattr(service, "configured_xui", lambda: FakeXui())
+    response = client.post("/api/admin/xui/sync")
+    assert response.status_code == 200, response.text
+    assert response.json()["mode"] == "read_only_comparison"
+    assert response.json()["counts"]["panel_only"] == 1
+    assert "client_id" not in response.json()["panel_only"][0]
+
+    panel_users = client.get("/api/admin/users?source=xui")
+    assert panel_users.status_code == 200
+    item = panel_users.json()["items"][0]
+    assert item["email"] == "panel-only@example.test"
+    assert item["inbound_ids"] == [4, 9]
+    assert item["source"] == "xui"
+
+    with service.database() as db:
+        user_count = db.execute("SELECT COUNT(*) FROM users WHERE role = 'user'").fetchone()[0]
+        snapshot_count = db.execute("SELECT COUNT(*) FROM xui_client_snapshots").fetchone()[0]
+    assert user_count == 0
+    assert snapshot_count == 1
