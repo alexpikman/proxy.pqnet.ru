@@ -237,7 +237,10 @@
       const title = escapeHtml(program.name || program.title || "Программа");
       const description = escapeHtml(program.description || "Приложение для подключения.");
       const url = escapeHtml(program.download_url || program.url || "#");
-      return `<article class="program-card" data-platform-value="${platform}" data-search-value="${(title + " " + description).toLowerCase()}"><div class="program-icon">${escapeHtml((program.name || "P").slice(0, 1).toUpperCase())}</div><div class="program-meta"><span class="program-platform">${platform}</span><h3>${title}</h3><p>${description}</p><small>${escapeHtml(program.version || "")}</small></div><a class="button button-outline button-small" href="${url}" target="_blank" rel="noopener noreferrer">Скачать ↗</a></article>`;
+      const icon = program.icon_url
+        ? `<img src="${escapeHtml(program.icon_url)}" alt="" loading="lazy">`
+        : escapeHtml((program.name || "P").slice(0, 1).toUpperCase());
+      return `<article class="program-card" data-platform-value="${platform}" data-search-value="${(title + " " + description).toLowerCase()}"><div class="program-icon">${icon}</div><div class="program-meta"><span class="program-platform">${platform}</span><h3>${title}</h3><p>${description}</p><small>${escapeHtml(program.version || "")}</small></div><a class="button button-outline button-small" href="${url}" target="_blank" rel="noopener noreferrer">Скачать ↗</a></article>`;
     }).join("");
   }
 
@@ -311,6 +314,10 @@
     $("#user-status-filter")?.addEventListener("change", loadAdminUsers);
     $("#user-source-filter")?.addEventListener("change", loadAdminUsers);
     $("[data-add-program]")?.addEventListener("click", () => openEntityModal("program"));
+    $("#admin-program-list")?.addEventListener("click", event => {
+      const button = event.target.closest("[data-edit-program]");
+      if (button) openEntityModal("program", Number(button.dataset.editProgram));
+    });
     $("[data-add-promo]")?.addEventListener("click", () => openEntityModal("promo"));
     $("#credit-form")?.addEventListener("submit", creditUser);
     $("#admin-program-search")?.addEventListener("input", loadAdminPrograms);
@@ -377,9 +384,35 @@
     if (!node) return;
     try {
       const result = await api("/admin/programs");
-      const items = Array.isArray(result) ? result : (result.items || []);
-      renderPrograms("#admin-program-list", items);
-    } catch (error) { node.innerHTML = `<div class="empty-panel">${escapeHtml(error.status === 404 ? "API каталога ещё не подключён." : error.message)}</div>`; }
+      const query = ($("#admin-program-search")?.value || "").trim().toLowerCase();
+      const platform = $("#admin-program-platform")?.value || "all";
+      const items = (Array.isArray(result) ? result : (result.items || [])).filter(item => {
+        const matchesPlatform = platform === "all" || item.platform === platform;
+        const matchesQuery = !query || `${item.name} ${item.description} ${item.platform}`.toLowerCase().includes(query);
+        return matchesPlatform && matchesQuery;
+      });
+      if (!items.length) {
+        node.innerHTML = '<div class="empty-panel">Программы не найдены. Добавьте первую запись.</div>';
+        return;
+      }
+      node.innerHTML = items.map(item => {
+        const icon = item.icon_url
+          ? `<img src="${escapeHtml(item.icon_url)}" alt="" loading="lazy">`
+          : escapeHtml((item.name || "P").slice(0, 1).toUpperCase());
+        return `<article class="program-card program-card-admin">
+          <div class="program-icon">${icon}</div>
+          <div class="program-meta">
+            <span class="program-platform">${escapeHtml(item.platform)}</span>
+            <h3>${escapeHtml(item.name)}</h3>
+            <p>${escapeHtml(item.description || "Без описания")}</p>
+            <small>${escapeHtml(item.version || "")} · ${formatNumber(item.coin_price)} PQcoins · ${item.is_active ? "Опубликовано" : "Скрыто"}</small>
+          </div>
+          <button class="button button-outline button-small" type="button" data-edit-program="${item.id}">Изменить</button>
+        </article>`;
+      }).join("");
+    } catch (error) {
+      node.innerHTML = `<div class="empty-panel">${escapeHtml(error.message)}</div>`;
+    }
   }
 
   function field(name, label, value, type = "text", readonly = false) {
@@ -401,15 +434,46 @@
     };
   }
 
-  function openEntityModal(type) {
+  async function openEntityModal(type, programId = null) {
     if (type === "program") {
-      showModal("КАТАЛОГ ПРОГРАММ", "Добавить программу", [
-        field("name", "Название", ""), field("platform", "Платформа (windows/android/ios/macos/linux)", ""),
-        field("version", "Версия", ""), field("download_url", "Ссылка на скачивание", ""),
-        field("description", "Описание", "")
+      let current = {};
+      if (programId) {
+        try {
+          const result = await api("/admin/programs");
+          const items = Array.isArray(result) ? result : (result.items || []);
+          current = items.find(item => Number(item.id) === programId);
+          if (!current) throw new Error("Программа не найдена.");
+        } catch (error) {
+          toast(error.message, true);
+          return;
+        }
+      }
+      const activeValue = current.is_active === false || current.is_active === 0 ? "0" : "1";
+      showModal("КАТАЛОГ ПРОГРАММ", programId ? "Изменить программу" : "Добавить программу", [
+        field("icon_url", "Ссылка на иконку", current.icon_url || ""),
+        field("name", "Название", current.name || ""),
+        field("platform", "Платформа (windows/android/ios/macos/linux)", current.platform || ""),
+        field("url", "Ссылка на скачивание или инструкцию", current.url || current.download_url || ""),
+        field("description", "Описание", current.description || ""),
+        field("version", "Версия", current.version || ""),
+        field("coin_price", "Стоимость в PQcoins (0 — бесплатно)", current.coin_price ?? 0, "number"),
+        field("sort_order", "Порядок отображения", current.sort_order ?? 100, "number"),
+        field("is_active", "Опубликовано (1 — да, 0 — скрыто)", activeValue, "number")
       ], async values => {
-        await api("/admin/programs", { method: "POST", body: JSON.stringify(values) });
-        toast("Программа добавлена.");
+        const payload = {
+          ...values,
+          coin_price: Number(values.coin_price),
+          sort_order: Number(values.sort_order),
+          is_active: Number(values.is_active) === 1
+        };
+        if (!payload.name || !payload.platform || !payload.url) {
+          throw new Error("Заполните название, платформу и ссылку.");
+        }
+        await api(programId ? `/admin/programs/${programId}` : "/admin/programs", {
+          method: programId ? "PUT" : "POST",
+          body: JSON.stringify(payload)
+        });
+        toast(programId ? "Изменения сохранены." : "Программа добавлена.");
         loadAdminPrograms();
       });
     } else {
