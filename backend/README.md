@@ -39,7 +39,7 @@ Run locally on the server console, from the repository root:
 set -a
 . backend/.env
 set +a
-python -m backend.app create-admin
+python -m backend.bootstrap
 ```
 
 The command prompts for the login, email and password. Password must be at least 12 characters. The password is hashed with Argon2id immediately. Bootstrap is refused if an administrator already exists; there is no public first-admin endpoint.
