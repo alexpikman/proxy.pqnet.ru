@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import secrets
 import smtplib
@@ -17,6 +18,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, EmailStr, Field
+
+from backend.integrations.xui.client import XuiClient, XuiConfig, XuiError
+from backend.integrations.xui.sync import build_sync_snapshot
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -155,6 +159,14 @@ def init_db() -> None:
                 target_id TEXT NOT NULL DEFAULT '',
                 details TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS xui_sync_state (
+                id INTEGER PRIMARY KEY CHECK(id = 1),
+                last_sync_at TEXT NOT NULL,
+                clients_count INTEGER NOT NULL DEFAULT 0,
+                inbounds_count INTEGER NOT NULL DEFAULT 0,
+                comparison_json TEXT NOT NULL DEFAULT '{}'
             );
 
             CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash);
@@ -682,14 +694,114 @@ def admin_delete_program(program_id: int, admin: dict[str, Any] = Depends(requir
     return {"success": True}
 
 
+def configured_xui() -> XuiClient:
+    try:
+        config = XuiConfig.from_env()
+    except XuiError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if not config:
+        raise HTTPException(
+            status_code=503,
+            detail="3x-ui не настроена. Требуются PQ_XUI_BASE_URL и PQ_XUI_API_TOKEN в серверном environment-файле.",
+        )
+    return XuiClient(config)
+
+
 @app.get("/api/admin/xui/status")
 def admin_xui_status(admin: dict[str, Any] = Depends(require_admin)):
-    return {"connected": False, "inbounds_count": 0, "message": "Интеграция 3x-ui ещё не настроена."}
+    try:
+        client = configured_xui()
+        result = client.probe()
+    except XuiError as exc:
+        with database() as db:
+            state = db.execute("SELECT last_sync_at FROM xui_sync_state WHERE id = 1").fetchone()
+        return {
+            "connected": False,
+            "inbounds_count": 0,
+            "clients_count": 0,
+            "last_sync": state["last_sync_at"] if state else None,
+            "message": str(exc),
+        }
+    with database() as db:
+        state = db.execute("SELECT last_sync_at FROM xui_sync_state WHERE id = 1").fetchone()
+    return {
+        **result,
+        "last_sync": state["last_sync_at"] if state else None,
+        "message": "Соединение с API 3x-ui установлено.",
+    }
 
 
 @app.post("/api/admin/xui/sync")
 def admin_xui_sync(admin: dict[str, Any] = Depends(require_admin)):
-    raise HTTPException(status_code=503, detail="Синхронизация недоступна: параметры API 3x-ui ещё не согласованы.")
+    client = configured_xui()
+    with database() as db:
+        rows = db.execute(
+            "SELECT id, uuid, login, email, xui_client_id, status FROM users WHERE role = 'user'"
+        ).fetchall()
+        local_users = [dict(row) for row in rows]
+    try:
+        snapshot = build_sync_snapshot(client, local_users)
+    except XuiError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    comparison = snapshot["comparison"]
+    synced_at = iso_now()
+    with database() as db:
+        db.execute(
+            """
+            INSERT INTO xui_sync_state(id, last_sync_at, clients_count, inbounds_count, comparison_json)
+            VALUES (1, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                last_sync_at = excluded.last_sync_at,
+                clients_count = excluded.clients_count,
+                inbounds_count = excluded.inbounds_count,
+                comparison_json = excluded.comparison_json
+            """,
+            (
+                synced_at,
+                len(snapshot["clients"]),
+                len(snapshot["inbounds"]),
+                json.dumps(comparison, ensure_ascii=False),
+            ),
+        )
+        audit(
+            db,
+            admin["id"],
+            "xui.sync.preview",
+            "xui",
+            "all",
+            f"matched={comparison['counts']['matched']}; panel_only={comparison['counts']['panel_only']}; service_only={comparison['counts']['service_only']}; conflicts={comparison['counts']['conflicts']}",
+        )
+
+    return {
+        "success": True,
+        "mode": "read_only_comparison",
+        "last_sync": synced_at,
+        "counts": comparison["counts"],
+        "matched": comparison["matched"],
+        "panel_only": [
+            {key: value for key, value in item.items() if key != "client_id" and key != "raw"}
+            for item in comparison["panel_only"]
+        ],
+        "service_only": comparison["service_only"],
+        "conflicts": comparison["conflicts"],
+        "message": "Снимок 3x-ui получен. Изменения в панели и PQService не выполнялись.",
+    }
+
+
+@app.get("/api/admin/xui/sync-state")
+def admin_xui_sync_state(admin: dict[str, Any] = Depends(require_admin)):
+    with database() as db:
+        row = db.execute("SELECT * FROM xui_sync_state WHERE id = 1").fetchone()
+    if not row:
+        return {"last_sync": None, "counts": None, "message": "Синхронизация ещё не выполнялась."}
+    comparison = json.loads(row["comparison_json"])
+    return {
+        "last_sync": row["last_sync_at"],
+        "clients_count": row["clients_count"],
+        "inbounds_count": row["inbounds_count"],
+        "counts": comparison.get("counts", {}),
+    }
 
 
 @app.get("/api/admin/registration-requests")
