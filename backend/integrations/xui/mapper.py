@@ -45,8 +45,28 @@ def compare_clients(local_users: list[dict[str, Any]], remote_clients: list[dict
     for raw in remote_clients:
         remote = normalize_client(raw)
         remote_identity = client_identity(raw)
-        user = local_by_xui.get(remote_identity) if remote_identity else None
-        user = user or local_by_email.get(remote["email"].casefold())
+        id_user = local_by_xui.get(remote_identity) if remote_identity else None
+        email_user = local_by_email.get(remote["email"].casefold())
+        if id_user and email_user and int(id_user["id"]) != int(email_user["id"]):
+            conflicts.append({
+                "email": remote["email"],
+                "reason": "UUID клиента и email указывают на разные записи PQService.",
+            })
+            continue
+        user = id_user or email_user
+        if id_user and str(id_user.get("email") or "").casefold() != remote["email"].casefold():
+            conflicts.append({
+                "email": remote["email"],
+                "reason": "UUID совпал, но email клиента отличается от email связанного пользователя.",
+            })
+            continue
+        if not id_user and email_user and email_user.get("xui_client_id") and remote_identity:
+            if str(email_user["xui_client_id"]) != remote_identity:
+                conflicts.append({
+                    "email": remote["email"],
+                    "reason": "Email совпал, но UUID отличается от уже связанного клиента.",
+                })
+                continue
         if not user:
             panel_only.append(remote)
             continue
