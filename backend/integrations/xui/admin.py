@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import os
 import uuid
 from typing import Any, Callable
 
@@ -66,6 +68,44 @@ def init_connection_tables(database: Callable[[], Any]) -> None:
                 ON xui_connection_snapshots(connection_id, email);
             """
         )
+
+
+def migrate_legacy_environment(database: Callable[[], Any], iso_now: Callable[[], str]) -> None:
+    base_url = os.getenv("PQ_XUI_BASE_URL", "").strip()
+    api_token = os.getenv("PQ_XUI_API_TOKEN", "").strip()
+    if not base_url and not api_token:
+        return
+    if not base_url or not api_token:
+        logging.warning("PQService: legacy 3x-ui settings are incomplete; migration skipped.")
+        return
+    try:
+        normalized_url = validate_base_url(base_url)
+        encrypted_token = encrypt_token(api_token)
+    except RuntimeError:
+        logging.warning("PQService: PQ_XUI_ENCRYPTION_KEY is not configured; legacy 3x-ui migration skipped.")
+        return
+    except ValueError as exc:
+        logging.warning("PQService: legacy 3x-ui URL is invalid; migration skipped: %s", exc)
+        return
+
+    with database() as db:
+        existing = db.execute(
+            "SELECT id FROM xui_connections WHERE base_url = ? LIMIT 1",
+            (normalized_url,),
+        ).fetchone()
+        if existing:
+            return
+        now = iso_now()
+        db.execute(
+            """
+            INSERT INTO xui_connections(
+                id, name, base_url, token_encrypted, enabled, is_active,
+                timeout_seconds, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, 1, 1, 15, ?, ?)
+            """,
+            (str(uuid.uuid4()), "3x-ui (legacy config)", normalized_url, encrypted_token, now, now),
+        )
+        logging.info("PQService: migrated legacy 3x-ui connection into encrypted connection registry.")
 
 
 def build_admin_router(

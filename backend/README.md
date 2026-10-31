@@ -17,17 +17,34 @@ FastAPI backend for the existing `www/` frontend.
 
 ## 3x-ui integration
 
-The adapter lives in `backend/integrations/xui/` and is isolated from the core user/account logic.
+The adapter and multi-server connection registry live in `backend/integrations/xui/`. Each panel is stored as an independent connection with its own encrypted API token, detected version, API capabilities, test state, synchronization history and client snapshots.
 
-Configure these variables only in the server environment file (production: `/etc/pqservice/pqservice.env`):
+Configure `PQ_XUI_ENCRYPTION_KEY` only in `/etc/pqservice/pqservice.env`. It must be a URL-safe Base64 representation of exactly 32 random bytes. Generate it once with:
 
-- `PQ_XUI_BASE_URL`: panel origin and optional URL prefix, without credentials or query string.
-- `PQ_XUI_API_TOKEN`: Bearer API token created in the 3x-ui panel. It has full administrator permissions; never commit it or send it through the browser.
+```bash
+openssl rand -base64 32 | tr '+/' '-_'
+```
 
-The administrator endpoints `/api/admin/xui/status`, `/api/admin/xui/sync`, and `/api/admin/xui/sync-state` test connectivity, compare local users with panel clients, and retain the last comparison summary. The current sync action is deliberately read-only: it does not create, update, disable, or delete clients. The adapter has isolated client CRUD and inbound-attachment methods, but write operations remain gated until the installed panel version and its exact API schema are confirmed.
+Keep the generated key permanently and back it up securely. If it is lost, stored API tokens cannot be decrypted. Never put this key or any panel API token in Git, the frontend, logs or chat.
 
-Matching order is the stored 3x-ui client identifier, then email; conflicting identity matches are reported instead of linked automatically. The adapter detects the installed panel version and route capabilities through `/panel/api/openapi.json` when available. It supports both first-class client records and a legacy fallback that aggregates clients from every inbound without assuming a fixed inbound ID. A client can have multiple inbound attachments. Client credentials are not included in the comparison response. No direct access to the 3x-ui SQLite database is used.
+The administrator page **3x-ui → Подключения 3x-ui** supports adding, editing, testing, activating, disabling and enabling multiple panels. The API token is encrypted with AES-256-GCM before storage; it is never returned to the browser. When editing a connection, an empty token field retains the current token. Remote panels must use HTTPS; loopback HTTP is permitted for local panels.
 
+API routes:
+- `GET/POST /api/admin/xui/connections`
+- `PUT /api/admin/xui/connections/{id}`
+- `POST /api/admin/xui/connections/{id}/test`
+- `POST /api/admin/xui/connections/{id}/activate`
+- `POST /api/admin/xui/connections/{id}/deactivate`
+- `POST /api/admin/xui/connections/{id}/enable`
+- `POST /api/admin/xui/connections/{id}/disable`
+- `POST /api/admin/xui/connections/{id}/sync`
+- `GET /api/admin/xui/connections/{id}/sync-state`
+
+Client snapshots and synchronization state are scoped by `connection_id`; the same PQService user can later be mapped independently to clients on multiple panels. The current synchronization operation is deliberately read-only: it compares clients and records snapshots, but does not create, update, disable or delete panel clients. No inbound ID is hardcoded. Write operations remain gated until the installed panel's exact OpenAPI schema and inbound-attachment policy are verified.
+
+Legacy `PQ_XUI_BASE_URL` and `PQ_XUI_API_TOKEN` settings are migrated into the encrypted registry on startup only when `PQ_XUI_ENCRYPTION_KEY` is configured. If the key is absent, migration is skipped and the existing legacy settings remain available to the compatibility endpoints.
+
+The adapter detects panel version and route capabilities through `/panel/api/openapi.json` when available. It supports first-class client records and a legacy fallback that aggregates clients from every inbound. No direct access to the 3x-ui SQLite database is used.
 ## Install
 
 After the repository has been updated on the server, run the installer as root:

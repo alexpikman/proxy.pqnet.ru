@@ -21,7 +21,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from backend.integrations.xui.client import XuiClient, XuiConfig, XuiError
 from backend.integrations.xui.sync import build_sync_snapshot
-from backend.integrations.xui.admin import build_admin_router, init_connection_tables
+from backend.integrations.xui.admin import build_admin_router, init_connection_tables, migrate_legacy_environment
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -197,6 +197,7 @@ def init_db() -> None:
 def startup() -> None:
     init_db()
     init_connection_tables(database)
+    migrate_legacy_environment(database, iso_now)
 
 
 @app.middleware("http")
