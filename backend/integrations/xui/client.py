@@ -124,14 +124,43 @@ class XuiClient:
             {"inboundIds": inbound_ids},
         )
 
+    def get_openapi(self) -> dict[str, Any]:
+        payload = self.unwrap(self.request("GET", "/panel/api/openapi.json"))
+        if not isinstance(payload, dict):
+            raise XuiError("3x-ui вернула некорректную OpenAPI-схему.")
+        return payload
+
     def probe(self) -> dict[str, Any]:
         clients = self.list_clients()
         inbounds = self.list_inbounds()
+        schema: dict[str, Any] = {}
+        schema_available = False
+        try:
+            schema = self.get_openapi()
+            schema_available = True
+        except XuiError as exc:
+            if exc.status_code not in {None, 404}:
+                raise
+        info = schema.get("info") if isinstance(schema.get("info"), dict) else {}
+        paths = schema.get("paths") if isinstance(schema.get("paths"), dict) else {}
+        required_paths = {
+            "client_get": "/panel/api/clients/get/{email}",
+            "client_create": "/panel/api/clients",
+            "client_update": "/panel/api/clients/update/{email}",
+            "client_delete": "/panel/api/clients/del/{email}",
+            "client_attach": "/panel/api/clients/{email}/attach",
+        }
+        capabilities = {
+            name: path in paths if schema_available else None
+            for name, path in required_paths.items()
+        }
         return {
             "connected": True,
             "clients_count": len(clients),
             "inbounds_count": len(inbounds),
             "api_family": "clients-first",
-            "version": None,
-            "version_detection": "Ожидается подтверждение версией панели или API-схемой.",
+            "panel_version": info.get("version"),
+            "openapi_available": schema_available,
+            "capabilities": capabilities,
+            "version_detection": "Версия получена из OpenAPI info.version." if info.get("version") else "OpenAPI доступна, но info.version не указана." if schema_available else "Панель не предоставляет OpenAPI endpoint.",
         }
