@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="description" content="Интерактивная анимация концепции CFCP Protocol: фрагменты, наблюдение цензора, отдельный канал управления и каскадная сборка у получателя.">
+  <title>CFCP Protocol — интерактивная модель</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="protocol-page">
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark"><b></b><b></b><b></b><i></i></span><span><strong>CFCP</strong><small>PROTOCOL</small></span></a>
+    <button class="menu-toggle" aria-label="Открыть меню" aria-expanded="false"><span></span><span></span></button>
+    <nav class="main-nav" aria-label="Навигация"><a href="index.html">Обзор</a><a href="index.html#architecture">Архитектура</a><a href="index.html#crypto">Криптография</a><a class="active" href="protocol.html">Симуляция</a><span class="author-badge">Автор: Александр Пикман 2026. <b>🇮🇱</b></span>
+    </nav>
+  </header>
+  <main>
+    <section class="protocol-hero section-wrap"><div><span class="eyebrow"><span class="live-dot"></span> INTERACTIVE PROTOCOL MODEL</span><h1>Письмо проходит<br><em>через хаос фрагментов.</em></h1><p>Наблюдатель пытается сопоставить отдельные части. Получатель тем временем проверяет их по своему контексту и собирает сообщение. Анимация показывает принцип концепции, а не реальную работу конкретного DPI.</p></div><div class="protocol-badge"><span>CFCP</span><small>CASCADE<br>ASSEMBLY</small><i>01—05</i></div></section>
+
+    <section class="section-wrap sim-section">
+      <div class="sim-topline"><div><span class="section-kicker">LIVE SIMULATION / 01</span><h2>Цензор против получателя</h2></div><div class="sim-status"><span class="status-pulse"></span><span id="sim-status-text">СИМУЛЯЦИЯ ГОТОВА</span></div></div>
+      <div class="sim-shell">
+        <div class="sim-toolbar"><div class="sim-legend"><span><i class="legend-blue"></i> фрагменты сообщения</span><span><i class="legend-orange"></i> управляющий сигнал</span><span><i class="legend-muted"></i> попытка сопоставления</span></div><div class="sim-controls"><button id="play-btn" class="control-primary" aria-label="Запустить анимацию">Ⅱ Пауза</button><button id="restart-btn" aria-label="Начать заново">↺ Сначала</button></div></div>
+        <div class="canvas-wrap"><canvas id="cfcp-canvas" aria-label="Анимация передачи цветных фрагментов, медленного анализа наблюдателем и каскадной сборки получателем"></canvas><div class="canvas-overlay"><span class="overlay-chip">MODEL VIEW <b>HIGH-DENSITY PARTICLES</b></span><span class="overlay-chip overlay-right">60 FPS TARGET · AUTO SCALE</span></div></div>
+        <div class="sim-lanes"><div class="lane censor-lane"><div class="lane-icon censor-icon">⌕</div><div class="lane-copy"><span>INTERCEPT / OBSERVER</span><b>Цензор</b><small>Сопоставляет видимые признаки и пытается восстановить картину потока.</small></div><div class="lane-meter"><div class="meter-caption"><span>Попытка анализа</span><b id="censor-percent">08%</b></div><div class="meter-track"><i id="censor-meter"></i></div><small>Модельная скорость: медленно</small></div><div class="lane-result" id="censor-result">ПОИСК...</div></div>
+          <div class="lane friend-lane"><div class="lane-icon friend-icon">✳</div><div class="lane-copy"><span>AUTHENTICATED RECEIVER</span><b>Друг №2</b><small>Получает фрагменты, сверяет контекст и собирает исходное письмо.</small></div><div class="lane-meter"><div class="meter-caption"><span>Сборка письма</span><b id="friend-percent">00%</b></div><div class="meter-track friend-track"><i id="friend-meter"></i></div><small>Модельная скорость: каскадно</small></div><div class="lane-result" id="friend-result">ОЖИДАНИЕ</div></div></div>
+        <div class="stage-progress"><div class="stage-progress-head"><span>ХОД ПРОЦЕССА</span><b id="stage-counter">ЭТАП 01 / 05</b></div><div class="stage-rail"><i id="stage-progress-fill"></i></div><div class="stage-tabs" role="group" aria-label="Этапы симуляции"><button class="active" data-stage="0"><b>01</b><span>Фрагменты</span></button><button data-stage="1"><b>02</b><span>Перехват</span></button><button data-stage="2"><b>03</b><span>Звонок другу</span></button><button data-stage="3"><b>04</b><span>Сборка</span></button><button data-stage="4"><b>05</b><span>Проверка</span></button></div></div>
+      </div>
+      <div class="sim-explainer"><div class="explainer-icon">↗</div><div><span class="section-kicker" id="stage-kicker">STAGE 01 / DATAGRAM FRAGMENTATION</span><h3 id="stage-title">Письмо распадается на фрагменты</h3><p id="stage-description">Отправитель формирует набор независимых частей. Цвета в этой модели — только визуальная метафора: реальные пакеты не получают «цвет» как криптографический атрибут.</p></div><div class="explainer-action"><button id="next-stage-btn" class="button button-primary">Следующий этап <span>→</span></button></div></div>
+    </section>
+
+    <section class="section-wrap details-section"><div class="section-heading"><div><span class="section-kicker">02 / WHAT THE ANIMATION MEANS</span><h2>Что происходит на каждом этапе</h2></div><p>Переключайте этапы вручную, чтобы связать визуальную метафору с инженерными понятиями.</p></div><div class="detail-grid">
+      <article><span>01 / DATA PLANE</span><h3>Фрагментация и контекст</h3><p>Полезная нагрузка разбивается на допустимые части. В рабочем протоколе нужны идентификаторы сообщения/сессии, контроль длины, лимиты буферов и чёткие правила сборки. Простого удаления последовательности недостаточно.</p></article>
+      <article><span>02 / OBSERVABILITY</span><h3>Что может видеть DPI</h3><p>Даже без расшифровки содержимого наблюдателю могут быть доступны IP-адреса, размеры, частота, направление и длительность потоков, а также часть handshake-метаданных. Шифрование уменьшает видимость содержимого, но не устраняет анализ трафика.</p></article>
+      <article><span>03 / CONTROL PLANE</span><h3>«Звонок другу»</h3><p>Отдельный канал управления иллюстрирует разделение управляющего состояния и передачи данных. Он должен иметь собственную аутентификацию и защиту. Разделение каналов не гарантирует, что наблюдатель не заметит корреляцию между ними.</p></article>
+      <article><span>04 / REASSEMBLY</span><h3>Сборка и аннулирование</h3><p>Получатель проверяет каждый фрагмент, учитывает повторы и собирает полное сообщение. Удаление уже обработанных копий освобождает ресурсы и снижает риск повторной обработки, но само по себе не создаёт forward secrecy.</p></article>
+      <article><span>05 / INTEGRITY</span><h3>Расшифрование и проверка</h3><p>AEAD-аутентификация подтверждает целостность и подлинность защищённой записи. Хеш или корень Merkle Tree может дополнительно связывать части сообщения и доказывать целостность набора.</p></article>
+      <article class="detail-note"><span>DESIGN NOTE</span><h3>Цель концепции</h3><p>Сделать доставку проверяемой и устойчивой к потере, перестановке и повторам пакетов. Утверждение о гарантированном обходе DPI потребовало бы отдельной модели угроз, экспериментов и независимой оценки.</p></article>
+    </div></section>
+
+    <section class="section-wrap technical-strip"><div><span class="section-kicker">CRYPTOGRAPHY REFERENCES</span><h2>Технологическая база</h2></div><div class="reference-pills"><a href="https://www.rfc-editor.org/rfc/rfc8446.html" target="_blank" rel="noreferrer">TLS 1.3 · RFC 8446 ↗</a><a href="https://www.rfc-editor.org/rfc/rfc9000.html" target="_blank" rel="noreferrer">QUIC · RFC 9000 ↗</a><a href="https://www.rfc-editor.org/rfc/rfc9147.html" target="_blank" rel="noreferrer">DTLS 1.3 · RFC 9147 ↗</a><a href="https://www.rfc-editor.org/rfc/rfc9849.html" target="_blank" rel="noreferrer">ECH · RFC 9849 ↗</a><a href="https://www.rfc-editor.org/rfc/rfc8439.html" target="_blank" rel="noreferrer">ChaCha20-Poly1305 · RFC 8439 ↗</a></div></section>
+  </main>
+  <footer class="site-footer"><a class="footer-brand" href="index.html">CFCP <span>PROTOCOL</span></a><div class="footer-credit">Автор: <b>Александр Пикман</b> 2026. <span class="israel-flag" role="img" aria-label="Флаг Израиля">🇮🇱</span></div><span class="footer-note">Авторская концепция · Визуальная модель, не сетевой тест</span></footer>
+  <script src="assets/main.js"></script><script src="assets/protocol.js"></script>
+</body>
+</html>

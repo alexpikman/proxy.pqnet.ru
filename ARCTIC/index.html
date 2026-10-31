@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="description" content="CFCP Protocol — концепция цветной фрагментации, независимого управления и каскадной сборки защищённых сообщений.">
+  <title>CFCP Protocol — Color-Fragmented Cascade Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="CFCP Protocol — главная">
+      <span class="brand-mark"><b></b><b></b><b></b><i></i></span>
+      <span><strong>CFCP</strong><small>PROTOCOL</small></span>
+    </a>
+    <button class="menu-toggle" aria-label="Открыть меню" aria-expanded="false"><span></span><span></span></button>
+    <nav class="main-nav" aria-label="Главная навигация">
+      <a class="active" href="#overview">Обзор</a>
+      <a href="#architecture">Архитектура</a>
+      <a href="#crypto">Криптография</a>
+      <a href="#standards">Стандарты</a>
+      <a class="nav-cta" href="protocol.html">Открыть анимацию <span>↗</span></a>
+    <span class="author-badge">Автор: Александр Пикман 2026. <b>🇮🇱</b></span>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section-wrap" id="overview">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="live-dot"></span> NETWORK DESIGN CONCEPT <span class="eyebrow-year">2026</span></div>
+        <h1>Данные идут<br>фрагментами.<br><em>Собираются</em> у друга.</h1>
+        <p class="hero-lead">CFCP — концепция защищённой передачи, в которой сообщение представляется набором фрагментов, контрольная информация отделена от потока данных, а получатель проверяет целостность собранного сообщения.</p>
+        <div class="hero-actions"><a class="button button-primary" href="protocol.html">Смотреть интерактивную модель <span>→</span></a><a class="button button-quiet" href="#architecture">Изучить архитектуру</a></div>
+        <div class="hero-meta"><span class="meta-line"></span><span>Color-Fragmented Cascade Protocol</span><span class="meta-sep">/</span><span>Concept study · 2026</span></div>
+      </div>
+      <div class="hero-visual" aria-label="Схематичная визуализация фрагментов и каскадной сборки">
+        <div class="visual-grid"></div>
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="core-shield"><svg viewBox="0 0 120 140" role="img" aria-label="Щит с замком"><path d="M60 5 106 23v39c0 32-19 54-46 72C33 116 14 94 14 62V23L60 5Z"/><path d="M60 16 95 30v32c0 25-14 43-35 57C39 105 25 87 25 62V30l35-14Z" class="shield-inner"/><rect x="43" y="57" width="34" height="29" rx="6"/><path d="M49 57v-9a11 11 0 0 1 22 0v9" class="lock-line"/><circle cx="60" cy="70" r="3" class="lock-dot"/></svg></div>
+        <div class="cube cube-a"></div><div class="cube cube-b"></div><div class="cube cube-c"></div><div class="cube cube-d"></div><div class="cube cube-e"></div><div class="cube cube-f"></div>
+        <span class="visual-label label-left">FRAGMENTS <b>↗</b></span><span class="visual-label label-right">CASCADE <b>✓</b></span>
+        <div class="visual-caption"><span class="caption-dot"></span> SECURE MESSAGE FLOW <span>01—05</span></div>
+      </div>
+    </section>
+
+    <section class="principle-band section-wrap">
+      <div class="principle-intro"><span class="section-kicker">01 / THE IDEA</span><h2>Не магия.<br><span>Инженерная модель.</span></h2></div>
+      <p>CFCP объединяет несколько известных направлений сетевого дизайна в одну проектную концепцию: датаграммную доставку, аутентифицированное шифрование, раздельные плоскости данных и управления, проверку целостности и защиту от повторной отправки.</p>
+      <div class="status-note"><span class="status-icon">i</span><span><b>Статус разработки</b>Авторская концепция. Это не опубликованный RFC и не готовая криптографическая спецификация.</span></div>
+    </section>
+
+    <section class="section-wrap section-block" id="architecture">
+      <div class="section-heading"><div><span class="section-kicker">02 / ARCHITECTURE</span><h2>Пять этапов одного сообщения</h2></div><p>Каждый этап выполняет отдельную функцию. Их сочетание должно быть описано точным форматом пакетов, моделью угроз и проверяемыми криптографическими правилами.</p></div>
+      <div class="stage-grid">
+        <article class="stage-card"><span class="stage-num">01</span><div class="stage-icon icon-fragments"><i></i><i></i><i></i><i></i></div><h3>Фрагментация</h3><p>Исходное сообщение разделяется на части. У каждой есть контекст сессии, границы и данные, необходимые для проверки.</p><span class="stage-tag">DATAGRAM FRAMING</span></article>
+        <article class="stage-card"><span class="stage-num">02</span><div class="stage-icon icon-scan"><span></span><span></span><span></span></div><h3>Наблюдение сети</h3><p>Промежуточный узел может видеть адреса, размеры, время и часть открытых метаданных. Шифрование не скрывает все свойства потока.</p><span class="stage-tag">TRAFFIC METADATA</span></article>
+        <article class="stage-card"><span class="stage-num">03</span><div class="stage-icon icon-call">⌁</div><h3>Канал управления</h3><p>Отдельный аутентифицированный канал может согласовывать состояние сессии и параметры доставки. Сам факт отдельного канала не делает его невидимым.</p><span class="stage-tag">CONTROL PLANE</span></article>
+        <article class="stage-card"><span class="stage-num">04</span><div class="stage-icon icon-cascade"><i></i><i></i><i></i><i></i></div><h3>Каскадная сборка</h3><p>Получатель проверяет фрагменты, устраняет дубликаты, учитывает порядок и собирает полезную нагрузку. Неверные или устаревшие части отклоняются.</p><span class="stage-tag">REASSEMBLY & STATE</span></article>
+        <article class="stage-card"><span class="stage-num">05</span><div class="stage-icon icon-check">✓</div><h3>Проверка</h3><p>Аутентификация и контроль целостности подтверждают, что сообщение собрано без незаметной подмены или повреждения.</p><span class="stage-tag">INTEGRITY CHECK</span></article>
+      </div>
+      <div class="flow-cta"><div><b>Посмотрите процесс в движении</b><span>Пошаговая модель: медленная проверка цензора и более быстрая сборка получателем.</span></div><a class="text-link" href="protocol.html">Запустить симуляцию <span>↗</span></a></div>
+    </section>
+
+    <section class="crypto-section" id="crypto">
+      <div class="section-wrap crypto-inner">
+        <div class="section-heading"><div><span class="section-kicker">03 / CRYPTOGRAPHIC BUILDING BLOCKS</span><h2>На чём может строиться защита</h2></div><p>CFCP не должен изобретать собственную криптографию. Практическая реализация должна опираться на проверенные примитивы и стандартизованные протоколы.</p></div>
+        <div class="crypto-list">
+          <article class="crypto-row"><div class="crypto-code">01 <span>KEY EXCHANGE</span></div><div><h3>Эфемерный обмен ключами</h3><p>В режимах TLS 1.3 с (EC)DHE, например X25519, стороны согласуют эфемерный общий секрет. HKDF выводит из него разделённые ключи и секреты трафика; свойства PSK-only режима отличаются.</p></div><a href="https://www.rfc-editor.org/rfc/rfc8446.html" target="_blank" rel="noreferrer">RFC 8446 ↗</a></article>
+          <article class="crypto-row"><div class="crypto-code">02 <span>AEAD</span></div><div><h3>Шифрование с аутентификацией</h3><p>AES-GCM или ChaCha20-Poly1305 защищают конфиденциальность и целостность данных. Для каждого ключа критично соблюдать правила уникальности nonce.</p></div><a href="https://www.rfc-editor.org/rfc/rfc8439.html" target="_blank" rel="noreferrer">RFC 8439 ↗</a></article>
+          <article class="crypto-row"><div class="crypto-code">03 <span>ANTI-REPLAY</span></div><div><h3>Окно защиты от повторов</h3><p>Счётчики, эпохи и скользящее окно позволяют распознавать повторно доставленные записи. Это состояние протокола, а не «сгорание» криптографического ключа.</p></div><a href="https://www.rfc-editor.org/rfc/rfc9147.html" target="_blank" rel="noreferrer">DTLS 1.3 ↗</a></article>
+          <article class="crypto-row"><div class="crypto-code">04 <span>INTEGRITY</span></div><div><h3>Хеш-деревья и доказательства</h3><p>Merkle Tree позволяет компактно проверять принадлежность элемента набору и целостность структуры. Само по себе дерево не шифрует данные и не распределяет секретные ключи.</p></div><a href="https://www.rfc-editor.org/rfc/rfc6962.html" target="_blank" rel="noreferrer">RFC 6962 ↗</a></article>
+          <article class="crypto-row"><div class="crypto-code">05 <span>METADATA PRIVACY</span></div><div><h3>Encrypted Client Hello</h3><p>ECH защищает внутреннее содержимое ClientHello, включая SNI и ALPN, при поддержке сервера и корректной настройке. IP-адрес и другие внешние признаки соединения могут оставаться видимыми.</p></div><a href="https://www.rfc-editor.org/rfc/rfc9849.html" target="_blank" rel="noreferrer">RFC 9849 ↗</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-wrap section-block" id="standards">
+      <div class="section-heading"><div><span class="section-kicker">04 / REAL-WORLD STANDARDS</span><h2>Существующие технологии рядом с CFCP</h2></div><p>Ни один стандарт ниже не реализует CFCP целиком. Это ориентиры для проектирования отдельных слоёв.</p></div>
+      <div class="standards-grid">
+        <a class="standard-card" href="https://www.rfc-editor.org/rfc/rfc9000.html" target="_blank" rel="noreferrer"><span class="standard-type">TRANSPORT</span><b>QUIC</b><p>Защищённый транспорт поверх UDP с номерами пакетов, подтверждениями, восстановлением потерь и миграцией соединения.</p><span>RFC 9000 <i>↗</i></span></a>
+        <a class="standard-card" href="https://www.rfc-editor.org/rfc/rfc9147.html" target="_blank" rel="noreferrer"><span class="standard-type">DATAGRAM SECURITY</span><b>DTLS 1.3</b><p>TLS-подобная защита для датаграммных приложений, включая номера записей и механизм anti-replay.</p><span>RFC 9147 <i>↗</i></span></a>
+        <a class="standard-card" href="https://www.rfc-editor.org/rfc/rfc5869.html" target="_blank" rel="noreferrer"><span class="standard-type">KEY DERIVATION</span><b>HKDF</b><p>Стандартизованная схема извлечения и расширения ключевого материала на базе HMAC.</p><span>RFC 5869 <i>↗</i></span></a>
+        <a class="standard-card" href="https://www.rfc-editor.org/rfc/rfc6962.html" target="_blank" rel="noreferrer"><span class="standard-type">VERIFIABLE DATA</span><b>Merkle Tree</b><p>Хеш-структура для проверяемой целостности и доказательств включения элементов.</p><span>RFC 6962 <i>↗</i></span></a>
+      </div>
+    </section>
+
+    <section class="limits-section">
+      <div class="section-wrap limits-inner"><div><span class="section-kicker">05 / ENGINEERING REALITY</span><h2>Что важно не перепутать</h2></div><div class="limits-grid"><article><b>UDP ≠ невидимость</b><p>UDP не скрывает IP-адреса, размеры, интервалы и структуру обмена. Приложение само определяет формат датаграмм и состояние доставки.</p></article><article><b>Шифрование ≠ анонимность</b><p>Шифрование защищает содержимое, но не гарантирует сокрытие метаданных, конечных узлов или самого факта соединения.</p></article><article><b>PFS ≠ сгорание фрагментов</b><p>Forward secrecy ограничивает последствия компрометации долговременных ключей. Удаление буферов — отдельная задача управления памятью и секретами.</p></article><article><b>Merkle DAG ≠ обмен ключами</b><p>Граф хеш-зависимостей может связывать данные и проверку целостности, но не заменяет протокол согласования ключей и аутентификацию.</p></article></div></div>
+    </section>
+
+    <section class="closing section-wrap"><div class="closing-mark"><span></span><span></span><span></span></div><div><span class="section-kicker">CFCP / CONCEPT 2026</span><h2>От фрагмента —<br><em>к целому сообщению.</em></h2><p>Следующий шаг концепции — формальная спецификация формата датаграммы, конечного автомата сессии, модели угроз, криптографического профиля и независимый аудит.</p><a class="button button-primary" href="protocol.html">Перейти к интерактивной модели <span>→</span></a></div></section>
+  </main>
+
+  <footer class="site-footer"><a class="footer-brand" href="index.html">CFCP <span>PROTOCOL</span></a><div class="footer-credit">Автор: <b>Александр Пикман</b> 2026. <span class="israel-flag" role="img" aria-label="Флаг Израиля">🇮🇱</span></div><span class="footer-note">Авторская концепция · Не является стандартом IETF</span></footer>
+  <script src="assets/main.js"></script>
+</body>
+</html>
