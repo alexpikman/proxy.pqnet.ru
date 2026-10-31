@@ -400,7 +400,8 @@
         const result = await api("/admin/xui/status");
         $("#xui-api-value").textContent = result.connected ? "Подключено" : "Нет соединения";
         $("#xui-inbounds-count").textContent = formatNumber(result.inbounds_count);
-        $("#xui-sync-details").textContent = result.message || "Проверка завершена.";
+        const versionLabel = result.panel_version ? " Версия панели: " + result.panel_version + "." : "";
+        $("#xui-sync-details").textContent = (result.message || "Проверка завершена.") + versionLabel;
       } catch (error) { toast(error.message, true); }
     });
     $("#user-search")?.addEventListener("input", loadAdminUsers);
