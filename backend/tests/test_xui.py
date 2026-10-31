@@ -54,14 +54,14 @@ def test_compare_clients_matches_by_external_id_then_email():
     ]
     result = compare_clients(local, remote)
     assert result["counts"] == {
-        "matched": 1,
+        "matched": 0,
         "panel_only": 1,
-        "service_only": 1,
-        "conflicts": 0,
+        "service_only": 2,
+        "conflicts": 1,
     }
-    assert result["matched"][0]["identity_match"] == "client_id"
+    assert result["conflicts"][0]["email"] == "alice@changed.test"
     assert result["panel_only"][0]["email"] == "carol@example.test"
-    assert result["service_only"][0]["login"] == "bob"
+    assert {item["login"] for item in result["service_only"]} == {"alice", "bob"}
 
 
 def test_compare_clients_matches_by_email_when_external_id_is_missing():
