@@ -25,8 +25,10 @@ class XuiConfig:
     def from_env(cls) -> "XuiConfig | None":
         base_url = os.getenv("PQ_XUI_BASE_URL", "").strip().rstrip("/")
         api_token = os.getenv("PQ_XUI_API_TOKEN", "").strip()
-        if not base_url or not api_token:
+        if not base_url and not api_token:
             return None
+        if not base_url or not api_token:
+            raise XuiError("Для 3x-ui одновременно требуются PQ_XUI_BASE_URL и PQ_XUI_API_TOKEN.")
         parsed = urllib.parse.urlsplit(base_url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise XuiError("PQ_XUI_BASE_URL должен быть полным HTTP(S) URL.")
