@@ -97,7 +97,7 @@
     button.disabled = true;
     button.textContent = "Обновляем…";
     try {
-      const result = await api("/admin/xui/connections/" + connectionId + "/sync", {
+      const result = await api("/admin/xui/connections/" + connectionId + "/refresh", {
         method: "POST", body: "{}"
       });
       await loadUsers();
