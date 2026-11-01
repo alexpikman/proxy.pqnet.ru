@@ -79,7 +79,7 @@ jobs:
                 apt-get update
                 DEBIAN_FRONTEND=noninteractive apt-get install -y cron
               fi
-              printf '%s\\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" > /etc/cron.d/pqservice-xui-sync
+              printf '%s\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" > /etc/cron.d/pqservice-xui-sync
               chmod 0644 /etc/cron.d/pqservice-xui-sync
               systemctl enable --now cron
             elif command -v sudo >/dev/null 2>&1 && sudo -n true; then
@@ -87,7 +87,7 @@ jobs:
                 sudo apt-get update
                 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y cron
               fi
-              printf '%s\\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" | sudo tee /etc/cron.d/pqservice-xui-sync >/dev/null
+              printf '%s\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" | sudo tee /etc/cron.d/pqservice-xui-sync >/dev/null
               sudo chmod 0644 /etc/cron.d/pqservice-xui-sync
               sudo systemctl enable --now cron
             else
