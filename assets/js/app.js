@@ -364,11 +364,68 @@
     $("#top-user-name").textContent = session.user?.login || session.login || "Администратор";
     await loadAdminOverview();
     bindAdminControls();
+    bindAdminPasswordForm();
     const activeView = location.hash.slice(1);
     if (activeView === "requests") loadRegistrationRequests();
     if (activeView === "finance") loadAdminTransactions();
     if (activeView === "users") loadAdminUsers();
     if (activeView === "programs") loadAdminPrograms();
+  }
+
+  function bindAdminPasswordForm() {
+    const form = $("#admin-password-form");
+    if (!form || form.dataset.bound === "true") return;
+    form.dataset.bound = "true";
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const currentPassword = $("#admin-current-password").value;
+      const newPassword = $("#admin-new-password").value;
+      const confirmPassword = $("#admin-confirm-password").value;
+      const message = $("#admin-password-message");
+      const button = $("#admin-password-submit");
+
+      message.hidden = true;
+      message.textContent = "";
+      message.classList.remove("form-message-error");
+
+      if (newPassword.length < 8) {
+        message.textContent = "Новый пароль должен содержать не менее 8 символов.";
+        message.hidden = false;
+        message.classList.add("form-message-error");
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        message.textContent = "Новые пароли не совпадают.";
+        message.hidden = false;
+        message.classList.add("form-message-error");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Сохраняем…";
+      try {
+        const result = await api("/admin/security/password", {
+          method: "POST",
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+            confirm_password: confirmPassword
+          })
+        });
+        form.reset();
+        message.textContent = result.message || "Пароль успешно изменён.";
+        message.hidden = false;
+        toast("Пароль администратора изменён.");
+      } catch (error) {
+        message.textContent = error.message || "Не удалось изменить пароль.";
+        message.hidden = false;
+        message.classList.add("form-message-error");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Изменить пароль";
+      }
+    });
   }
 
   async function loadAdminOverview(showToast = false) {
