@@ -30,7 +30,18 @@
         <div class="xui-live-footer"><span id="xui-xray-state">Xray: —</span><span id="xui-live-source">Источник: API 3x-ui</span></div>
       </article>
       <div class="content-grid"><article class="panel"><div class="panel-heading"><div><span class="panel-kicker">ИНТЕГРАЦИЯ</span><h2>Подключение 3x-ui</h2></div><span class="status-pill" id="xui-status">Проверка</span></div><p class="panel-description">Состояние API и последняя синхронизация клиентов.</p><div class="integration-line"><span class="integration-dot" id="xui-dot"></span><b id="xui-status-text">Статус пока не получен</b></div><small class="subtle-note" id="xui-last-sync">Данные появятся после подключения backend API.</small></article><article class="panel"><div class="panel-heading"><div><span class="panel-kicker">БЫСТРЫЕ ДЕЙСТВИЯ</span><h2>Управление</h2></div></div><button class="action-row" data-navigate="users"><span class="action-icon">♙</span><span><b>Пользователи</b><small>Поиск и управление клиентами</small></span><span>→</span></button><button class="action-row" data-navigate="programs"><span class="action-icon">▦</span><span><b>Каталог программ</b><small>Файлы и внешние ссылки</small></span><span>→</span></button><button class="action-row" data-navigate="finance"><span class="action-icon">◈</span><span><b>Начислить монеты</b><small>Баланс и история операций</small></span><span>→</span></button></article></div><article class="panel"><div class="panel-heading"><div><span class="panel-kicker">ПОСЛЕДНИЕ ИЗМЕНЕНИЯ</span><h2>Журнал операций</h2></div></div><div class="table-wrap"><table><thead><tr><th>Время</th><th>Событие</th><th>Пользователь</th><th>Результат</th></tr></thead><tbody id="admin-events"><tr><td colspan="4" class="empty-state">Журнал будет доступен после подключения API.</td></tr></tbody></table></div></article></section>
-    <section class="view" id="view-users"><div class="page-intro"><div><div class="eyebrow">УЧЁТНЫЕ ЗАПИСИ И ПОДКЛЮЧЕНИЯ</div><h1>Пользователи</h1><p>Клиенты из 3x-ui и внутренние данные PQService.</p></div><button class="button button-primary" data-sync-users>↻ Сверить с 3x-ui</button></div><div class="toolbar"><input class="search-input" id="user-search" placeholder="Логин, email или UUID"><select class="select-input" id="user-status-filter"><option value="all">Все статусы</option><option value="active">Активные</option><option value="disabled">Отключённые</option><option value="unlinked">Не импортированы</option></select><select class="select-input" id="user-source-filter"><option value="all">Все источники</option><option value="xui">3x-ui</option><option value="local">PQService</option></select></div><article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Пользователь</th><th>Доступ в кабинет</th><th>Статус прокси</th><th>Окончание</th><th>Дней</th><th>PQcoins</th><th>Цена / день</th><th>VIP</th><th></th></tr></thead><tbody id="admin-users"><tr><td colspan="9" class="empty-state">Список пользователей появится после подключения backend API.</td></tr></tbody></table></div></article><p class="subtle-note">Список 3x-ui будет загружаться с сервера. Импорт и изменение данных будут доступны только после проверки прав администратора.</p></section>
+    <section class="view" id="view-users">
+      <div class="page-intro">
+        <div><div class="eyebrow">УЧЁТНЫЕ ЗАПИСИ И ПОДКЛЮЧЕНИЯ</div><h1>Пользователи</h1><p>Клиенты из 3x-ui: <span id="xui-users-source-label">выберите сервер</span></p></div>
+        <button class="button button-primary" type="button" id="xui-users-refresh">↻ Обновить</button>
+      </div>
+      <div class="toolbar">
+        <select class="select-input" id="user-source-filter" data-multixui="true"><option value="">Выберите сервер 3x-ui</option></select>
+        <input class="search-input" id="user-search" placeholder="Поиск: логин, email или UUID">
+      </div>
+      <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Пользователь</th><th>Inbound</th><th>Статус 3x-ui</th><th>Наличие в панели</th><th>PQcoins</th><th>Цена / день</th></tr></thead><tbody id="admin-users"><tr><td colspan="6" class="empty-state">Выберите сервер с включённой загрузкой клиентов.</td></tr></tbody></table></div></article>
+      <p class="subtle-note">Статус клиента изменяется непосредственно в выбранной панели 3x-ui. Баланс, тариф и внутренние настройки PQService синхронизацией не перезаписываются.</p>
+    </section>
     <section class="view" id="view-requests">
       <div class="page-intro">
         <div><div class="eyebrow">ЗАКРЫТЫЙ ДОСТУП</div><h1>Заявки на регистрацию</h1><p>Новые пользователи получают доступ только после ручного одобрения.</p></div>
@@ -45,21 +56,9 @@
     <section class="view" id="view-promocodes"><div class="page-intro"><div><div class="eyebrow">ВОЗНАГРАЖДЕНИЯ</div><h1>Промокоды</h1><p>Создание кодов на начисление монет и дней подписки.</p></div><button class="button button-primary" data-add-promo>＋ Создать промокод</button></div><article class="panel"><div class="table-wrap"><table><thead><tr><th>Код</th><th>Награда</th><th>Использовано</th><th>Срок действия</th><th>Статус</th><th></th></tr></thead><tbody id="promocodes"><tr><td colspan="6" class="empty-state">Промокоды будут доступны после подключения API.</td></tr></tbody></table></div></article></section>
     <section class="view" id="view-xui">
       <div class="page-intro">
-        <div><div class="eyebrow">ВНЕШНЯЯ ИНФРАСТРУКТУРА</div><h1>Подключения 3x-ui</h1><p>Несколько панелей, отдельные API-ключи и независимая сверка данных.</p></div>
-        <button class="button button-outline" type="button" id="xui-connections-refresh">Обновить список</button>
+        <div><div class="eyebrow">ВНЕШНЯЯ ИНФРАСТРУКТУРА</div><h1>Подключения 3x-ui</h1><p>Настройка панелей, независимые параметры загрузки и read-only сверка.</p></div>
+        <div class="page-actions"><button class="button button-outline" type="button" id="xui-connections-refresh">Обновить список</button><button class="button button-primary" type="button" id="xui-connection-add">＋ Добавить сервер</button></div>
       </div>
-      <article class="panel">
-        <div class="panel-heading"><div><span class="panel-kicker">НОВОЕ ПОДКЛЮЧЕНИЕ</span><h2 id="xui-form-title">Добавить сервер 3x-ui</h2></div></div>
-        <form id="xui-connection-form" class="xui-connection-form">
-          <input type="hidden" id="xui-connection-id">
-          <label>Название сервера<input class="input-control" id="xui-connection-name" maxlength="100" placeholder="Например, PQ Europe" required></label>
-          <label>URL панели<input class="input-control" id="xui-connection-url" type="url" placeholder="https://panel.example.com/prefix" required></label>
-          <label>API Token<input class="input-control" id="xui-connection-token" type="password" autocomplete="new-password" placeholder="Токен хранится в зашифрованном виде"></label>
-          <label>Таймаут, сек.<input class="input-control" id="xui-connection-timeout" type="number" min="3" max="60" value="15" required></label>
-          <div class="xui-form-actions"><button class="button button-primary" type="submit" id="xui-connection-save">Сохранить подключение</button><button class="button button-outline" type="button" id="xui-connection-cancel" hidden>Отмена редактирования</button></div>
-        </form>
-        <p class="subtle-note">Удалённые панели должны использовать HTTPS. API Token шифруется на сервере и никогда не возвращается в браузер. При редактировании пустое поле токена сохраняет прежний ключ.</p>
-      </article>
       <div class="xui-connection-list" id="xui-connection-list"><div class="empty-panel">Загрузка подключений…</div></div>
       <article class="panel">
         <div class="panel-heading"><div><span class="panel-kicker">СВЕРКА ДАННЫХ</span><h2>Результат выбранного сервера</h2></div></div>
@@ -68,10 +67,32 @@
     </section>
     <section class="view" id="view-system"><div class="page-intro"><div><div class="eyebrow">ТЕХНИЧЕСКОЕ УПРАВЛЕНИЕ</div><h1>Система</h1><p>Параметры сервиса, резервные копии и журнал событий.</p></div></div><div class="stats-grid compact-stats"><article class="stat-card"><div class="stat-top"><span>Backend API</span><span class="stat-symbol">⌁</span></div><div class="stat-value stat-status" id="backend-status">Не подключён</div><div class="stat-foot">Состояние приложения</div></article><article class="stat-card"><div class="stat-top"><span>Последняя проверка</span><span class="stat-symbol">◷</span></div><div class="stat-value" id="backend-check">—</div><div class="stat-foot">Локальное время</div></article></div><article class="panel"><div class="panel-heading"><div><span class="panel-kicker">БЕЗОПАСНОСТЬ</span><h2>Правила эксплуатации</h2></div></div><ul class="system-list"><li>Секреты 3x-ui и ключи API хранятся вне публичной директории.</li><li>Административные операции проверяют роль на сервере.</li><li>Начисления и списания монет фиксируются в журнале.</li><li>Резервные копии хранятся вне web root и не публикуются.</li></ul></article></section>
   </div></main></div>
-  <div class="toast" id="toast" role="status"></div>
+<dialog class="modal" id="xui-connection-modal">
+    <form method="dialog" class="modal-card" id="xui-connection-form">
+      <div class="modal-head"><div><span class="panel-kicker">ИНТЕГРАЦИЯ 3X-UI</span><h2 id="xui-form-title">Добавить сервер</h2></div><button class="modal-close" type="button" id="xui-modal-close" aria-label="Закрыть">×</button></div>
+      <input type="hidden" id="xui-connection-id">
+      <label class="modal-field">Название сервера<input class="input-control" id="xui-connection-name" maxlength="100" placeholder="Например, PQ Europe" required></label>
+      <label class="modal-field">URL панели<input class="input-control" id="xui-connection-url" type="url" placeholder="https://panel.example.com/prefix" required></label>
+      <label class="modal-field">API Token<input class="input-control" id="xui-connection-token" type="password" autocomplete="new-password" placeholder="Токен хранится зашифрованным"></label>
+      <label class="modal-field">Таймаут, сек.<input class="input-control" id="xui-connection-timeout" type="number" min="3" max="60" value="15" required></label>
+      <div class="xui-form-actions"><button class="button button-outline" type="button" id="xui-connection-test">Проверить соединение</button><button class="button button-primary" type="submit" id="xui-connection-save">Сохранить</button></div>
+      <div id="xui-connection-options" class="xui-connection-options" hidden>
+        <p class="subtle-note">Параметры становятся доступны после успешной проверки соединения.</p>
+        <label class="switch-row"><span>Активное подключение</span><input type="checkbox" id="xui-option-active"></label>
+        <label class="switch-row"><span>Загружать клиентов</span><input type="checkbox" id="xui-option-clients"></label>
+        <label class="switch-row"><span>Загружать inbounds</span><input type="checkbox" id="xui-option-inbounds"></label>
+        <label class="switch-row"><span>Загружать логи</span><input type="checkbox" id="xui-option-logs"></label>
+        <label class="switch-row"><span>Загружать телеметрию</span><input type="checkbox" id="xui-option-telemetry"></label>
+        <button class="button button-primary" type="button" id="xui-options-save">Сохранить параметры</button>
+      </div>
+      <div class="modal-actions"><button class="button button-outline" type="button" id="xui-modal-cancel">Закрыть</button></div>
+    </form>
+  </dialog>
+    <div class="toast" id="toast" role="status"></div>
   <dialog class="modal" id="entity-modal"><form method="dialog" class="modal-card" id="entity-form"><div class="modal-head"><div><span class="panel-kicker" id="modal-kicker">PQService</span><h2 id="modal-title">Добавить запись</h2></div><button class="modal-close" value="cancel" aria-label="Закрыть">×</button></div><div id="modal-fields"></div><div class="modal-actions"><button class="button button-outline" value="cancel">Отмена</button><button class="button button-primary" id="modal-submit" value="default">Сохранить</button></div></form></dialog>
   <script src="/assets/js/app.js" defer></script>
   <script src="/assets/js/arctic-motion.js" defer></script>
   <script src="/assets/js/xui-connections.js" defer></script>
+  <script src="/assets/js/xui-users.js" defer></script>
   <script src="/assets/js/arctic-monitor.js" defer></script>
 </body></html>
