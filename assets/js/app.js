@@ -1,13 +1,16 @@
 (() => {
   "use strict";
 
-  const API_BASE = "/api";
+  const API_BASE = "/api/index.php";
   let csrfToken = "";
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
   async function api(path, options = {}) {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const [route, query = ""] = path.split("?", 2);
+    const queryParams = new URLSearchParams(query);
+    queryParams.set("route", route);
+    const response = await fetch(`${API_BASE}?${queryParams.toString()}`, {
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
