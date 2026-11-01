@@ -33,12 +33,13 @@ jobs:
           script: |
             set -Eeuo pipefail
             cd /var/WWW/proxy.pqnet.ru
+            PHP_BIN="$(command -v php)"
             git fetch origin main
             git reset --hard origin/main
             install -d -o www-data -g www-data -m 0700 /var/WWW/data
-            runuser -u www-data -- php scripts/bootstrap_data.php
+            runuser -u www-data -- "$PHP_BIN" scripts/bootstrap_data.php
             if [ -n "$PQSERVICE_ADMIN_PASSWORD" ]; then
-              runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" php scripts/init_admin.php
+              runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
             fi
