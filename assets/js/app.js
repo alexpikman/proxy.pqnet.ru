@@ -437,7 +437,7 @@
       const result = await api(`/admin/users?${params}`);
       const users = Array.isArray(result) ? result : (result.items || []);
       if (!users.length) {
-        body.innerHTML = '<tr><td colspan="8" class="empty-state">Пользователи не найдены.</td></tr>';
+        body.innerHTML = '<tr><td colspan="9" class="empty-state">Пользователи не найдены.</td></tr>';
         return;
       }
       body.innerHTML = users.map(user => { const passwordStatus = typeof user.password_set === "boolean" ? (user.password_set ? '<span class="status-pill status-good">Установлен</span>' : '<span class="status-pill status-muted">Пароль не установлен</span>') : '<span class="status-pill status-muted">Не проверен</span>'; const login = user.login ?? user.email ?? user.uuid ?? ""; return `<tr><td><b>${escapeHtml(login || "Логин не задан")}</b><small class="table-sub">${escapeHtml(user.uuid || "")}</small></td><td>${passwordStatus}</td><td><span class="status-pill ${user.localstatus ? "status-good" : "status-muted"}">${user.localstatus ? "Активен" : "Отключён"}</span></td><td>${escapeHtml(formatDate(user.localexpire || user.expiry_date))}</td><td>${escapeHtml(formatNumber(user.days_left))}</td><td><b>${escapeHtml(formatNumber(user.coins))}</b></td><td>${escapeHtml(formatNumber(user.price_per_day))}</td><td>${user.vip ? "VIP" : "—"}</td><td>${user.source === "xui" ? "" : `<button class="icon-button" data-edit-user="${escapeHtml(user.uuid)}" aria-label="Редактировать">↗</button>`}</td></tr>`; }).join("");
