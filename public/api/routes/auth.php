@@ -30,3 +30,55 @@ function route_auth_me(): never
     }
     json_ok(['user' => $public, 'csrf_token' => $_SESSION['csrf_token']]);
 }
+
+
+function route_admin_password_change(array $body): never
+{
+    require_role('admin');
+
+    $currentPassword = $body['current_password'] ?? null;
+    $newPassword = $body['new_password'] ?? null;
+    $confirmation = $body['confirm_password'] ?? null;
+
+    if (!is_string($currentPassword) || $currentPassword === ''
+        || !is_string($newPassword) || strlen($newPassword) < 8 || strlen($newPassword) > 1024
+        || !is_string($confirmation) || !hash_equals($newPassword, $confirmation)) {
+        json_err('Проверьте текущий пароль и подтверждение нового. Новый пароль должен содержать не менее 8 символов.', 422);
+    }
+
+    $settings = JsonStore::read('settings.json', []);
+    $storedHash = (string) ($settings['admin_password_hash'] ?? '');
+    if ($storedHash === '' || !password_verify($currentPassword, $storedHash)) {
+        json_err('Текущий пароль администратора указан неверно.', 403);
+    }
+
+    $newHash = password_hash($newPassword, PASSWORD_ARGON2ID);
+    if (!is_string($newHash)) {
+        json_err('Не удалось безопасно сохранить новый пароль.', 500);
+    }
+
+    JsonStore::update('settings.json', static function (&$current) use ($newHash): void {
+        if (!is_array($current)) {
+            throw new RuntimeException('Administrator settings are unavailable.');
+        }
+        $current['admin_password_hash'] = $newHash;
+        $current['admin_password_change_required'] = false;
+        $current['admin_password_changed_at'] = date(DATE_ATOM);
+        $current['updated_at'] = date(DATE_ATOM);
+    }, []);
+
+    session_start_once();
+    $currentSessionKey = session_storage_key();
+    JsonStore::update('sessions.json', static function (&$sessions) use ($currentSessionKey): void {
+        if (!is_array($sessions)) {
+            $sessions = [];
+        }
+        foreach ($sessions as $key => $session) {
+            if ($key !== $currentSessionKey && is_array($session) && ($session['role'] ?? '') === 'admin') {
+                unset($sessions[$key]);
+            }
+        }
+    }, []);
+
+    json_ok(['changed' => true, 'message' => 'Пароль администратора успешно изменён.']);
+}
