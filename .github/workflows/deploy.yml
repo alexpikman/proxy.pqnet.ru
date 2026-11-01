@@ -33,13 +33,31 @@ jobs:
           script: |
             set -Eeuo pipefail
             cd /var/WWW/proxy.pqnet.ru
-            PHP_BIN="$(command -v php)"
+            PHP_BIN="$(command -v php || command -v php8.2 || command -v php8.3 || true)"
+            if [ -z "$PHP_BIN" ]; then
+              echo "ERROR: PHP CLI binary not found on server."
+              ls -l /usr/bin/php* /usr/local/bin/php* 2>/dev/null || true
+              exit 1
+            fi
+            echo "Using PHP CLI: $PHP_BIN"
             git fetch origin main
             git reset --hard origin/main
-            install -d -o www-data -g www-data -m 0700 /var/WWW/data
-            runuser -u www-data -- "$PHP_BIN" scripts/bootstrap_data.php
+            if [ "$(id -u)" -eq 0 ]; then
+              install -d -o www-data -g www-data -m 0700 /var/WWW/data
+              runuser -u www-data -- "$PHP_BIN" scripts/bootstrap_data.php
+            elif command -v sudo >/dev/null 2>&1; then
+              sudo install -d -o www-data -g www-data -m 0700 /var/WWW/data
+              sudo -u www-data "$PHP_BIN" scripts/bootstrap_data.php
+            else
+              echo "ERROR: deployment user needs root or passwordless sudo for JSON storage permissions."
+              exit 1
+            fi
             if [ -n "$PQSERVICE_ADMIN_PASSWORD" ]; then
-              runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
+              if [ "$(id -u)" -eq 0 ]; then
+                runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
+              else
+                sudo -u www-data env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
+              fi
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
             fi
