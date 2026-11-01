@@ -3,7 +3,7 @@
  * Loaded after app.css. Contains design tokens and PQService component overrides only.
  */
 
-/* 1. Design tokens */
+/* 1. Design tokens */    
 :root {
   color-scheme: light;
   --arctic-white: #F7FAFD;
@@ -19,6 +19,8 @@
   --shadow-soft: 0 8px 30px rgba(24, 55, 90, .07);
   --gradient-primary: linear-gradient(135deg, #2878E8, #39C5E8);
   --gradient-cascade: linear-gradient(135deg, #FF913D, #FFC16B);
+  --mono: "DM Mono",monospace;
+  --sans: Manrope,system-ui,-apple-system,"Segoe UI",sans-serif
 
   --ink: var(--deep-navy);
   --muted: var(--slate);
