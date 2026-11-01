@@ -1273,3 +1273,7 @@ samp,
 #view-users .table-wrap{overflow-x:auto}
 #view-users table{min-width:720px}
 @media(max-width:640px){#view-users .toolbar{grid-template-columns:1fr}.page-actions{width:100%}.page-actions .button{flex:1}}
+
+#xui-connection-modal .xui-token-field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px}
+#xui-connection-modal .xui-token-field .modal-field{margin-bottom:0}
+@media(max-width:520px){#xui-connection-modal .xui-token-field{grid-template-columns:1fr}#xui-connection-modal .xui-token-field button{width:100%}}
