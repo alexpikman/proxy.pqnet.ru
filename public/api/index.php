@@ -12,6 +12,7 @@ require_once __DIR__ . '/routes/user.php';
 require_once __DIR__ . '/routes/admin.php';
 require_once __DIR__ . '/routes/cron.php';
 require_once __DIR__ . '/routes/compat.php';
+require_once __DIR__ . '/routes/xui_connections.php';
 
 JsonStore::init();
 configure_error_handling();
@@ -46,6 +47,13 @@ try {
     if (in_array($method, ['POST', 'PATCH', 'DELETE', 'PUT'], true) && !$isLogin && !$isCron && !$isPublic) {
         require_auth();
         require_csrf();
+    }
+
+    if (preg_match('#^/admin/xui/connections(?:/([a-f0-9]+)(?:/(test|sync|settings))?)?$#D', $uri, $xuiMatch) === 1) {
+        route_admin_xui_connections($xuiMatch[1] ?? '', $xuiMatch[2] ?? '', $method, $body);
+    }
+    if (preg_match('#^/admin/xui/connections/([a-f0-9]+)/users$#D', $uri, $xuiUsersMatch) === 1) {
+        route_admin_xui_connection_users($xuiUsersMatch[1], $method, $body);
     }
 
     switch (true) {
