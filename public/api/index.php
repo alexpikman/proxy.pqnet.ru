@@ -49,7 +49,7 @@ try {
         require_csrf();
     }
 
-    if (preg_match('#^/admin/xui/connections(?:/([a-f0-9]+)(?:/(test|sync|settings))?)?$#D', $uri, $xuiMatch) === 1) {
+    if (preg_match('#^/admin/xui/connections(?:/([a-f0-9]+)(?:/(test|sync|refresh|settings))?)?$#D', $uri, $xuiMatch) === 1) {
         route_admin_xui_connections($xuiMatch[1] ?? '', $xuiMatch[2] ?? '', $method, $body);
     }
     if (preg_match('#^/admin/xui/connections/([a-f0-9]+)/users$#D', $uri, $xuiUsersMatch) === 1) {
