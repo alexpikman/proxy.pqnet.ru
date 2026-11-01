@@ -73,9 +73,9 @@
       <input type="hidden" id="xui-connection-id">
       <label class="modal-field">Название сервера<input class="input-control" id="xui-connection-name" maxlength="100" placeholder="Например, PQ Europe" required></label>
       <label class="modal-field">URL панели<input class="input-control" id="xui-connection-url" type="url" placeholder="https://panel.example.com/prefix" required></label>
-      <label class="modal-field">API Token<input class="input-control" id="xui-connection-token" type="password" autocomplete="new-password" placeholder="Токен хранится зашифрованным"></label>
+      <div class="xui-token-field"><label class="modal-field">API Token<input class="input-control" id="xui-connection-token" type="password" autocomplete="new-password" placeholder="Токен хранится зашифрованным"></label><button class="button button-outline" type="button" id="xui-connection-test">Проверить соединение</button></div>
       <label class="modal-field">Таймаут, сек.<input class="input-control" id="xui-connection-timeout" type="number" min="3" max="60" value="15" required></label>
-      <div class="xui-form-actions"><button class="button button-outline" type="button" id="xui-connection-test">Проверить соединение</button><button class="button button-primary" type="submit" id="xui-connection-save">Сохранить</button></div>
+      <div class="xui-form-actions"><button class="button button-primary" type="submit" id="xui-connection-save">Сохранить</button></div>
       <div id="xui-connection-options" class="xui-connection-options" hidden>
         <p class="subtle-note">Параметры становятся доступны после успешной проверки соединения.</p>
         <label class="switch-row"><span>Активное подключение</span><input type="checkbox" id="xui-option-active"></label>
