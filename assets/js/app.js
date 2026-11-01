@@ -84,14 +84,22 @@
     const form = $("#login-form");
     if (!form) return;
     $("#year").textContent = new Date().getFullYear();
+    const password = $("#password");
+    $("[data-password-toggle]")?.addEventListener("click", event => {
+      const visible = password.type === "text";
+      password.type = visible ? "password" : "text";
+      event.currentTarget.textContent = visible ? "Показать" : "Скрыть";
+      event.currentTarget.setAttribute("aria-label", visible ? "Показать пароль" : "Скрыть пароль");
+    });
     form.addEventListener("submit", async event => {
       event.preventDefault();
       const message = $("#login-message");
       const button = $("#login-submit");
       message.hidden = true;
       const login = $("#login").value.trim();
-      if (!login) {
-        message.textContent = "Введите логин.";
+      const secret = password.value;
+      if (!login || !secret) {
+        message.textContent = "Введите логин и пароль.";
         message.hidden = false;
         return;
       }
@@ -100,7 +108,7 @@
       try {
         const result = await api("/login", {
           method: "POST",
-          body: JSON.stringify({ login })
+          body: JSON.stringify({ login, password: secret })
         });
         if (!result.success) throw new Error(result.message || "Не удалось выполнить вход.");
         window.location.replace(result.role === "admin" ? "/admin.html" : "/account.html");
