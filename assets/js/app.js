@@ -662,8 +662,43 @@
     }
   }
 
+
+  async function initHomeDownloads() {
+    const links = $("[data-home-download]");
+    if (!links.length) return;
+    try {
+      const result = await api("/programs");
+      const items = Array.isArray(result) ? result : (result.items || []);
+      const normalizePlatform = value => String(value || "").trim().toLowerCase();
+      const safeDownloadUrl = value => {
+        if (!value) return "";
+        try {
+          const parsed = new URL(String(value).trim(), window.location.origin);
+          return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+        } catch {
+          return "";
+        }
+      };
+      links.forEach(link => {
+        const platform = normalizePlatform(link.dataset.homeDownload);
+        const candidates = items
+          .filter(item => normalizePlatform(item.platform) === platform
+            && item.is_active !== false && item.is_active !== 0)
+          .sort((a, b) => Number(a.sort_order ?? 100) - Number(b.sort_order ?? 100));
+        const selected = candidates.find(item => safeDownloadUrl(item.download_url || item.url));
+        const url = safeDownloadUrl(selected?.download_url || selected?.url);
+        if (!url) return;
+        link.href = url;
+        link.hidden = false;
+      });
+    } catch {
+      links.forEach(link => { link.hidden = true; });
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initLogin();
+    initHomeDownloads();
     initRegistration();
     initPasswordSetup();
     initWorkspaceShell();
