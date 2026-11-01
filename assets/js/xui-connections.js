@@ -176,12 +176,8 @@
     const button = $("#xui-connection-test");
     button.disabled = true;
     try {
-      let id = $("#xui-connection-id").value;
-      if (!id || $("#xui-connection-token").value) {
-        const item = await saveConnection();
-        id = item.id;
-      }
-      await testConnection(id);
+      const item = await saveConnection();
+      await testConnection(item.id);
     } catch (error) {
       notify(error.message, true);
     } finally {
