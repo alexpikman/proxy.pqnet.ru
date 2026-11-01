@@ -35,8 +35,8 @@ function input_password(array $data): string
         throw new InvalidArgumentException('Invalid password.');
     }
     $password = $data['password'];
-    if (strlen($password) < 8 || strlen($password) > 1024) {
-        throw new InvalidArgumentException('Password must contain between 8 and 1024 bytes.');
+    if (strlen($password) < 1 || strlen($password) > 1024) {
+        throw new InvalidArgumentException('Password must contain between 1 and 1024 bytes.');
     }
     return $password;
 }
