@@ -256,7 +256,16 @@ body {
 .preview-card,
 .float-tile {
   border: 1px solid var(--border-light);
-  background: background: #ffffff9c;
+  background: #ffffff9c;
+    background-image: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: rgba(255, 255, 255, 0.61);
   box-shadow: var(--shadow-soft);
 }
 
