@@ -1245,3 +1245,31 @@ samp,
 .platform-download[hidden] {
   display: none !important;
 }
+
+
+/* Multi-panel 3x-ui management */
+.page-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.xui-connection-options{display:grid;gap:12px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border-color,rgba(255,255,255,.1))}
+.xui-connection-options[hidden]{display:none}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:9px 0;font-size:14px}
+.switch-row input,.switch-control input{accent-color:var(--accent,#75a9ff);width:18px;height:18px}
+.xui-flags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.xui-flag{font-size:12px;padding:5px 9px;border-radius:999px;background:rgba(128,128,128,.12);color:var(--text-muted,#999)}
+.xui-flag.is-enabled{background:rgba(64,170,125,.14);color:var(--success,#58bd91)}
+.switch-control{display:inline-flex;align-items:center;gap:9px;cursor:pointer;white-space:nowrap}
+.switch-control input{position:absolute;opacity:0;width:1px;height:1px}
+.switch-track{position:relative;width:36px;height:20px;border-radius:20px;background:rgba(128,128,128,.35);transition:background .18s ease}
+.switch-track:after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .18s ease}
+.switch-control input:checked+.switch-track{background:var(--accent,#4c9b78)}
+.switch-control input:checked+.switch-track:after{transform:translateX(16px)}
+.switch-control input:focus-visible+.switch-track{outline:2px solid var(--accent,#75a9ff);outline-offset:3px}
+.switch-control input:disabled+.switch-track{opacity:.55;cursor:wait}
+.switch-label{font-size:13px;color:var(--text-muted,#999)}
+#xui-connection-modal .modal-card{width:min(560px,calc(100vw - 32px));max-height:min(88vh,900px);overflow:auto}
+#xui-connection-modal .modal-field{display:grid;gap:7px;margin:13px 0;font-size:13px}
+#xui-connection-modal .xui-form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+#xui-connection-modal .modal-actions{justify-content:flex-end;margin-top:16px}
+#view-users .toolbar{display:grid;grid-template-columns:minmax(220px,320px) minmax(220px,1fr);gap:12px}
+#view-users .table-wrap{overflow-x:auto}
+#view-users table{min-width:720px}
+@media(max-width:640px){#view-users .toolbar{grid-template-columns:1fr}.page-actions{width:100%}.page-actions .button{flex:1}}
