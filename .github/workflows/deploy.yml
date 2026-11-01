@@ -56,19 +56,19 @@ jobs:
             git reset --hard origin/main
             if [ "$(id -u)" -eq 0 ]; then
               install -d -o www-data -g www-data -m 0700 /var/WWW/data
-              runuser -u www-data -- "$PHP_BIN" scripts/bootstrap_data.php
+              runuser -u www-data -- env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/bootstrap_data.php
             elif command -v sudo >/dev/null 2>&1; then
               sudo install -d -o www-data -g www-data -m 0700 /var/WWW/data
-              sudo -u www-data "$PHP_BIN" scripts/bootstrap_data.php
+              sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/bootstrap_data.php
             else
               echo "ERROR: deployment user needs root or passwordless sudo for JSON storage permissions."
               exit 1
             fi
             if [ -n "$PQSERVICE_ADMIN_PASSWORD" ]; then
               if [ "$(id -u)" -eq 0 ]; then
-                runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
+                runuser -u www-data -- env PQSERVICE_DATA_DIR=/var/WWW/data PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
               else
-                sudo -u www-data env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
+                sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
               fi
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
