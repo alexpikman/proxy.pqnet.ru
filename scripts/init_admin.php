@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/public/api/lib/store.php';
 
 if (PHP_SAPI !== 'cli') {
-    fwrite(STDERR, "CLI only.\\n");
+    fwrite(STDERR, "CLI only.\n");
     exit(1);
 }
 
@@ -33,5 +33,5 @@ $initialized = JsonStore::update('settings.json', static function (&$settings): 
 }, []);
 
 fwrite(STDOUT, $initialized
-    ? "Default administrator credentials initialized: admin / admin. Change the password in Technical Management > System.\\n"
-    : "Existing administrator password preserved.\\n");
+    ? "Default administrator credentials initialized: admin / admin. Change the password in Technical Management > System.\n"
+    : "Existing administrator password preserved.\n");
