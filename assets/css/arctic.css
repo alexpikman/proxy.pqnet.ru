@@ -256,7 +256,7 @@ body {
 .preview-card,
 .float-tile {
   border: 1px solid var(--border-light);
-  background: var(--pure-white);
+  background: background: #ffffff9c;
   box-shadow: var(--shadow-soft);
 }
 
