@@ -1277,3 +1277,13 @@ samp,
 #xui-connection-modal .xui-token-field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px}
 #xui-connection-modal .xui-token-field .modal-field{margin-bottom:0}
 @media(max-width:520px){#xui-connection-modal .xui-token-field{grid-template-columns:1fr}#xui-connection-modal .xui-token-field button{width:100%}}
+
+.admin-password-panel{max-width:760px}
+.admin-password-form{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;max-width:680px}
+.admin-password-form .modal-field{display:grid;gap:7px;margin:0;font-size:13px}
+.admin-password-form .modal-field:first-child{grid-column:1/-1}
+.admin-password-form .field-hint{color:var(--text-muted,#999);font-size:12px}
+.admin-password-actions{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
+.admin-password-actions .form-message{font-size:13px;color:var(--success,#58bd91)}
+.admin-password-actions .form-message-error{color:var(--danger,#d66)}
+@media(max-width:640px){.admin-password-form{grid-template-columns:1fr}.admin-password-form .modal-field:first-child{grid-column:auto}.admin-password-actions .button{width:100%}}
