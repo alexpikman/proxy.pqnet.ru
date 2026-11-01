@@ -17,7 +17,7 @@ final class XuiClient
         $this->username = (string) ($settings['xui_user'] ?? '');
         $this->password = (string) ($settings['xui_pass'] ?? '');
         $this->token = (string) ($settings['xui_token'] ?? '');
-        $this->timeout = max(1, min(10, (int) ($settings['xui_timeout'] ?? 10)));
+        $this->timeout = max(3, min(60, (int) ($settings['xui_timeout'] ?? 15)));
 
         if (!filter_var($this->host, FILTER_VALIDATE_URL)
             || !in_array(parse_url($this->host, PHP_URL_SCHEME), ['http', 'https'], true)) {
