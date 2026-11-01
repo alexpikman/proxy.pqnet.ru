@@ -145,6 +145,12 @@
     }
   });
 
+  document.addEventListener("click", event => {
+    if (event.target.closest('[data-view="users"], [data-navigate="users"]')) {
+      window.setTimeout(loadUsers, 0);
+    }
+  });
+
   document.addEventListener("xui-connections-updated", event => {
     connections = event.detail || [];
     renderSources();
