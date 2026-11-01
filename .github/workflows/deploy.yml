@@ -73,21 +73,7 @@ jobs:
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
             fi
-            php -m | grep -qi '^curl
-            test -S /run/php/php8.2-fpm.sock || { echo "ERROR: PHP-FPM socket is missing." >&2; exit 1; }
-            echo "Nginx routing for proxy.pqnet.ru:4444:"
-            nginx -T 2>/dev/null | grep -E 'server_name.*proxy\\.pqnet\\.ru|listen .*4444|location .*api|location .*php|fastcgi_pass|proxy_pass' || true
-            HTTP_CODE="$(curl --silent --show-error --insecure --resolve proxy.pqnet.ru:4444:127.0.0.1 --dump-header /tmp/pqservice-api-headers.txt --output /tmp/pqservice-api-smoke.json --write-out '%{http_code}' 'https://proxy.pqnet.ru:4444/api/index.php?route=%2Fsession')"
-            CONTENT_TYPE="$(grep -i '^Content-Type:' /tmp/pqservice-api-headers.txt | tail -n1 | tr -d '\\r' || true)"
-            echo "PHP API probe: HTTP $HTTP_CODE; $CONTENT_TYPE"
-            if [ "$HTTP_CODE" != "401" ] || ! php -r '$v=json_decode(file_get_contents("/tmp/pqservice-api-smoke.json"), true); exit(is_array($v) && ($v["success"] ?? null) === false ? 0 : 1);'; then
-              rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
-              echo "ERROR: PHP API is not routed through PHP-FPM yet." >&2
-              exit 1
-            fi
-            rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
-            echo "PHP files deployed, JSON storage initialized, and API endpoint smoke test passed."
- || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
+            "$PHP_BIN" -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
             if [ "$(id -u)" -eq 0 ]; then
               if ! command -v crontab >/dev/null 2>&1; then
                 apt-get update
@@ -114,10 +100,10 @@ jobs:
             HTTP_CODE="$(curl --silent --show-error --insecure --resolve proxy.pqnet.ru:4444:127.0.0.1 --dump-header /tmp/pqservice-api-headers.txt --output /tmp/pqservice-api-smoke.json --write-out '%{http_code}' 'https://proxy.pqnet.ru:4444/api/index.php?route=%2Fsession')"
             CONTENT_TYPE="$(grep -i '^Content-Type:' /tmp/pqservice-api-headers.txt | tail -n1 | tr -d '\\r' || true)"
             echo "PHP API probe: HTTP $HTTP_CODE; $CONTENT_TYPE"
-            if [ "$HTTP_CODE" != "401" ] || ! php -r '$v=json_decode(file_get_contents("/tmp/pqservice-api-smoke.json"), true); exit(is_array($v) && ($v["success"] ?? null) === false ? 0 : 1);'; then
+            if [ "$HTTP_CODE" != "401" ] || ! "$PHP_BIN" -r '$v=json_decode(file_get_contents("/tmp/pqservice-api-smoke.json"), true); exit(is_array($v) && ($v["success"] ?? null) === false ? 0 : 1);'; then
               rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
               echo "ERROR: PHP API is not routed through PHP-FPM yet." >&2
               exit 1
             fi
             rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
-            echo "PHP files deployed, JSON storage initialized, and API endpoint smoke test passed."
+            echo "PHP files deployed, JSON storage initialized, cron configured, and API endpoint smoke test passed."
