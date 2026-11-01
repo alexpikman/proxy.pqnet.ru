@@ -15,7 +15,7 @@ jobs:
         with:
           php-version: '8.1'
       - name: Check PHP syntax
-        run: find public/api scripts -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find public/api scripts api -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
   deploy:
     needs: php-lint
@@ -23,11 +23,24 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          PQSERVICE_ADMIN_PASSWORD: ${{ secrets.PQSERVICE_ADMIN_PASSWORD }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PQSERVICE_ADMIN_PASSWORD
           script: |
+            set -Eeuo pipefail
             cd /var/WWW/proxy.pqnet.ru
             git fetch origin main
             git reset --hard origin/main
+            install -d -o www-data -g www-data -m 0700 /var/WWW/data
+            runuser -u www-data -- php scripts/bootstrap_data.php
+            if [ -n "$PQSERVICE_ADMIN_PASSWORD" ]; then
+              runuser -u www-data -- env PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" php scripts/init_admin.php
+            else
+              echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
+            fi
+            php -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
+            echo "PHP files deployed and JSON data storage initialized."

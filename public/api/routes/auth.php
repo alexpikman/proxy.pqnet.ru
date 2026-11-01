@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 function route_auth_login(array $body): never
 {
-    json_ok(login(input_login($body), input_password($body)));
+    $result = login(input_login($body), input_password($body));
+    json_ok(['role' => $result['user']['role'], 'user' => $result['user'], 'csrf_token' => $result['csrf_token']]);
 }
 
 function route_auth_logout(): never

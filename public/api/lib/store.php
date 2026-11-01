@@ -15,7 +15,7 @@ final class JsonStore
         $configured = getenv('PQSERVICE_DATA_DIR');
         self::$directory = is_string($configured) && $configured !== ''
             ? rtrim($configured, DIRECTORY_SEPARATOR)
-            : dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'data';
+            : dirname(dirname(__DIR__, 3)) . DIRECTORY_SEPARATOR . 'data';
     }
 
     public static function directory(): string

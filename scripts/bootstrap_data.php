@@ -21,7 +21,7 @@ if (!is_dir($examples)) {
     exit(1);
 }
 
-foreach (['settings.json', 'users.json', 'tariffs.json', 'coins.json', 'sessions.json', 'sync_state.json'] as $file) {
+foreach (['settings.json', 'users.json', 'tariffs.json', 'coins.json', 'sessions.json', 'sync_state.json', 'registration_requests.json', 'setup_tokens.json', 'programs.json', 'promocodes.json'] as $file) {
     $target = $dataDir . DIRECTORY_SEPARATOR . $file;
     if (!is_file($target)) {
         if (!copy($examples . DIRECTORY_SEPARATOR . $file, $target)) {

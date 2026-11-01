@@ -11,7 +11,7 @@ if (PHP_SAPI !== 'cli') {
 $configured = getenv('PQSERVICE_DATA_DIR');
 $dataDir = is_string($configured) && $configured !== ''
     ? rtrim($configured, DIRECTORY_SEPARATOR)
-    : dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data';
+    : dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'data';
 JsonStore::init($dataDir);
 
 $password = getenv('PQSERVICE_ADMIN_PASSWORD') ?: '';

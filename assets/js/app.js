@@ -2,25 +2,32 @@
   "use strict";
 
   const API_BASE = "/api";
+  let csrfToken = "";
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
   async function api(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        ...(options.headers || {})
+      },
       ...options
     });
     const contentType = response.headers.get("content-type") || "";
     const payload = contentType.includes("application/json")
       ? await response.json()
       : { message: await response.text() };
-    if (!response.ok) {
+    if (!response.ok || payload.success === false) {
       const error = new Error(payload.message || payload.error || payload.detail || `Ошибка запроса (${response.status})`);
       error.status = response.status;
       throw error;
     }
-    return payload;
+    const data = Object.prototype.hasOwnProperty.call(payload, "data") ? payload.data : payload;
+    if (data && typeof data === "object" && data.csrf_token) csrfToken = data.csrf_token;
+    return data;
   }
 
   function toast(message, isError = false) {
