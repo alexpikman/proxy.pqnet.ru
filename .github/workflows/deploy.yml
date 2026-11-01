@@ -23,13 +23,10 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
-        env:
-          PQSERVICE_ADMIN_PASSWORD: ${{ secrets.PQSERVICE_ADMIN_PASSWORD }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: PQSERVICE_ADMIN_PASSWORD
           script: |
             set -Eeuo pipefail
             cd /var/WWW/proxy.pqnet.ru
@@ -64,14 +61,10 @@ jobs:
               echo "ERROR: deployment user needs root or passwordless sudo for JSON storage permissions."
               exit 1
             fi
-            if [ -n "$PQSERVICE_ADMIN_PASSWORD" ]; then
-              if [ "$(id -u)" -eq 0 ]; then
-                runuser -u www-data -- env PQSERVICE_DATA_DIR=/var/WWW/data PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
-              else
-                sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data PQSERVICE_ADMIN_PASSWORD="$PQSERVICE_ADMIN_PASSWORD" "$PHP_BIN" scripts/init_admin.php
-              fi
+            if [ "$(id -u)" -eq 0 ]; then
+              runuser -u www-data -- env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/init_admin.php
             else
-              echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
+              sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/init_admin.php
             fi
             "$PHP_BIN" -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
             if [ "$(id -u)" -eq 0 ]; then
