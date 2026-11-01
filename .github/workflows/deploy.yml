@@ -66,11 +66,6 @@ jobs:
             else
               sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/init_admin.php
             fi
-            if [ "$(id -u)" -eq 0 ]; then
-              runuser -u www-data -- env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/reset_admin_once.php
-            else
-              sudo -u www-data env PQSERVICE_DATA_DIR=/var/WWW/data "$PHP_BIN" scripts/reset_admin_once.php
-            fi
             "$PHP_BIN" -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
             if [ "$(id -u)" -eq 0 ]; then
               if ! command -v crontab >/dev/null 2>&1; then
