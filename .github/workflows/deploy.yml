@@ -73,8 +73,7 @@ jobs:
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
             fi
-            php -m | grep -qi '^curl
- || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
+            php -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
             systemctl enable --now php8.2-fpm
             test -S /run/php/php8.2-fpm.sock || { echo "ERROR: PHP-FPM socket is missing." >&2; exit 1; }
             echo "Nginx routing for proxy.pqnet.ru:4444:"
