@@ -1175,3 +1175,73 @@ samp,
 .mono {
   font-family: "DM Mono", ui-monospace, SFMono-Regular, Consolas, monospace !important;
 }
+
+
+/* Anchor landing offset */
+#help {
+  scroll-margin-top: 50px;
+}
+
+/* Login fields: stable Manrope typography and consistent autofill surface */
+.login-page .input-wrap {
+  background: #fbfcfe;
+}
+
+.login-page .input-wrap input,
+.login-page .input-wrap input:-webkit-autofill,
+.login-page .input-wrap input:-webkit-autofill:hover,
+.login-page .input-wrap input:-webkit-autofill:focus,
+.login-page .input-wrap input:autofill {
+  color: var(--ink) !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  font-family: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  caret-color: var(--ink);
+}
+
+.login-page .input-wrap input:-webkit-autofill,
+.login-page .input-wrap input:-webkit-autofill:hover,
+.login-page .input-wrap input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fbfcfe inset !important;
+  box-shadow: 0 0 0 1000px #fbfcfe inset !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+/* Homepage platform download action */
+.platform-card {
+  position: relative;
+  padding-right: 62px;
+}
+
+.platform-download {
+  position: absolute;
+  top: 50%;
+  right: 17px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid #dce6f5;
+  border-radius: 11px;
+  background: #f7f9ff;
+  color: var(--blue);
+  transition: background .18s, border-color .18s, color .18s, transform .18s;
+}
+
+.platform-download:hover {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.platform-download svg {
+  width: 19px;
+  height: 19px;
+}
+
+.platform-download[hidden] {
+  display: none !important;
+}
