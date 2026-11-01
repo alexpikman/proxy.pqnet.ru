@@ -387,8 +387,7 @@ function route_admin_xui_connection_users(string $connectionId, string $method, 
         $items = [];
         foreach (JsonStore::read('users.json', []) as $user) {
             if (!is_array($user) || !empty($user['deleted'])
-                || (string) ($user['xui_connection_id'] ?? '') !== $connectionId
-                || empty($user['xui_present'])) {
+                || (string) ($user['xui_connection_id'] ?? '') !== $connectionId) {
                 continue;
             }
             $view = compat_user_view($user);
@@ -396,7 +395,7 @@ function route_admin_xui_connection_users(string $connectionId, string $method, 
             $view['connection_name'] = $connection['name'];
             $view['inbound_id'] = (int) ($user['xui_inbound_id'] ?? $user['inbound_id'] ?? 0);
             $view['enabled'] = (bool) ($user['xui_enabled'] ?? false);
-            $view['present'] = true;
+            $view['present'] = !empty($user['xui_present']);
             if ($search !== '' && stripos($view['login'] . ' ' . $view['email'] . ' ' . $view['uuid'], $search) === false) {
                 continue;
             }
