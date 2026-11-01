@@ -15,7 +15,10 @@
       const session = await api("/session");
       csrfToken = session.csrf_token || "";
     }
-    const response = await fetch(API_BASE + encodeURIComponent(path), {
+    const [route, query = ""] = path.split("?", 2);
+    const params = new URLSearchParams(query);
+    params.set("route", route);
+    const response = await fetch("/api/index.php?" + params.toString(), {
       credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
