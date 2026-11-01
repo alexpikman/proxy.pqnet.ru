@@ -437,7 +437,7 @@
 
   async function loadAdminUsers() {
     const body = $("#admin-users");
-    if (!body) return;
+    if (!body || $("#user-source-filter")?.dataset.multixui === "true") return;
     const params = new URLSearchParams({
       search: $("#user-search")?.value || "",
       status: $("#user-status-filter")?.value || "all",
