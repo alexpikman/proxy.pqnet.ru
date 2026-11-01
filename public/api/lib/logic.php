@@ -96,12 +96,20 @@ function apply_access_state(string $userId): array
         return ['applied' => false, 'enabled' => $shouldEnable, 'reason' => 'client_not_linked'];
     }
 
-    $xui = new XuiClient();
-    $result = $xui->setClientEnabled(
-        (int) $user['inbound_id'],
-        (string) $user['uuid'],
-        $shouldEnable
-    );
+    if (!empty($user['xui_connection_id']) && function_exists('xui_connection_find')) {
+        $connection = xui_connection_find((string) $user['xui_connection_id']);
+        if ($connection === null) {
+            return ['applied' => false, 'enabled' => $shouldEnable, 'reason' => 'connection_not_found'];
+        }
+        $xui = xui_connection_client($connection);
+        $inboundId = (int) ($user['xui_inbound_id'] ?? $user['inbound_id'] ?? 0);
+        $uuid = (string) ($user['xui_uuid'] ?? $user['uuid'] ?? '');
+    } else {
+        $xui = new XuiClient();
+        $inboundId = (int) $user['inbound_id'];
+        $uuid = (string) $user['uuid'];
+    }
+    $result = $xui->setClientEnabled($inboundId, $uuid, $shouldEnable);
     return ['applied' => true, 'enabled' => $shouldEnable, 'result' => $result];
 }
 
