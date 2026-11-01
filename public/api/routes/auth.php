@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 function route_auth_login(array $body): never
 {
-    $result = login(input_login($body), input_password($body));
+    $result = login(input_login($body), isset($body['password']) && is_string($body['password']) ? $body['password'] : '');
     json_ok(['role' => $result['user']['role'], 'user' => $result['user'], 'csrf_token' => $result['csrf_token']]);
 }
 
