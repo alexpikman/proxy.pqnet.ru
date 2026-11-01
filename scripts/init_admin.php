@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/public/api/lib/store.php';
 
 if (PHP_SAPI !== 'cli') {
-    fwrite(STDERR, "CLI only.\n");
+    fwrite(STDERR, "CLI only.\\n");
     exit(1);
 }
 
@@ -14,19 +14,24 @@ $dataDir = is_string($configured) && $configured !== ''
     : dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'data';
 JsonStore::init($dataDir);
 
-$password = getenv('PQSERVICE_ADMIN_PASSWORD') ?: '';
-if (strlen($password) < 12) {
-    fwrite(STDERR, "Set PQSERVICE_ADMIN_PASSWORD to a password of at least 12 characters.\n");
-    exit(1);
-}
-
-JsonStore::update('settings.json', static function (&$settings) use ($password): void {
+$initialized = JsonStore::update('settings.json', static function (&$settings): bool {
     if (!is_array($settings)) {
         $settings = [];
     }
-    $settings['admin_login'] = (string) ($settings['admin_login'] ?? 'admin');
-    $settings['admin_password_hash'] = password_hash($password, PASSWORD_ARGON2ID);
+
+    if (!empty($settings['admin_password_initialized'])) {
+        return false;
+    }
+
+    $settings['admin_login'] = 'admin';
+    $settings['admin_password_hash'] = password_hash('admin', PASSWORD_ARGON2ID);
+    $settings['admin_password_change_required'] = true;
+    $settings['admin_password_initialized'] = true;
+    $settings['admin_password_changed_at'] = null;
     $settings['updated_at'] = date(DATE_ATOM);
+    return true;
 }, []);
 
-fwrite(STDOUT, "Administrator password hash saved.\n");
+fwrite(STDOUT, $initialized
+    ? "Default administrator credentials initialized: admin / admin. Change the password in Technical Management > System.\\n"
+    : "Existing administrator password preserved.\\n");
