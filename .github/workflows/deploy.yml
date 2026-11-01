@@ -73,7 +73,40 @@ jobs:
             else
               echo "NOTICE: PQSERVICE_ADMIN_PASSWORD secret is empty; admin password not initialized."
             fi
-            php -m | grep -qi '^curl$' || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
+            php -m | grep -qi '^curl
+            test -S /run/php/php8.2-fpm.sock || { echo "ERROR: PHP-FPM socket is missing." >&2; exit 1; }
+            echo "Nginx routing for proxy.pqnet.ru:4444:"
+            nginx -T 2>/dev/null | grep -E 'server_name.*proxy\\.pqnet\\.ru|listen .*4444|location .*api|location .*php|fastcgi_pass|proxy_pass' || true
+            HTTP_CODE="$(curl --silent --show-error --insecure --resolve proxy.pqnet.ru:4444:127.0.0.1 --dump-header /tmp/pqservice-api-headers.txt --output /tmp/pqservice-api-smoke.json --write-out '%{http_code}' 'https://proxy.pqnet.ru:4444/api/index.php?route=%2Fsession')"
+            CONTENT_TYPE="$(grep -i '^Content-Type:' /tmp/pqservice-api-headers.txt | tail -n1 | tr -d '\\r' || true)"
+            echo "PHP API probe: HTTP $HTTP_CODE; $CONTENT_TYPE"
+            if [ "$HTTP_CODE" != "401" ] || ! php -r '$v=json_decode(file_get_contents("/tmp/pqservice-api-smoke.json"), true); exit(is_array($v) && ($v["success"] ?? null) === false ? 0 : 1);'; then
+              rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
+              echo "ERROR: PHP API is not routed through PHP-FPM yet." >&2
+              exit 1
+            fi
+            rm -f /tmp/pqservice-api-smoke.json /tmp/pqservice-api-headers.txt
+            echo "PHP files deployed, JSON storage initialized, and API endpoint smoke test passed."
+ || { echo "ERROR: PHP cURL extension is required." >&2; exit 1; }
+            if [ "$(id -u)" -eq 0 ]; then
+              if ! command -v crontab >/dev/null 2>&1; then
+                apt-get update
+                DEBIAN_FRONTEND=noninteractive apt-get install -y cron
+              fi
+              printf '%s\\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" > /etc/cron.d/pqservice-xui-sync
+              chmod 0644 /etc/cron.d/pqservice-xui-sync
+              systemctl enable --now cron
+            elif command -v sudo >/dev/null 2>&1 && sudo -n true; then
+              if ! command -v crontab >/dev/null 2>&1; then
+                sudo apt-get update
+                sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y cron
+              fi
+              printf '%s\\n' "*/2 * * * * www-data env PQSERVICE_DATA_DIR=/var/WWW/data $PHP_BIN /var/WWW/proxy.pqnet.ru/scripts/sync_xui.php >> /var/WWW/data/xui_cron.log 2>&1" | sudo tee /etc/cron.d/pqservice-xui-sync >/dev/null
+              sudo chmod 0644 /etc/cron.d/pqservice-xui-sync
+              sudo systemctl enable --now cron
+            else
+              echo "NOTICE: no root access; automatic 3x-ui sync cron was not installed."
+            fi
             systemctl enable --now php8.2-fpm
             test -S /run/php/php8.2-fpm.sock || { echo "ERROR: PHP-FPM socket is missing." >&2; exit 1; }
             echo "Nginx routing for proxy.pqnet.ru:4444:"
