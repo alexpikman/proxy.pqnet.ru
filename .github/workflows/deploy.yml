@@ -35,8 +35,20 @@ jobs:
             cd /var/WWW/proxy.pqnet.ru
             PHP_BIN="$(command -v php || command -v php8.2 || command -v php8.3 || true)"
             if [ -z "$PHP_BIN" ]; then
-              echo "ERROR: PHP CLI binary not found on server."
-              ls -l /usr/bin/php* /usr/local/bin/php* 2>/dev/null || true
+              if [ "$(id -u)" -eq 0 ]; then
+                apt-get update
+                DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli php-fpm php-curl php-mbstring
+              elif command -v sudo >/dev/null 2>&1 && sudo -n true; then
+                sudo apt-get update
+                sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli php-fpm php-curl php-mbstring
+              else
+                echo "ERROR: PHP is not installed and deployment user has no root/sudo access to install it."
+                exit 1
+              fi
+              PHP_BIN="$(command -v php || true)"
+            fi
+            if [ -z "$PHP_BIN" ]; then
+              echo "ERROR: PHP CLI installation did not provide a php binary."
               exit 1
             fi
             echo "Using PHP CLI: $PHP_BIN"
