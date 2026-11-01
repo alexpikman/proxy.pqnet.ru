@@ -65,7 +65,20 @@
         <div id="xui-connection-sync-result" class="empty-state">Выберите сервер и выполните сверку. Изменения в 3x-ui и PQService не применяются.</div>
       </article>
     </section>
-    <section class="view" id="view-system"><div class="page-intro"><div><div class="eyebrow">ТЕХНИЧЕСКОЕ УПРАВЛЕНИЕ</div><h1>Система</h1><p>Параметры сервиса, резервные копии и журнал событий.</p></div></div><div class="stats-grid compact-stats"><article class="stat-card"><div class="stat-top"><span>Backend API</span><span class="stat-symbol">⌁</span></div><div class="stat-value stat-status" id="backend-status">Не подключён</div><div class="stat-foot">Состояние приложения</div></article><article class="stat-card"><div class="stat-top"><span>Последняя проверка</span><span class="stat-symbol">◷</span></div><div class="stat-value" id="backend-check">—</div><div class="stat-foot">Локальное время</div></article></div><article class="panel"><div class="panel-heading"><div><span class="panel-kicker">БЕЗОПАСНОСТЬ</span><h2>Правила эксплуатации</h2></div></div><ul class="system-list"><li>Секреты 3x-ui и ключи API хранятся вне публичной директории.</li><li>Административные операции проверяют роль на сервере.</li><li>Начисления и списания монет фиксируются в журнале.</li><li>Резервные копии хранятся вне web root и не публикуются.</li></ul></article></section>
+    <section class="view" id="view-system">
+      <div class="page-intro"><div><div class="eyebrow">ТЕХНИЧЕСКОЕ УПРАВЛЕНИЕ</div><h1>Система</h1><p>Параметры сервиса, безопасность и администрирование.</p></div></div>
+      <div class="stats-grid compact-stats"><article class="stat-card"><div class="stat-top"><span>Backend API</span><span class="stat-symbol">⌁</span></div><div class="stat-value stat-status" id="backend-status">Не подключён</div><div class="stat-foot">Состояние приложения</div></article><article class="stat-card"><div class="stat-top"><span>Последняя проверка</span><span class="stat-symbol">◷</span></div><div class="stat-value" id="backend-check">—</div><div class="stat-foot">Локальное время</div></article></div>
+      <article class="panel admin-password-panel">
+        <div class="panel-heading"><div><span class="panel-kicker">УЧЁТНАЯ ЗАПИСЬ ADMIN</span><h2>Смена пароля администратора</h2><p class="subtle-note">Для подтверждения изменений введите действующий пароль. Новый пароль можно выбрать самостоятельно.</p></div></div>
+        <form id="admin-password-form" class="admin-password-form" autocomplete="off">
+          <label class="modal-field">Текущий пароль<input class="input-control" id="admin-current-password" type="password" autocomplete="current-password" required></label>
+          <label class="modal-field">Новый пароль<input class="input-control" id="admin-new-password" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required><small class="field-hint">Не менее 8 символов.</small></label>
+          <label class="modal-field">Повторите новый пароль<input class="input-control" id="admin-confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required></label>
+          <div class="admin-password-actions"><button class="button button-primary" type="submit" id="admin-password-submit">Изменить пароль</button><span class="form-message" id="admin-password-message" role="status" aria-live="polite" hidden></span></div>
+        </form>
+      </article>
+      <article class="panel"><div class="panel-heading"><div><span class="panel-kicker">БЕЗОПАСНОСТЬ</span><h2>Правила эксплуатации</h2></div></div><ul class="system-list"><li>Пароль администратора хранится в виде Argon2id-хеша, а не в открытом виде.</li><li>После смены пароля остальные административные сессии завершаются.</li><li>Секреты 3x-ui и ключи API хранятся вне публичной директории.</li><li>Резервные копии хранятся вне web root и не публикуются.</li></ul></article>
+    </section>
   </div></main></div>
 <dialog class="modal" id="xui-connection-modal">
     <form method="dialog" class="modal-card" id="xui-connection-form">
