@@ -1,8 +1,3 @@
-/* Ubuntu Font Licence 1.0 — see assets/fonts/UBUNTU-FONT-LICENSE.txt */
-@font-face{font-family:"Ubuntu";src:url("/assets/fonts/Ubuntu-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
-@font-face{font-family:"Ubuntu";src:url("/assets/fonts/Ubuntu-Medium.ttf") format("truetype");font-style:normal;font-weight:500 600;font-display:swap}
-@font-face{font-family:"Ubuntu";src:url("/assets/fonts/Ubuntu-Bold.ttf") format("truetype");font-style:normal;font-weight:700 900;font-display:swap}
-
 :root{--ink:#182334;--muted:#778397;--line:#e8edf3;--surface:#fff;--canvas:#f6f8fb;--blue:#4269e8;--blue-dark:#3156d4;--blue-soft:#edf2ff;--mint:#eaf8f2;--green:#16865e;--red:#c24d59;--shadow:0 14px 40px rgba(31,52,86,.07);--radius:20px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Ubuntu",Arial,sans-serif;color:var(--ink);background:var(--canvas);font-size:14px;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}.container{width:min(1160px,calc(100% - 48px));margin-inline:auto}.brand{display:inline-flex;align-items:center;gap:10px;font:800 19px "Ubuntu",sans-serif;letter-spacing:-.7px;color:var(--ink)}.brand-mark{width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,#6486f3,#355bd7);display:grid;place-items:center;color:white;font:800 13px "Ubuntu",sans-serif;letter-spacing:-.7px;box-shadow:0 6px 14px #4269e83b}.button{min-height:44px;border:1px solid transparent;border-radius:12px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:12px;font-weight:700;transition:transform .18s,box-shadow .18s,background .18s}.button:hover{transform:translateY(-1px)}.button-primary{color:#fff;background:linear-gradient(115deg,#5278ee,#3c61df);box-shadow:0 8px 18px #4269e82b}.button-primary:hover{background:var(--blue-dark);box-shadow:0 10px 22px #4269e83d}.button-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}.button-outline{background:#fff;border-color:#dfe6f0;color:#34445c}.button-outline:hover,.button-quiet:hover{border-color:#bdcafa;background:#f8faff}.button-quiet{background:transparent;border-color:transparent;color:#45536a}.button-light{background:#fff;color:#355bd7}.button-small{min-height:38px;padding:0 14px;font-size:12px;border-radius:10px}.button-wide{width:100%;min-height:50px}.eyebrow{font:800 10px "Ubuntu",sans-serif;letter-spacing:1.55px;color:#71809a}.public-header{height:82px;width:min(1280px,calc(100% - 56px));margin:auto;display:flex;align-items:center;justify-content:space-between}.public-nav{display:flex;gap:34px;color:#68758a;font-size:13px;font-weight:600}.public-nav a:hover{color:var(--blue)}.hero{min-height:550px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:35px;padding-top:30px;padding-bottom:70px}.hero-copy{position:relative;z-index:2}.hero-copy .eyebrow{display:flex;align-items:center;gap:9px}.eyebrow-dot{width:7px;height:7px;background:#4f78ec;border-radius:50%;box-shadow:0 0 0 5px #e6edff}.hero h1,.login-aside h1{font:800 clamp(38px,5vw,59px)/1.13 "Ubuntu",sans-serif;letter-spacing:-2.5px;margin:22px 0 18px}.hero h1 span{color:var(--blue)}.hero-lead{max-width:470px;color:#6e7b8f;font-size:16px;line-height:1.8;margin:0}.hero-actions{display:flex;gap:12px;margin-top:30px}.hero-note{display:flex;align-items:center;gap:9px;margin-top:26px;color:#8490a1;font-size:12px}.note-check{width:20px;height:20px;border-radius:50%;background:#e5f6ee;color:#1b9868;display:grid;place-items:center;font-weight:800}.hero-art{height:350px;position:relative;display:grid;place-items:center}.hero-glow{position:absolute;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle,#e5ebff 0%,#f2f5ff 45%,transparent 72%);z-index:0}.orbit{position:absolute;border:1px solid #dfe6fb;border-radius:50%;z-index:1}.orbit-one{width:390px;height:390px}.orbit-two{width:470px;height:470px;border-color:#e8edf8}.preview-card{position:relative;z-index:2;background:#fff;border:1px solid #edf0f7;border-radius:24px;box-shadow:0 25px 65px #293f711c}.preview-main{width:340px;padding:25px}.preview-top,.preview-stats{display:flex;align-items:center;justify-content:space-between}.preview-label,.panel-kicker{font:800 9px "Ubuntu",sans-serif;letter-spacing:1.4px;color:#8895a8}.status-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:30px;background:#eff8f3;color:#25845f;font-size:10px;font-weight:700;white-space:nowrap}.status-soft{background:#eef8f3}.preview-number{font:800 32px "Ubuntu",sans-serif;letter-spacing:-1.6px;margin:30px 0 23px;color:#314fbd}.preview-number span{color:#91a0bf;font-size:22px}.preview-divider{height:1px;background:#edf0f5}.preview-stats{padding:18px 0}.preview-stats div{display:grid;gap:5px}.preview-stats small,.preview-caption{font-size:10px;color:#9aa5b5}.preview-stats strong{font-size:13px}.preview-line{height:6px;border-radius:8px;background:#edf1fa}.preview-line span{display:block;width:68%;height:100%;border-radius:8px;background:linear-gradient(90deg,#6486f3,#8aa1fa)}.preview-caption{margin-top:14px}.float-tile{position:absolute;z-index:3;display:flex;align-items:center;gap:11px;background:#fff;padding:13px 16px;border-radius:15px;box-shadow:0 12px 35px #263d6c17;border:1px solid #f0f2f8}.float-tile b,.float-tile small{display:block}.float-tile b{font-size:11px}.float-tile small{font-size:10px;color:#9aa5b5;margin-top:4px}.float-one{top:48px;right:-5px}.float-two{bottom:55px;left:-15px}.float-icon{width:30px;height:30px;border-radius:10px;background:#eff8f3;color:#21956a;display:grid;place-items:center;font-size:17px}.float-icon-blue{background:#edf2ff;color:#4c6ee3}.trust-strip{border-block:1px solid #e9edf3;background:#fff}.trust-inner{min-height:68px;display:flex;align-items:center;justify-content:center;gap:30px;color:#8792a3;font-size:11px;font-weight:600}.trust-inner i{width:4px;height:4px;border-radius:50%;background:#b5c0d0}.section{padding-top:94px;padding-bottom:100px}.section-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:34px}.section-heading h2,.apps-inner h2,.help-banner h2{font:800 30px/1.25 "Ubuntu",sans-serif;letter-spacing:-1px;margin:12px 0 0}.section-heading p{max-width:350px;color:#7c899b;line-height:1.7;margin:0}.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.step-card{position:relative;background:#fff;border:1px solid #e9edf3;border-radius:18px;padding:27px;min-height:225px;box-shadow:0 8px 24px #243b6507}.step-index{position:absolute;right:25px;top:24px;color:#bdc7d6;font:700 12px "Ubuntu"}.step-icon{width:42px;height:42px;border-radius:13px;background:#eef2ff;color:#4b6fe2;display:grid;place-items:center;font-size:21px}.step-card h3{font:700 16px "Ubuntu";margin:24px 0 9px}.step-card p{color:#8591a2;font-size:12px;line-height:1.7;margin:0;max-width:290px}.apps-section{background:#f0f3fa;padding:82px 0}.apps-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:65px}.apps-inner h2{font-size:32px}.apps-inner p{color:#7b8799;line-height:1.8;max-width:410px;margin:17px 0 22px}.text-link{font-weight:700;font-size:12px;color:var(--blue)}.text-link span{margin-left:8px}.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.platform-card{background:#fff;border:1px solid #e7ebf3;border-radius:16px;padding:20px;display:grid;gap:8px;min-height:115px}.platform-card span{color:#5275e5;font-size:21px}.platform-card b{font:700 13px "Ubuntu"}.platform-card small{font-size:10px;color:#929daf}.help-banner{margin-top:64px;margin-bottom:65px;border-radius:22px;padding:30px 35px;background:linear-gradient(110deg,#4569df,#607fe8);color:#fff;display:flex;align-items:center;gap:20px;box-shadow:0 15px 30px #4269e82b}.help-mark{width:44px;height:44px;border:1px solid #ffffff70;border-radius:14px;display:grid;place-items:center;font:700 20px "Ubuntu"}.help-banner h2{font-size:17px;margin:0}.help-banner p{color:#e0e7ff;font-size:11px;margin:7px 0 0}.help-banner .button{margin-left:auto;white-space:nowrap}.public-footer{background:#fff;border-top:1px solid #edf0f5}.footer-inner{height:82px;display:flex;align-items:center;justify-content:space-between;color:#9aa4b3;font-size:10px}.footer-inner .brand{font-size:15px}.footer-inner .brand-mark{width:29px;height:29px;border-radius:9px;font-size:10px}
 .login-page{min-height:100vh;background:#fff}.login-back{position:absolute;top:28px;left:38px;color:#a2adbd;font-size:12px;z-index:3}.login-layout{min-height:100vh;display:grid;}.login-aside{position:relative;overflow:hidden;padding:38px 8%;background:linear-gradient(145deg,#243f9d,#385ed0 60%,#5075e8);color:#fff;display:flex;flex-direction:column}.brand-light{color:#fff}.brand-light .brand-mark{background:#ffffff24;box-shadow:none;border:1px solid #ffffff35}.login-aside-content{margin:auto 0;position:relative;z-index:1}.eyebrow-light{color:#c6d3ff}.login-aside h1{font-size:42px;max-width:480px;letter-spacing:-1.7px}.login-aside-content>p{color:#d4defe;line-height:1.8;max-width:390px;font-size:13px}.aside-decoration{height:170px;position:relative;margin-top:25px}.aside-ring{position:absolute;width:220px;height:220px;border:1px solid #ffffff36;border-radius:50%;left:55px;top:-5px;box-shadow:0 0 0 28px #ffffff08,0 0 0 58px #ffffff06}.aside-chip{position:absolute;top:42px;left:90px;padding:20px 27px;border-radius:16px;background:#ffffff20;border:1px solid #ffffff40;backdrop-filter:blur(10px);font:800 26px "Ubuntu"}.aside-chip span{font-size:16px;color:#cbd7ff}.aside-small-chip{position:absolute;left:0;bottom:5px;background:#fff;color:#526bc0;border-radius:30px;padding:9px 13px;font-size:10px;font-weight:700;box-shadow:0 8px 25px #142d7c33}.aside-footer{font-size:10px;color:#c4d1ff}.login-main{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 35px 35px}.login-card{width:min(390px,100%)}.login-heading{margin-bottom:34px}.login-heading h2{font:800 29px "Ubuntu";letter-spacing:-1px;margin:12px 0 7px}.login-heading p{color:#8a96a8;font-size:12px;margin:0}.field-label{display:block;font-size:11px;font-weight:700;color:#45536a;margin-bottom:9px}.input-wrap{height:49px;border:1px solid #e2e8f0;border-radius:11px;background:#fbfcfe;display:flex;align-items:center;padding:0 13px;gap:10px;margin-bottom:22px;transition:border .2s,box-shadow .2s}.input-wrap:focus-within{border-color:#9db2f8;box-shadow:0 0 0 3px #edf1ff}.input-icon{color:#9aa7ba;font-size:16px}.input-wrap input{width:100%;border:0;outline:0;background:transparent;color:var(--ink);font-size:12px;min-width:0}.input-wrap input::placeholder{color:#b1bac7}.password-toggle{border:0;background:transparent;color:#7284b7;font-size:10px;font-weight:700;padding:6px}.form-message{padding:11px 13px;border-radius:10px;background:#fff0f0;color:#b74b56;font-size:11px;line-height:1.5;margin:-5px 0 16px}.login-separator{display:flex;align-items:center;gap:14px;color:#b3bdca;font-size:10px;margin:20px 0}.login-separator:before,.login-separator:after{content:"";height:1px;background:#edf0f4;flex:1}.login-footnote{text-align:center;color:#a0aabb;font-size:10px;line-height:1.7;margin-top:24px}.login-copyright{margin-top:65px;color:#b1bac7;font-size:10px}.login-mobile-brand{display:none}
 .app-shell{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:246px;background:#fff;border-right:1px solid #e9edf3;padding:25px 17px 18px;display:flex;flex-direction:column;z-index:20}.sidebar-brand{padding:0 10px 30px}.sidebar-caption{font:800 9px "Ubuntu";letter-spacing:1.4px;color:#a4afbe;padding:0 12px 13px}.side-nav{display:grid;gap:5px}.side-link{height:44px;padding:0 12px;border-radius:10px;display:flex;align-items:center;gap:12px;color:#778498;font-size:12px;font-weight:600;transition:.18s}.side-link>span{width:20px;text-align:center;font-size:17px;color:#9aa7b9}.side-link:hover{background:#f7f9fd;color:#3e5fc9}.side-link.active{background:#eef2ff;color:#3e5fd1}.side-link.active>span{color:#496be0}.sidebar-bottom{margin-top:auto}.sidebar-help{display:flex;align-items:center;gap:10px;background:#f6f8fc;padding:13px;border-radius:12px;margin-bottom:12px}.sidebar-help>span{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#e7edff;color:#5270dc;font-weight:800}.sidebar-help b,.sidebar-help small{display:block}.sidebar-help b{font-size:10px}.sidebar-help small{font-size:9px;color:#9aa5b5;margin-top:4px}.side-logout{border:0;background:transparent;color:#8995a7;font-size:11px;padding:10px 12px;text-align:left;width:100%}.side-logout:hover{color:#c24d59}.workspace-main{margin-left:246px;min-height:100vh}.topbar{height:72px;background:#fff;border-bottom:1px solid #e9edf3;display:flex;align-items:center;justify-content:space-between;padding:0 38px;position:sticky;top:0;z-index:10}.breadcrumb{color:#a0aaba;font-size:11px}.breadcrumb span{padding:0 9px;color:#c8d0dc}.breadcrumb b{color:#46546b;font-weight:700}.topbar-user{display:flex;align-items:center;gap:10px}.topbar-user b,.topbar-user small{display:block}.topbar-user b{font-size:11px}.topbar-user small{font-size:9px;color:#9aa5b5;margin-top:3px}.avatar{width:33px;height:33px;border-radius:50%;display:grid;place-items:center;background:#edf1ff;color:#4969d8;font:800 12px "Ubuntu"}.avatar-admin{background:#eaf5f0;color:#20845e}.mobile-menu{display:none;border:0;background:transparent;font-size:20px;color:#68758a}.workspace-content{max-width:1380px;margin:auto;padding:34px 38px 60px}.view{display:none}.view.active{display:block}.page-intro{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:25px}.page-intro h1{font:800 27px "Ubuntu";letter-spacing:-.9px;margin:8px 0 6px}.page-intro p{font-size:12px;color:#8b97a8;margin:0}.date-chip{font-size:10px;color:#8190a5;background:#fff;border:1px solid #e9edf3;padding:9px 12px;border-radius:9px}.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:18px}.stats-grid.admin-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat-card{background:#fff;border:1px solid #e9edf3;border-radius:16px;padding:19px 20px;min-height:132px;box-shadow:0 5px 18px #243b6505}.stat-top{display:flex;justify-content:space-between;align-items:center;color:#8793a4;font-size:10px;font-weight:600}.stat-symbol{width:28px;height:28px;border-radius:9px;background:#f1f4fa;color:#6e82c8;display:grid;place-items:center;font-size:16px}.stat-value{font:800 27px "Ubuntu";letter-spacing:-.8px;margin:12px 0 4px;color:#27364d}.stat-foot{font-size:9px;color:#a0aaba}.stat-balance{background:linear-gradient(135deg,#fff,#f8faff);border-color:#e5eafe}.stat-balance .stat-symbol{background:#edf1ff;color:#496ce0}.stat-status{font-size:20px;color:#16865e}.content-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:16px;margin-bottom:18px}.panel{background:#fff;border:1px solid #e9edf3;border-radius:16px;padding:22px;margin-bottom:17px;box-shadow:0 5px 18px #243b6505;min-width:0}.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-heading h2{font:700 15px "Ubuntu";margin:6px 0 0;letter-spacing:-.3px}.panel-description{font-size:11px;color:#929eae;line-height:1.65;margin:14px 0}.subscription-link{padding:13px 14px;background:#f7f9fc;border:1px dashed #dce4f1;border-radius:10px;color:#8d9aae;font-size:10px;word-break:break-all;margin:16px 0}.panel-actions{display:flex;gap:9px}.panel-actions .button{min-height:39px;font-size:10px}.panel-hint{margin-top:14px;color:#a0aaba;font-size:9px;line-height:1.6}.quick-icon{width:31px;height:31px;border-radius:10px;background:#eef2ff;color:#5472df;display:grid;place-items:center}.quick-step{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #f0f2f6}.quick-step>span{width:25px;height:25px;display:grid;place-items:center;background:#f0f3fc;color:#5472df;border-radius:8px;font-weight:800;font-size:10px}.quick-step b,.quick-step small{display:block}.quick-step b{font-size:10px}.quick-step small{font-size:9px;color:#a0aaba;margin-top:4px}.text-link-button{border:0;background:transparent;color:#4b6de0;font-size:10px;font-weight:700;padding:14px 0 0}.table-wrap{width:100%;overflow:auto;margin-top:17px}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{font-size:9px;letter-spacing:.3px;color:#9ba6b5;font-weight:700;padding:11px 12px;border-bottom:1px solid #edf0f4}td{font-size:10px;color:#59677c;padding:13px 12px;border-bottom:1px solid #f0f2f6}tbody tr:last-child td{border-bottom:0}.empty-state{text-align:center;color:#a3adba;padding:25px 12px}.amount-positive{color:#16865e;font-weight:700}.amount-negative{color:#c24d59;font-weight:700}.subtle-note{font-size:10px;color:#9ba6b5;line-height:1.7}.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:23px 0}.detail-grid>div{padding:14px;background:#f8f9fc;border-radius:10px}.detail-grid small,.detail-grid b{display:block}.detail-grid small{font-size:9px;color:#9ba6b5;margin-bottom:7px}.detail-grid b{font-size:11px}.compact-stats{grid-template-columns:repeat(2,minmax(0,1fr));max-width:650px}.program-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.program-card{display:flex;align-items:center;gap:13px;padding:17px;background:#fff;border:1px solid #e9edf3;border-radius:14px;min-width:0}.program-card[hidden]{display:none}.program-icon{width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:#eef2ff;color:#5271df;display:grid;place-items:center;font:800 17px "Ubuntu"}.program-meta{flex:1;min-width:0}.program-platform{font:800 8px "Ubuntu";letter-spacing:1px;color:#8192b7;text-transform:uppercase}.program-meta h3{font:700 12px "Ubuntu";margin:5px 0}.program-meta p{font-size:9px;color:#919dae;line-height:1.5;margin:0 0 4px}.program-meta small{font-size:9px;color:#aab3c0}.search-input,.select-input,.input-control{height:40px;border:1px solid #e3e8f0;border-radius:10px;background:#fff;padding:0 12px;color:#45536a;font-size:10px;outline:0}.search-input{min-width:240px}.search-input:focus,.select-input:focus,.input-control:focus{border-color:#9db2f8;box-shadow:0 0 0 3px #edf1ff}.filter-row,.toolbar{display:flex;align-items:center;gap:9px;margin-bottom:16px;flex-wrap:wrap}.filter-chip{height:32px;padding:0 13px;border:1px solid #e5eaf1;border-radius:30px;background:#fff;color:#8290a3;font-size:9px;font-weight:700}.filter-chip.active{background:#eef2ff;border-color:#dce4ff;color:#4969d8}.table-panel{padding:8px 17px}.table-sub{display:block;font-size:9px;color:#a0aaba;margin-top:4px}.icon-button{width:28px;height:28px;border:1px solid #e6ebf2;border-radius:8px;background:#fff;color:#6176c7}.integration-line{display:flex;align-items:center;gap:9px;font-size:10px;color:#59677c;margin:16px 0 8px}.integration-dot{width:8px;height:8px;border-radius:50%;background:#e2a64a;box-shadow:0 0 0 4px #fff6e8}.integration-dot.is-online{background:#24a574;box-shadow:0 0 0 4px #e9f8f1}.action-row{display:flex;align-items:center;gap:11px;width:100%;border:0;border-bottom:1px solid #f0f2f6;background:#fff;padding:12px 0;text-align:left;color:#526176}.action-row:last-child{border:0}.action-row>span:nth-last-child(1){margin-left:auto;color:#8294ce}.action-icon{width:30px;height:30px;border-radius:9px;background:#f0f3fc;color:#5572dc;display:grid;place-items:center;font-size:16px}.action-row b,.action-row small{display:block}.action-row b{font-size:10px}.action-row small{font-size:9px;color:#a0aaba;margin-top:4px}.inline-form{display:grid;grid-template-columns:1fr .8fr 1.2fr auto;gap:10px;align-items:end;margin-top:18px}.inline-form label,.modal-field{font-size:9px;color:#7e8b9e;font-weight:700;display:grid;gap:7px}.inline-form .input-control{width:100%}.system-list{padding-left:18px;color:#778498;font-size:11px;line-height:2.1}.empty-panel{grid-column:1/-1;background:#fff;border:1px dashed #dfe6ef;border-radius:14px;padding:35px;text-align:center;color:#a0aaba;font-size:11px}.modal{border:0;border-radius:18px;padding:0;width:min(480px,calc(100% - 30px));box-shadow:0 25px 90px #15244435}.modal::backdrop{background:#182a4c55;backdrop-filter:blur(3px)}.modal-card{padding:23px}.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.modal-head h2{font:800 18px "Ubuntu";margin:6px 0}.modal-close{border:0;background:#f3f5f9;border-radius:9px;width:30px;height:30px;font-size:20px;color:#7b8799}.modal-field{margin:12px 0}.modal-field .input-control{width:100%}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}.toast{position:fixed;bottom:24px;right:24px;z-index:100;background:#24334b;color:#fff;padding:12px 17px;border-radius:11px;box-shadow:0 10px 30px #17284430;font-size:11px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s}.toast.visible{opacity:1;transform:translateY(0)}.toast-error{background:#a83d4b}
@@ -138,3 +133,1045 @@ html,body,button,input,select,textarea,optgroup,option{font-family:"Ubuntu",Aria
 .xui-card-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .xui-card-actions .button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:760px){.xui-connection-form{grid-template-columns:1fr}.xui-card-top{flex-direction:column}.xui-card-actions .button{flex:1 1 calc(50% - 8px)}.xui-form-actions .button{width:100%}}
+
+/* ===== Arctic visual layer (merged) ===== */
+/*
+ * PQService — ARCTIC visual layer
+ * Loaded after app.css. Contains design tokens and PQService component overrides only.
+ */
+
+/* 1. Design tokens */    
+:root {
+  color-scheme: light;
+  --arctic-white: #F7FAFD;
+  --pure-white: #FFFFFF;
+  --deep-navy: #10243D;
+  --electric-blue: #2878E8;
+  --ice-cyan: #39C5E8;
+  --cascade-orange: #FF913D;
+  --silver: #C8D2DF;
+  --slate: #63758B;
+  --border-light: #E3EAF2;
+  --surface-soft: #EDF4FA;
+  --shadow-soft: 0 8px 30px rgba(24, 55, 90, .07);
+  --gradient-primary: linear-gradient(135deg, #2878E8, #39C5E8);
+  --gradient-cascade: linear-gradient(135deg, #FF913D, #FFC16B);
+  --mono: "DM Mono",monospace;
+  --sans: Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  --ink: var(--deep-navy);
+  --muted: var(--slate);
+  --line: var(--border-light);
+  --surface: var(--pure-white);
+  --canvas: var(--arctic-white);
+  --blue: var(--electric-blue);
+  --blue-dark: #1F65C8;
+  --blue-soft: #EAF3FF;
+  --green: #16865E;
+  --red: #B94B55;
+  --shadow: var(--shadow-soft);
+  --radius: 16px;
+
+  /* Compatibility tokens required by the unchanged live-monitor layer. */
+  --ink-soft: var(--slate);
+  --mono: "Ubuntu", Arial, sans-serif;
+}
+
+/* 2. Base typography and focus */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+body {
+  color: var(--deep-navy);
+  background: var(--arctic-white);
+  font-family: "Ubuntu", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(40, 120, 232, .38);
+  outline-offset: 3px;
+}
+
+/* 3. Public brand and navigation */
+.brand {
+  color: var(--deep-navy);
+  letter-spacing: -.6px;
+}
+
+.brand-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .42);
+  border-radius: 11px;
+  color: #FFFFFF;
+  background: var(--gradient-primary);
+  box-shadow: 0 6px 14px rgba(40, 120, 232, .24);
+  font: 800 13px/1 "Ubuntu", Arial, sans-serif;
+  letter-spacing: -.5px;
+}
+
+.brand-mark::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, .28) 48%, transparent 72%);
+}
+
+.eyebrow,
+.panel-kicker,
+.preview-label,
+.sidebar-caption {
+  color: var(--slate);
+  font-family: "Ubuntu", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.public-header {
+  width: min(1280px, calc(100% - 64px));
+  height: 84px;
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgb(248 251 255 / 95%);
+}
+
+.public-nav {
+  color: var(--slate);
+  font-size: 14px;
+}
+
+.public-nav a {
+  transition: color .18s ease;
+}
+
+.public-nav a:hover {
+  color: var(--electric-blue);
+}
+
+/* 4. Buttons */
+.button {
+  min-height: 46px;
+  border-radius: 11px;
+  font-family: "Ubuntu", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.button-primary {
+  color: #FFFFFF;
+  border-color: transparent;
+  background: var(--gradient-primary);
+  box-shadow: 0 7px 18px rgba(40, 120, 232, .2);
+}
+
+.button-primary:hover {
+  background: linear-gradient(135deg, #216BD3, #2AAED4);
+  box-shadow: 0 10px 24px rgba(40, 120, 232, .25);
+}
+
+.button-outline {
+  color: var(--deep-navy);
+  border-color: var(--border-light);
+  background: var(--pure-white);
+}
+
+.button-outline:hover,
+.button-quiet:hover {
+  color: var(--electric-blue);
+  border-color: rgba(40, 120, 232, .32);
+  background: #F5F9FE;
+}
+
+.button-quiet {
+  color: var(--slate);
+}
+
+.button-light {
+  color: var(--deep-navy);
+  background: var(--pure-white);
+}
+
+.button-small {
+  min-height: 38px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.button:disabled {
+  opacity: .52;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 5. Public landing page */
+.hero {
+  position: relative;
+  min-height: 570px;
+  padding-top: 38px;
+  padding-bottom: 82px;
+  isolation: isolate;
+}
+
+.hero::before {
+  position: absolute;
+  top: 6%;
+  right: 4%;
+  width: min(48vw, 570px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(57, 197, 232, .09), rgba(40, 120, 232, .045) 42%, transparent 70%);
+  content: "";
+  pointer-events: none;
+}
+
+.hero h1 {
+  color: var(--deep-navy);
+  font-size: clamp(40px, 5.2vw, 62px);
+  font-weight: 800;
+  letter-spacing: -2.7px;
+  line-height: 1.08;
+}
+
+.hero h1 span {
+  color: var(--electric-blue);
+  background: linear-gradient(90deg, #2878E8, #39C5E8 58%, #FF913D);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-lead {
+  max-width: 510px;
+  color: var(--slate);
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.eyebrow-dot {
+  background: var(--ice-cyan);
+  box-shadow: 0 0 0 5px rgba(57, 197, 232, .13);
+}
+
+.hero-art {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-glow {
+  background: radial-gradient(circle, rgba(57, 197, 232, .2), rgba(40, 120, 232, .07) 43%, transparent 72%);
+}
+
+.orbit {
+  border-color: rgba(40, 120, 232, .16);
+  transform-origin: center;
+}
+
+.orbit-one {
+  animation: arctic-orbit 24s linear infinite;
+}
+
+.orbit-two {
+  border-color: rgba(99, 117, 139, .13);
+  border-style: dashed;
+  animation: arctic-orbit-reverse 32s linear infinite;
+}
+
+.preview-card,
+.float-tile {
+  border: 1px solid var(--border-light);
+  background: #ffffff9c;
+    background-image: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: rgba(255, 255, 255, 0.61);
+  box-shadow: var(--shadow-soft);
+}
+
+.preview-card {
+  border-radius: 16px;
+}
+
+.preview-number {
+  color: var(--electric-blue);
+}
+
+.preview-line {
+  background: var(--surface-soft);
+}
+
+.preview-line span {
+  background: var(--gradient-primary);
+}
+
+.float-tile {
+  border-radius: 12px;
+}
+
+.float-icon {
+  color: #16865E;
+  background: #EAF7F1;
+}
+
+.float-icon-blue {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.trust-strip,
+.public-footer {
+  border-color: var(--border-light);
+  background: var(--pure-white);
+}
+
+.trust-inner {
+  color: var(--slate);
+}
+
+.section-heading h2 {
+  color: var(--deep-navy);
+  letter-spacing: -1.1px;
+}
+
+.section-heading p {
+  color: var(--slate);
+}
+
+.step-card {
+  border: 1px solid var(--border-light);
+  border-radius: 15px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.step-card:hover,
+.platform-card:hover {
+  border-color: rgba(40, 120, 232, .25);
+  box-shadow: 0 10px 28px rgba(24, 55, 90, .09);
+  transform: translateY(-2px);
+}
+
+.step-card p {
+  color: var(--slate);
+}
+
+.step-icon {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.step-index {
+  color: var(--silver);
+}
+
+.apps-section {
+  background: linear-gradient(180deg, #EDF4FA 0%, #F3F7FB 100%);
+}
+
+.platform-card {
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.help-banner {
+  border: 1px solid rgba(40, 120, 232, .12);
+  background: var(--gradient-primary);
+  box-shadow: 0 12px 28px rgba(40, 120, 232, .16);
+}
+
+.help-mark {
+  color: var(--electric-blue);
+  background: rgba(255, 255, 255, .18);
+}
+
+.public-footer {
+  border-top: 1px solid var(--border-light);
+}
+
+/* 6. Authentication pages */
+.login-page {
+  background: var(--arctic-white);
+}
+
+.login-layout {
+  background: var(--pure-white);
+}
+
+.login-aside {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 78% 22%, rgba(57, 197, 232, .22), transparent 32%),
+    linear-gradient(145deg, #10243D 0%, #173B62 56%, #1E5A91 100%);
+}
+
+.login-aside::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(135deg, rgba(0, 0, 0, .8), transparent 76%);
+  content: "";
+  pointer-events: none;
+}
+
+.login-aside h1 {
+  color: var(--pure-white);
+  letter-spacing: -1.8px;
+}
+
+.aside-ring {
+  border-color: rgba(135, 210, 239, .36);
+  box-shadow: 0 0 0 28px rgba(57, 197, 232, .055), 0 0 0 58px rgba(57, 197, 232, .035);
+}
+
+.aside-chip {
+  border-color: rgba(255, 255, 255, .28);
+  background: rgba(255, 255, 255, .12);
+  box-shadow: 0 14px 36px rgba(5, 22, 42, .16);
+  backdrop-filter: blur(10px);
+}
+
+.aside-small-chip {
+  color: var(--deep-navy);
+  background: var(--pure-white);
+  box-shadow: 0 8px 25px rgba(5, 22, 42, .18);
+}
+
+.aside-footer {
+  color: #C7DCEC;
+}
+
+.login-main {
+  background:
+    radial-gradient(circle at 80% 8%, rgba(57, 197, 232, .055), transparent 30%),
+    var(--pure-white);
+}
+
+.login-card {
+  background: var(--pure-white);
+}
+
+.login-heading h2 {
+  color: var(--deep-navy);
+  letter-spacing: -1.1px;
+}
+
+.login-heading p,
+.login-footnote {
+  color: var(--slate);
+}
+
+.input-wrap {
+  color: var(--deep-navy);
+  border-color: var(--border-light);
+  border-radius: 9px;
+  background: #FBFDFF;
+}
+
+.input-wrap:focus-within {
+  border-color: rgba(40, 120, 232, .55);
+  box-shadow: 0 0 0 3px rgba(40, 120, 232, .1);
+}
+
+.password-toggle {
+  color: var(--electric-blue);
+}
+
+.form-message {
+  border-color: rgba(185, 75, 85, .14);
+  border-radius: 9px;
+  background: #FFF5F4;
+}
+
+.form-message-error {
+  color: #B94B55;
+  border-color: rgba(185, 75, 85, .14);
+  background: #FFF5F4;
+}
+
+/* 7. Application shell */
+.app-shell {
+  background: var(--arctic-white);
+}
+
+.sidebar {
+  border-color: var(--border-light);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 5px 0 24px rgba(24, 55, 90, .025);
+}
+
+.sidebar-caption {
+  color: #8799AC;
+}
+
+.side-link {
+  min-height: 44px;
+  border-radius: 9px;
+  color: var(--slate);
+}
+
+.side-link:hover {
+  color: var(--electric-blue);
+  background: #F2F7FC;
+}
+
+.side-link.active {
+  color: #1765C2;
+  background: #EAF3FF;
+  box-shadow: inset 3px 0 0 var(--electric-blue);
+}
+
+.sidebar-help {
+  border: 1px solid var(--border-light);
+  background: #F7FAFD;
+}
+
+.topbar {
+  border-color: var(--border-light);
+  background: rgba(255, 255, 255, .94);
+  backdrop-filter: blur(14px);
+}
+
+.breadcrumb {
+  color: #8496A9;
+}
+
+.avatar {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.avatar-admin {
+  color: #187A59;
+  background: #EAF7F1;
+}
+
+.mobile-menu {
+  color: var(--deep-navy);
+}
+
+.workspace-content {
+  max-width: 1440px;
+  padding-top: 38px;
+}
+
+.page-intro h1 {
+  color: var(--deep-navy);
+  letter-spacing: -1.1px;
+}
+
+.page-intro p {
+  color: var(--slate);
+}
+
+.date-chip {
+  color: #526A82;
+  border-color: var(--border-light);
+  background: var(--pure-white);
+}
+
+/* 8. Dashboard metrics and panels */
+.stats-grid {
+  gap: 14px;
+}
+
+.stat-card {
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(40, 120, 232, .2);
+  box-shadow: 0 10px 28px rgba(24, 55, 90, .09);
+  transform: translateY(-1px);
+}
+
+.stat-symbol {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.stat-value {
+  color: var(--deep-navy);
+  font-size: 30px;
+  letter-spacing: -.9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.is-updating {
+  animation: arctic-data-pulse .7s ease;
+}
+
+.stat-foot,
+.stat-status {
+  color: var(--slate);
+}
+
+.stat-balance {
+  border-color: rgba(40, 120, 232, .2);
+  background: linear-gradient(145deg, #FFFFFF 0%, #F1F7FF 100%);
+}
+
+.stat-balance .stat-symbol {
+  color: var(--electric-blue);
+  background: #E2EFFF;
+}
+
+.panel {
+  border: 1px solid var(--border-light);
+  border-radius: 15px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.panel-heading h2 {
+  color: var(--deep-navy);
+}
+
+.panel-description,
+.panel-hint {
+  color: var(--slate);
+}
+
+.panel-actions {
+  gap: 9px;
+}
+
+.subscription-link {
+  color: #49627C;
+  border-color: #D7E5F2;
+  background: #F5F9FD;
+}
+
+.quick-icon {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.quick-step {
+  border-color: #EDF2F7;
+}
+
+.quick-step b {
+  color: var(--deep-navy);
+}
+
+.text-link-button {
+  color: var(--electric-blue);
+}
+
+/* 9. Tables, lists and program catalogue */
+.table-wrap {
+  scrollbar-color: #C8D7E6 #F2F6FA;
+  scrollbar-width: thin;
+}
+
+th {
+  color: #71869B;
+  border-color: var(--border-light);
+  background: #F7FAFD;
+}
+
+td {
+  color: #40566D;
+  border-color: #EDF2F7;
+}
+
+.table-sub {
+  color: #8295A9;
+}
+
+.empty-state,
+.empty-panel {
+  color: #8295A9;
+}
+
+.empty-panel {
+  border-color: #D6E2ED;
+  background: rgba(255, 255, 255, .82);
+}
+
+.amount-positive {
+  color: #16865E;
+}
+
+.amount-negative {
+  color: #B94B55;
+}
+
+.detail-grid > div {
+  background: #F4F8FC;
+}
+
+.detail-grid small {
+  color: #7D91A6;
+}
+
+.detail-grid b {
+  color: var(--deep-navy);
+}
+
+.program-card {
+  border-color: var(--border-light);
+  border-radius: 12px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.program-card:hover {
+  border-color: rgba(40, 120, 232, .25);
+  box-shadow: 0 10px 28px rgba(24, 55, 90, .09);
+  transform: translateY(-2px);
+}
+
+.program-icon {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.program-platform {
+  color: #5D83A8;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+}
+
+.program-meta h3 {
+  color: var(--deep-navy);
+}
+
+.search-input,
+.select-input,
+.input-control {
+  color: var(--deep-navy);
+  border-color: var(--border-light);
+  border-radius: 9px;
+  background: #FBFDFF;
+}
+
+.search-input:focus,
+.select-input:focus,
+.input-control:focus {
+  border-color: rgba(40, 120, 232, .55);
+  box-shadow: 0 0 0 3px rgba(40, 120, 232, .1);
+}
+
+.filter-chip {
+  color: var(--slate);
+  border-color: var(--border-light);
+  background: var(--pure-white);
+}
+
+.filter-chip.active {
+  color: #1765C2;
+  border-color: rgba(40, 120, 232, .22);
+  background: #EAF3FF;
+}
+
+.toolbar {
+  gap: 9px;
+}
+
+/* 10. Integrations, requests and 3x-ui connections */
+.integration-line {
+  color: #40566D;
+}
+
+.integration-dot {
+  background: var(--cascade-orange);
+  box-shadow: 0 0 0 4px rgba(255, 145, 61, .12);
+}
+
+.integration-dot.is-online {
+  background: #16865E;
+  box-shadow: 0 0 0 4px rgba(22, 134, 94, .12);
+}
+
+.action-row {
+  border-color: #EDF2F7;
+  color: #40566D;
+}
+
+.action-icon {
+  color: var(--electric-blue);
+  background: #EAF3FF;
+}
+
+.system-list {
+  color: var(--slate);
+}
+
+.request-card {
+  border-color: var(--border-light);
+  border-radius: 12px;
+  background: var(--pure-white);
+}
+
+.request-title {
+  color: var(--deep-navy);
+}
+
+.request-actions {
+  gap: 8px;
+}
+
+.request-contacts {
+  color: var(--slate);
+}
+
+.xui-connection-form {
+  gap: 13px;
+}
+
+.xui-connection-list {
+  gap: 2px;
+}
+
+.xui-connection-card {
+  border-color: var(--border-light);
+  border-radius: 14px;
+  background: var(--pure-white);
+  box-shadow: var(--shadow-soft);
+}
+
+.xui-card-title {
+  color: var(--deep-navy);
+}
+
+.xui-card-url,
+.xui-card-meta {
+  color: var(--slate);
+}
+
+.xui-card-error {
+  color: #B94B55;
+  border-color: rgba(185, 75, 85, .14);
+  border-radius: 8px;
+  background: #FFF5F4;
+}
+
+.xui-card-actions,
+.xui-form-actions {
+  gap: 8px;
+}
+
+/* 11. Modal and notifications */
+.modal {
+  border: 1px solid var(--border-light);
+  border-radius: 15px;
+  background: var(--pure-white);
+  box-shadow: 0 24px 70px rgba(16, 36, 61, .18);
+}
+
+.modal::backdrop {
+  background: rgba(16, 36, 61, .42);
+  backdrop-filter: blur(4px);
+}
+
+.modal-head h2 {
+  color: var(--deep-navy);
+}
+
+.modal-close {
+  color: var(--slate);
+  background: #F0F5F9;
+}
+
+.modal-field {
+  color: var(--slate);
+}
+
+.toast {
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 11px;
+  background: var(--deep-navy);
+  box-shadow: 0 12px 34px rgba(16, 36, 61, .2);
+}
+
+.toast-error {
+  background: #A83D4B;
+}
+
+/* 12. Restrained ARCTIC motion */
+@keyframes arctic-orbit {
+  to { transform: translate(-50%, -50%) rotate(336deg); }
+}
+
+@keyframes arctic-orbit-reverse {
+  to { transform: translate(-50%, -50%) rotate(-336deg); }
+}
+
+@keyframes arctic-glow {
+  from { opacity: .55; transform: scale(.94); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes arctic-data-pulse {
+  0% { opacity: .55; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.hero-glow {
+  animation: arctic-glow 7s ease-in-out infinite alternate;
+}
+
+/* 13. Responsive component adjustments */
+@media (max-width: 1050px) {
+  .workspace-content {
+    padding-inline: 26px;
+  }
+}
+
+@media (max-width: 760px) {
+  .public-header {
+    width: calc(100% - 40px);
+    height: 72px;
+  }
+
+  .hero {
+    padding-top: 44px;
+    padding-bottom: 42px;
+  }
+
+  .hero h1 {
+    letter-spacing: -1.8px;
+  }
+
+  .hero-art {
+    max-width: 100%;
+  }
+
+  .workspace-content {
+    padding: 26px 20px 48px;
+  }
+
+  .topbar {
+    padding-inline: 20px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  .table-wrap table {
+    min-width: 560px;
+  }
+
+  .xui-connection-form {
+    grid-template-columns: 1fr;
+  }
+
+  .xui-card-top {
+    flex-direction: column;
+  }
+
+  .xui-card-actions .button {
+    min-width: 0;
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  .xui-form-actions .button {
+    width: 100%;
+  }
+
+  .request-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .request-actions {
+    width: 100%;
+  }
+
+  .request-actions .button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 390px) {
+  .workspace-content {
+    padding-inline: 16px;
+  }
+
+  .topbar {
+    padding-inline: 16px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hero-art .orbit-one,
+  .hero-art .orbit-two,
+  .hero-glow,
+  .stat-value.is-updating {
+    animation: none !important;
+  }
+
+  .button,
+  .step-card,
+  .platform-card,
+  .program-card,
+  .stat-card {
+    transition: none !important;
+  }
+}
+
+
+/* Typography: Manrope */
+html,
+body,
+body * {
+  font-family: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+}
+
+code,
+pre,
+kbd,
+samp,
+.font-mono,
+.mono {
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Consolas, monospace !important;
+}
