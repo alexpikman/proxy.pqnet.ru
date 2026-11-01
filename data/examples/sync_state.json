@@ -1,0 +1,12 @@
+{
+    "started_at": null,
+    "finished_at": null,
+    "inbounds": 0,
+    "remote_clients": 0,
+    "imported": 0,
+    "updated": 0,
+    "enabled": 0,
+    "blocked": 0,
+    "skipped": 0,
+    "errors": []
+}

@@ -1,0 +1,12 @@
+{
+    "admin_login": "admin",
+    "admin_password_hash": "",
+    "xui_host": "https://3x-ui.example.com",
+    "xui_user": "",
+    "xui_pass": "",
+    "xui_token": "",
+    "xui_timeout": 10,
+    "cron_secret": "",
+    "currency": "COIN",
+    "cors_origins": []
+}

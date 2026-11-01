@@ -1,0 +1,10 @@
+[
+    {
+        "id": "basic",
+        "name": "Basic",
+        "description": "Базовый тариф",
+        "price": 100,
+        "duration_days": 30,
+        "active": true
+    }
+]
