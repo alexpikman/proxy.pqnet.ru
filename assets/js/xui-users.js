@@ -81,8 +81,8 @@
       body.innerHTML = users.map(user => '<tr data-user-id="' + escapeHtml(user.id) + '">' +
         '<td><b>' + escapeHtml(user.login || user.email || "Без логина") + '</b><small class="table-sub">' + escapeHtml(user.uuid || "") + '</small></td>' +
         '<td>' + escapeHtml(user.inbound_id) + '</td>' +
-        '<td><label class="switch-control"><input type="checkbox" data-client-enabled ' + (user.enabled ? "checked" : "") + '><span class="switch-track"></span><span class="switch-label">' + (user.enabled ? "Включён" : "Выключен") + '</span></label></td>' +
-        '<td><span class="status-pill status-good">В панели</span></td>' +
+        '<td><label class="switch-control"><input type="checkbox" data-client-enabled ' + (user.enabled ? "checked" : "") + ' ' + (!user.present ? "disabled" : "") + '><span class="switch-track"></span><span class="switch-label">' + (user.enabled ? "Включён" : "Выключен") + '</span></label></td>' +
+        '<td><span class="status-pill ' + (user.present ? "status-good" : "status-muted") + '">' + (user.present ? "В панели" : "Отсутствует в панели") + '</span></td>' +
         '<td>' + escapeHtml(new Intl.NumberFormat("ru-RU").format(Number(user.coins || 0))) + '</td>' +
         '<td>' + escapeHtml(new Intl.NumberFormat("ru-RU").format(Number(user.price_per_day || 0))) + '</td></tr>').join("");
     } catch (error) {
