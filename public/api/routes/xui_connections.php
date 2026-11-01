@@ -217,6 +217,45 @@ function xui_sync_connection(array $connection): array
     return $stats;
 }
 
+function xui_compare_connection(array $connection): array
+{
+    $client = xui_connection_client($connection);
+    $remoteKeys = [];
+    $inbounds = $client->listInbounds();
+    foreach ($inbounds as $inbound) {
+        $inboundId = (int) ($inbound['id'] ?? 0);
+        if ($inboundId < 1) {
+            continue;
+        }
+        foreach ($client->getClients($inboundId) as $remoteClient) {
+            $uuid = trim((string) ($remoteClient['id'] ?? ''));
+            if ($uuid !== '') {
+                $remoteKeys[$inboundId . ':' . $uuid] = true;
+            }
+        }
+    }
+
+    $localKeys = [];
+    foreach (JsonStore::read('users.json', []) as $user) {
+        if (!is_array($user) || (string) ($user['xui_connection_id'] ?? '') !== (string) $connection['id']) {
+            continue;
+        }
+        $key = (int) ($user['xui_inbound_id'] ?? $user['inbound_id'] ?? 0) . ':' . (string) ($user['xui_uuid'] ?? $user['uuid'] ?? '');
+        $localKeys[$key] = true;
+    }
+
+    $matched = count(array_intersect_key($remoteKeys, $localKeys));
+    return [
+        'inbounds' => count($inbounds),
+        'remote_clients' => count($remoteKeys),
+        'matched' => $matched,
+        'panel_only' => count(array_diff_key($remoteKeys, $localKeys)),
+        'service_only' => count(array_diff_key($localKeys, $remoteKeys)),
+        'conflicts' => 0,
+        'changed' => false
+    ];
+}
+
 function route_admin_xui_connections(string $id, string $action, string $method, array $body): never
 {
     require_role('admin');
