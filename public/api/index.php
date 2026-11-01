@@ -75,6 +75,8 @@ try {
             route_auth_logout();
         case $uri === '/auth/me' && $method === 'GET':
             route_auth_me();
+        case $uri === '/admin/security/password' && $method === 'POST':
+            route_admin_password_change($body);
 
         case $uri === '/user/balance' && $method === 'GET':
             route_user_balance();
