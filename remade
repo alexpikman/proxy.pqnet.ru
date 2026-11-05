@@ -1,0 +1,1204 @@
+1. Жёсткие запреты
+НИКОГДА не делать при правке:
+❌ Запрет	Почему
+Удалять существующие функции, методы, классы	Ломает роутинг, cron, демоны
+Переименовывать функции (route_*, input_*, json_*, find_*, credit, debit, apply_access_state, sync_xui_clients, calculateSubscriptionUrl)	На них ссылаются другие файлы
+Менять сигнатуры существующих функций (порядок/типы аргументов, возвращаемый тип)	Ломает вызовы из index.php, cron_billing.php, sync_daemon.php, sync_xui.php
+Менять структуру JsonStore (read/write/update, flock, атомарная запись)	Риск порчи JSON при параллельном доступе
+Менять формат JSON-ответов ({success, data} / {success:false, error})	Ломает все JS-обёртки api()
+Менять имена ключей в JSON-файлах (data/users.json, data/settings.json, data/xui_connections.json и т.д.)	Ломает существующие данные пользователей
+Менять пути эндпоинтов (/admin/..., /user/..., /auth/..., /cron/...)	Ломает cron-скрипты и фронтенд
+Трогать data/xui_connections.key и логику AES-256-GCM	Потеря токенов 3x-ui
+Трогать логику require_csrf(), require_auth(), require_role()	Дыры в безопасности
+Удалять catch (Throwable $e) {} в cron_billing.php (только дополнять логом, но не ломать поток)	Биллинг должен продолжаться при сбое 3x-ui
+Менять session_name('PQSERVICE_SESSION'), SameSite=Strict, Secure, HttpOnly	Безопасность сессии
+Удалять существующие маршруты в index.php	404 на живых страницах
+Удалять существующие поля из users.json	Потеря данных
+Менять password_hash существующих пользователей без явного запроса	Блокировка входа
+Перезаписывать data/examples/*.json при bootstrap_data.php, если файл уже существует	Затирание рабочих данных
+
+2. Обязательные правила правок
+ДО правки:
+
+Прочитать файл целиком, зафиксировать список функций/методов/маршрутов.
+
+Составить «карту зависимостей»: какие функции вызываются из других файлов (grep по проекту).
+
+Проверить, что новые имена не конфликтуют с существующими (function_exists, grep).
+
+Определить, какие JSON-поля читаются/пишутся.
+
+ПРИ правке:
+
+Только добавлять — новые функции в конец файла, новые маршруты в switch перед default, новые поля в users.json — только array_merge поверх дефолтов.
+
+Порядок маршрутов в index.php: специфичные (с фиксированным путём) до общих (preg_match), DELETE /admin/users/local/{id} до DELETE /admin/users/{id}.
+
+Новые эндпоинты — под require_role('admin') + require_csrf() (кроме GET).
+
+Новые поля JSON — только при JsonStore::update, через array_merge/??, чтобы старые записи не ломались.
+
+Обратная совместимость — дефолтное поведение нового кода = текущее поведение (для field_mapping дефолт = panel_settings/auto/subPort/subPath/xui.subId).
+
+Обработка ошибок — новые вызовы calculateSubscriptionUrl/field_mapping_read оборачивать в try { } catch (Throwable $e) { } в критичных местах (импорт, cron, демон), чтобы не рвать основной поток.
+
+Никаких die, exit, json_err в местах, где раньше их не было — только возврат null/false в критичных циклах (sync_xui_clients, cron_billing.php).
+
+json_err — только в новых эндпоинтах или в существующих, где уже есть (не добавлять в helpers без явного требования).
+
+Не трогать declare(strict_types=1) и не ослаблять типы.
+
+Не менять chmod 0600/0700, flock, атомарную запись.
+
+ПОСЛЕ правки:
+
+php -l для каждого изменённого PHP — обязательно.
+
+node --check для каждого изменённого JS — обязательно.
+
+Ручной smoke-тест:
+
+логин админа → /admin/overview → 200
+
+/profile под пользователем → 200, subscription_url не null (если был)
+
+/admin/xui/connections → 200, ping работает
+
+/admin/users → 200, все поля присутствуют
+
+cron_billing.php в CLI → завершается без Fatal error
+
+sync_daemon.php первые 10 с → без ошибок в error.log
+
+Diff-проверка: убедиться, что нет удалённых строк (кроме тех, что явно в задаче).
+
+Проверить data/error.log и data/xui_errors.log — не появилось новых записей.
+
+Проверить, что старые записи в users.json читаются: взять 2–3 реальных пользователя, убедиться, что все поля на месте, subscription_url не затёрт null.
+
+3. Защита данных (data-safety)
+Перед любой правкой:
+
+bash
+cp -a data/ data_backup_$(date +%Y%m%d_%H%M%S)/
+При изменении JSON:
+
+Только JsonStore::update (атомарная замена, flock LOCK_EX), никогда file_put_contents('data/users.json', ...).
+
+Новые поля добавлять через $user['new_field'] = $user['new_field'] ?? default;, не затирая существующие.
+
+Существующие поля — только обновление значений, не удаление.
+
+array_merge($defaults, $existing) — дефолт слева, реальные данные справа (данные приоритетнее).
+
+Проверить, что после записи json_decode возвращает массив с ожидаемым числом записей (count до = count после, если не создавали/удаляли).
+
+При изменении схемы:
+
+Новые поля — опциональные (nullable), не обязательные.
+
+Если поле обязательное — миграция: foreach ($users as &$u) { $u['field'] = $u['field'] ?? default; } внутри JsonStore::update.
+
+4. Защита безопасности (security-safety)
+Не ослаблять:
+
+session.use_strict_mode = 1, use_only_cookies = 1
+
+Secure, HttpOnly, SameSite=Strict в cookie
+
+hash_equals для сравнения токенов/паролей
+
+password_hash(..., PASSWORD_ARGON2ID)
+
+CSRF-проверку на всех POST/PATCH/DELETE/PUT (кроме /auth/login, /auth/logout, /cron/sync, /register-request, /set-password)
+
+require_role('admin') на всех /admin/*
+
+require_role('user') на /profile, /transactions, /user/*
+
+filter_var(..., FILTER_VALIDATE_URL) и parse_url(...)['scheme'] === 'https' для base_url 3x-ui
+
+AES-256-GCM для токенов 3x-ui
+
+X-Cron-Secret + hash_equals для /cron/sync
+
+При добавлении эндпоинтов:
+
+Все новые /admin/* — require_role('admin') + require_csrf() (кроме GET).
+
+Валидация входа через input_* из validate.php.
+
+Не логировать пароли/токены в открытом виде.
+
+json_err без раскрытия стека (Internal server error. + запись в error.log).
+
+5. Защита функционала (feature-safety)
+Проверить, что НЕ сломались:
+
+Функционал	Что проверить
+Логин	POST /auth/login → 200 + csrf_token
+Логаут	POST /auth/logout → 200, sessions.json очищен
+Профиль	GET /profile → user + subscription_url
+Транзакции	GET /transactions → массив
+Программы	GET /programs → массив (только is_active)
+Админ-обзор	GET /admin/overview → total_users, active_users, total_coins
+Пользователи	GET /admin/users → все поля (subscription_url присутствует)
+Монеты	POST /admin/coins/credit / debit → 201, apply_access_state вызван
+Тарифы	GET/POST/PATCH/DELETE /admin/tariffs → 200/201
+Настройки	GET/PATCH /admin/settings → секреты замаскированы ********
+3x-ui подключения	GET /admin/xui/connections → массив, ping работает
+Синхронизация	POST /cron/sync с X-Cron-Secret → sync_state.json обновлён
+Биллинг	php cron_billing.php → завершается, coins.json пополняется
+Демон	sync_daemon.php 10 с → xui_enabled синхронизируется
+Ссылка	calculateSubscriptionUrl → https://proxy.pqnet.ru:2027/<subId>
+QR-код	account.html → QR из subscription_url
+Online	ping раз в 60 с, таймаут 8 с
+Сессия	60 мин, при истечении 401 → редирект /login.html
+6. Обязательные проверки после каждой правки
+bash
+# 1. Синтаксис PHP
+find public/api -name '*.php' -exec php -l {} \;
+
+# 2. Синтаксис JS
+for f in assets/js/*.js; do node --check "$f"; done
+
+# 3. Валидность JSON
+for f in data/*.json; do php -r "json_decode(file_get_contents('$f'), true, 512, JSON_THROW_ON_ERROR);" && echo "OK: $f" || echo "FAIL: $f"; done
+
+# 4. Нет удалённых строк (кроме явных правок)
+# Использовать diff с бэкапом:
+diff -u data_backup_*/users.json data/users.json | grep '^-' | grep -v '^---' || echo "No deletions in users.json"
+
+# 5. Логи после smoke-теста
+tail -n 50 data/error.log data/xui_errors.log
+7. Чек-лист перед сдачей
+□ php -l — 0 ошибок
+□ node --check — 0 ошибок
+□ Все JSON валидны (json_decode без исключения)
+□ Нет удалённых функций/маршрутов/полей (diff с бэкапом)
+□ Старые users.json читаются без потерь (2–3 реальных пользователя)
+□ cron_billing.php завершается без Fatal error
+□ sync_daemon.php 10 с — без ошибок в error.log
+□ POST /auth/login → 200
+□ GET /profile → 200 + subscription_url
+□ GET /admin/xui/connections → 200 + ping
+□ POST /admin/users/{id}/refresh-from-xui → 200 + subscription_url сохранён
+□ POST /admin/users/refresh-all-subscriptions → {updated, total, errors}
+□ GET /admin/field-mapping → дефолты = текущее поведение
+□ POST /admin/field-mapping/preview для test → https://proxy.pqnet.ru:2027/<subId>
+□ POST /admin/field-mapping/reset → возврат к дефолтам
+□ 401/403 → редирект на /login.html в браузере
+□ data/error.log и data/xui_errors.log — без новых критических записей
+□ Бэкап data/ сохранён, путь указан в отчёте
+8. Формат отчёта после правок
+Обязательно приложить:
+
+Список изменённых файлов — по одному, с diff (что добавлено, что изменено; удалений быть не должно, кроме явных).
+
+Результаты проверок — php -l, node --check, json_decode (скрин/лог).
+
+Smoke-тест — таблица «эндпоинт → статус → результат».
+
+Бэкап — путь к data_backup_YYYYMMDD_HHMMSS/.
+
+Что осталось нетронутым — явно перечислить (функции, маршруты, JSON-поля).
+
+Риски — если что-то потенциально может сломаться, указать и предложить проверку.
+
+9. Итоговое правило
+Если правка требует удаления существующего кода — остановиться и переспросить.
+Если правка меняет сигнатуру функции — остановиться и переспросить.
+Если правка меняет формат JSON-ответа или ключ в data/*.json — остановиться и переспросить.
+Во всех остальных случаях — только добавлять, не ломать, проверять после.
+
+
+
+Контекст
+Проект proxy.pqnet.ru — веб-оболочка на PHP 8 + Vanilla JS для управления панелями 3x-ui (импорт пользователей, учёт монет, включение/отключение клиентов по балансу).
+
+Уже внесены правки (блоки 1–6):
+
+Сессия админа — 60 минут + редирект на login.html при 401/403.
+
+Страница «Пользователи БД» — таблица (Пользователь / Монеты / Ссылка / Действия), 4 кнопки (Изменить / Пароль / Обновить / Удалить).
+
+Online-индикатор на «Подключения 3x-ui» — ping раз в 60 с, таймаут 8 с.
+
+Ссылка на подписку — {scheme}://{host}:{subPort}/{subPath}/{subId}, сохраняется в users.json.subscription_url, без жёсткого fallback.
+
+Модалка «Изменить» — все поля из users.json.
+
+Эмодзи заменены на SVG (svgIcon(name)).
+
+Нужно сделать: внести оставшиеся правки в присланные файлы (не создавать новые, не удалять существующее — только дополнять).
+
+Присланные файлы (работать только с ними)
+№	Файл	Что делать
+1	public/api/index.php	Добавить маршруты новых эндпоинтов
+2	public/api/lib/auth.php	Проверить/дополнить: сессия 60 мин, редирект при 401/403
+3	public/api/lib/logic.php	sync_xui_clients — применить маппинг, автосохранить subscription_url
+4	public/api/lib/xui.php	Оставить как есть (только использовать)
+5	public/api/lib/store.php	Не менять (только использовать JsonStore)
+6	public/api/lib/response.php	Не менять
+7	public/api/lib/validate.php	Не менять
+8	public/api/routes/admin.php	Новые эндпоинты маппинга + расширить PATCH /admin/users/{id}
+9	public/api/routes/compat.php	Рефактор calculateSubscriptionUrl под field_mapping
+10	public/api/routes/xui_connections.php	Применить маппинг в xui_sync_connection + ping
+11	public/api/routes/auth.php	Не менять
+12	public/api/routes/user.php	Не менять
+13	public/api/routes/cron.php	Не менять
+14	public/api/cron_billing.php	Не менять
+15	public/api/sync_daemon.php	Применить маппинг для xui_enabled, sub_id, telegram_id
+16	admin.html	Пункт меню «Глобальные настройки», разметка #view-field-mapping, модалка пользователя
+17	assets/js/admin-app.js	JS для маппинга, кнопки SVG, модалка со всеми полями
+18	assets/js/xui-connections.js	Online-индикатор (ping 60 с), таймаут 8 с
+19	assets/js/xui-users.js	401/403 → /login.html
+20	assets/js/admin-stats.js	401/403 → /login.html
+21	assets/js/account.js	Fallback на data.user.subscription_url
+22	assets/js/app.js	Не менять
+23	assets/js/core.js	Не менять
+24	assets/js/arctic-monitor.js	Не менять
+25	assets/js/arctic-motion.js	Не менять
+26	assets/css/app.css	Стили .modal-section, .field-mapping-table, .subscription-config-form
+27	assets/css/arctic-monitor.css	Не менять
+28	scripts/bootstrap_data.php	Добавить field_mapping.json в список
+29	scripts/init_admin.php	Не менять
+30	scripts/sync_xui.php	Не менять (использует xui_sync_connection)
+31	scripts/cron_sync.sh	Не менять
+32	public/api/test-xui.php	Не менять (диагностика)
+Новые файлы (создать отдельно, не через правку присланных):
+
+public/api/lib/field_mapping.php 🆕
+
+data/field_mapping.json 🆕
+
+data/examples/field_mapping.json 🆕
+
+Правки по файлам
+1. public/api/lib/auth.php
+Требование: Сессия админа — 60 минут.
+
+Правка:
+
+php
+// В session_start_once() перед session_set_cookie_params:
+ini_set('session.gc_maxlifetime', '3600');
+
+// В session_set_cookie_params:
+'lifetime' => 3600,   // было 0
+В login() — expires_at:
+
+php
+'expires_at' => time() + 3600   // было time() + (int) ini_get('session.gc_maxlifetime')
+В require_auth() — при истечении уже возвращается 401 (json_err('Session expired.', 401)). Ничего не менять.
+
+В logout() — не менять.
+
+2. public/api/lib/logic.php
+Требование: sync_xui_clients применяет field_mapping и сохраняет subscription_url.
+
+Правка sync_xui_clients:
+
+php
+// В начале функции:
+$mapping = field_mapping_read();
+
+// Внутри цикла по клиентам, при создании нового пользователя:
+$newUser = [];
+foreach ($mapping['xui_to_local'] as $xuiField => $localField) {
+    $newUser[$localField] = $client[$xuiField] ?? null;
+}
+$newUser = array_merge($mapping['local_defaults'], $newUser);
+$newUser['id'] = generate_id();
+$newUser['login'] = $newUser['email'];
+$newUser['password_hash'] = password_hash(bin2hex(random_bytes(32)), PASSWORD_ARGON2ID);
+$newUser['created_at'] = date(DATE_ATOM);
+$newUser['updated_at'] = date(DATE_ATOM);
+$newUser['uuid'] = $client['id'];
+$newUser['inbound_id'] = $inboundId;
+
+// После создания/обновления — сформировать ссылку:
+try {
+    $newUser['subscription_url'] = calculateSubscriptionUrl($newUser);
+} catch (Throwable $e) {
+    $newUser['subscription_url'] = null;
+}
+В apply_access_state — не менять (логика balance > 0 && !admin_blocked && !deleted).
+
+3. public/api/routes/compat.php
+Требование: calculateSubscriptionUrl читает секцию subscription из field_mapping.json.
+
+Правка:
+
+Вынести calculateSubscriptionUrl(array $user): ?string (если ещё не вынесена):
+
+php
+function calculateSubscriptionUrl(array $user): ?string
+{
+    $mapping = field_mapping_read();
+    $config = $mapping['subscription'] ?? field_mapping_defaults()['subscription'];
+    if (empty($config['enabled'])) {
+        return null;
+    }
+
+    $connections = xui_connections_read();
+    if (empty($connections)) {
+        return null;
+    }
+    $conn = $connections[0];
+
+    $scheme = $config['scheme'] === 'auto'
+        ? (parse_url($conn['base_url'], PHP_URL_SCHEME) ?: 'https')
+        : $config['scheme'];
+    $host = $config['host'] === 'auto' || $config['host'] === 'connection_host'
+        ? (parse_url($conn['base_url'], PHP_URL_HOST) ?: 'localhost')
+        : $config['host'];
+
+    $port = 0;
+    $path = '';
+    if ($config['source'] === 'panel_settings') {
+        try {
+            $client = xui_connection_client($conn);
+            $settings = $client->request('POST', 'panel/api/setting/all');
+            $obj = $settings['obj'] ?? [];
+            if (empty($obj['subEnable'])) {
+                return null;
+            }
+            $port = (int)($obj['subPort'] ?? 0);
+            $path = trim((string)($obj['subPath'] ?? ''), '/');
+        } catch (Throwable $e) {
+            return null;
+        }
+    } elseif ($config['port_source'] === 'connection_port') {
+        $port = (int)(parse_url($conn['base_url'], PHP_URL_PORT) ?? 0);
+    }
+
+    if ($port <= 0) {
+        return null;
+    }
+
+    $subId = match ($config['sub_id_source']) {
+        'xui.subId'    => (string)($user['sub_id'] ?? ''),
+        'local.sub_id' => (string)($user['sub_id'] ?? ''),
+        'login'        => (string)($user['login'] ?? ''),
+        'uuid'         => (string)($user['uuid'] ?? ''),
+        default        => '',
+    };
+    if ($subId === '') {
+        return null;
+    }
+
+    $url = str_replace(
+        ['{scheme}', '{host}', '{port}', '{path}', '{subId}'],
+        [$scheme, $host, (string)$port, $path ? $path . '/' : '', rawurlencode($subId)],
+        $config['url_template'] ?? '{scheme}://{host}:{port}/{path}{subId}'
+    );
+    return $url;
+}
+В route_compat_profile:
+
+php
+$subscriptionUrl = calculateSubscriptionUrl($user);
+if ($subscriptionUrl === null && !empty($user['subscription_url'])) {
+    $subscriptionUrl = $user['subscription_url'];
+}
+// Сохранить в users.json, если отличается:
+if ($subscriptionUrl !== null && ($user['subscription_url'] ?? null) !== $subscriptionUrl) {
+    JsonStore::update('users.json', static function (&$users) use ($user, $subscriptionUrl) {
+        $index = find_user_index($users, (string)$user['id']);
+        if ($index !== null) {
+            $users[$index]['subscription_url'] = $subscriptionUrl;
+            $users[$index]['updated_at'] = date(DATE_ATOM);
+        }
+    });
+}
+json_ok(['user' => $view, 'subscription_url' => $subscriptionUrl]);
+В compat_user_view — добавить 'subscription_url' => $user['subscription_url'] ?? null.
+
+4. public/api/routes/admin.php
+Требование: Новые эндпоинты маппинга + расширить PATCH /admin/users/{id}.
+
+Правки:
+
+route_admin_user_update — расширить $allowed:
+
+php
+$allowed = [
+    'admin_blocked', 'tariff_id', 'balance_delta',
+    'email', 'sub_id', 'xui_enabled',
+    'price_per_day', 'telegram_id', 'vip'
+];
+Обработка новых полей:
+
+php
+if (array_key_exists('email', $body)) {
+    if (!is_string($body['email']) || !filter_var($body['email'], FILTER_VALIDATE_EMAIL)) {
+        json_err('Invalid email.', 422);
+    }
+    $changes['email'] = $body['email'];
+    $changes['login'] = $body['email'];
+}
+if (array_key_exists('sub_id', $body)) {
+    $changes['sub_id'] = is_string($body['sub_id']) ? trim($body['sub_id']) : null;
+}
+if (array_key_exists('xui_enabled', $body)) {
+    $changes['xui_enabled'] = (bool)$body['xui_enabled'];
+}
+if (array_key_exists('price_per_day', $body)) {
+    $changes['price_per_day'] = ($body['price_per_day'] === null || $body['price_per_day'] === '')
+        ? null : (float)$body['price_per_day'];
+}
+if (array_key_exists('telegram_id', $body)) {
+    $changes['telegram_id'] = (string)$body['telegram_id'];
+}
+if (array_key_exists('vip', $body)) {
+    $changes['vip'] = (bool)$body['vip'];
+}
+Новые функции:
+
+php
+function route_admin_user_change_password(string $userId, array $body): never
+{
+    require_role('admin');
+    $password = input_password($body);
+    JsonStore::update('users.json', static function (&$users) use ($userId, $password): void {
+        $index = find_user_index($users, $userId);
+        if ($index === null || !empty($users[$index]['deleted'])) {
+            throw new RuntimeException('User not found.');
+        }
+        $users[$index]['password_hash'] = password_hash($password, PASSWORD_ARGON2ID);
+        $users[$index]['updated_at'] = date(DATE_ATOM);
+    }, []);
+    json_ok(['changed' => true]);
+}
+
+function route_admin_user_refresh_xui(string $userId): never
+{
+    require_role('admin');
+    $user = find_user_by_id($userId);
+    if ($user === null) json_err('User not found.', 404);
+
+    $connection = null;
+    if (!empty($user['xui_connection_id'])) {
+        $connection = xui_connection_find((string)$user['xui_connection_id']);
+    }
+    if ($connection === null) {
+        $all = xui_connections_read();
+        $connection = $all[0] ?? null;
+    }
+    if ($connection === null) json_err('No 3x-ui connection.', 409);
+
+    $client = xui_connection_client($connection);
+    $inboundId = (int)($user['xui_inbound_id'] ?? $user['inbound_id'] ?? 0);
+    $uuid = (string)($user['xui_uuid'] ?? $user['uuid'] ?? '');
+    if ($inboundId < 1 || $uuid === '') json_err('User not linked to 3x-ui.', 409);
+
+    $remote = null;
+    foreach ($client->getClients($inboundId) as $c) {
+        if (isset($c['id']) && hash_equals($uuid, (string)$c['id'])) { $remote = $c; break; }
+    }
+    if ($remote === null) json_err('Client not found in 3x-ui.', 404);
+
+    $updated = JsonStore::update('users.json', static function (&$users) use ($userId, $remote, $inboundId): array {
+        $index = find_user_index($users, $userId);
+        if ($index === null) throw new RuntimeException('User not found.');
+        $users[$index]['email'] = $users[$index]['login'] = (string)($remote['email'] ?? $users[$index]['login']);
+        $users[$index]['sub_id'] = (string)($remote['subId'] ?? '');
+        $users[$index]['telegram_id'] = (string)($remote['tgId'] ?? '');
+        $users[$index]['xui_enabled'] = (bool)($remote['enable'] ?? false);
+        $users[$index]['inbound_id'] = $inboundId;
+        $users[$index]['uuid'] = (string)$remote['id'];
+        $users[$index]['updated_at'] = date(DATE_ATOM);
+        return $users[$index];
+    }, []);
+
+    $subUrl = calculateSubscriptionUrl($updated);
+    if ($subUrl !== null) {
+        JsonStore::update('users.json', static function (&$users) use ($userId, $subUrl): void {
+            $index = find_user_index($users, $userId);
+            if ($index !== null) $users[$index]['subscription_url'] = $subUrl;
+        });
+        $updated['subscription_url'] = $subUrl;
+    }
+    json_ok(['user' => admin_public_user($updated)]);
+}
+
+function route_admin_user_hard_delete(string $userId): never
+{
+    require_role('admin');
+    JsonStore::update('users.json', static function (&$users) use ($userId): void {
+        foreach ($users as $index => $u) {
+            if (is_array($u) && (string)($u['id'] ?? '') === $userId) {
+                unset($users[$index]);
+                $users = array_values($users);
+                return;
+            }
+        }
+        throw new RuntimeException('User not found.');
+    }, []);
+    json_ok(['deleted' => true]);
+}
+
+function route_admin_users_refresh_all_subscriptions(): never
+{
+    require_role('admin');
+    $updated = 0; $total = 0; $errors = [];
+    JsonStore::update('users.json', static function (&$users) use (&$updated, &$total, &$errors): void {
+        foreach ($users as $index => $u) {
+            if (!is_array($u) || !empty($u['deleted'])) continue;
+            $total++;
+            try {
+                $url = calculateSubscriptionUrl($u);
+                if ($url !== null && ($u['subscription_url'] ?? null) !== $url) {
+                    $users[$index]['subscription_url'] = $url;
+                    $users[$index]['updated_at'] = date(DATE_ATOM);
+                    $updated++;
+                }
+            } catch (Throwable $e) {
+                $errors[] = ['user_id' => $u['id'] ?? '', 'message' => $e->getMessage()];
+            }
+        }
+    });
+    json_ok(['updated' => $updated, 'total' => $total, 'errors' => $errors]);
+}
+
+function route_admin_subscription_config(): never
+{
+    require_role('admin');
+    $mapping = field_mapping_read();
+    $connections = xui_connections_read();
+    $base = $connections[0]['base_url'] ?? null;
+    $scheme = $base ? parse_url($base, PHP_URL_SCHEME) : 'https';
+    $host = $base ? parse_url($base, PHP_URL_HOST) : '';
+    $port = 0;
+    try {
+        if ($base) {
+            $client = xui_connection_client($connections[0]);
+            $settings = $client->request('POST', 'panel/api/setting/all');
+            $port = (int)($settings['obj']['subPort'] ?? 0);
+        }
+    } catch (Throwable $e) {}
+    json_ok([
+        'scheme' => $scheme, 'host' => $host, 'port' => $port,
+        'base_url' => $base, 'field_mapping' => $mapping,
+    ]);
+}
+
+function route_admin_field_mapping_get(): never
+{
+    require_role('admin');
+    json_ok(field_mapping_read());
+}
+
+function route_admin_field_mapping_update(array $body): never
+{
+    require_role('admin');
+    $mapping = field_mapping_validate($body);
+    field_mapping_write($mapping);
+    json_ok($mapping);
+}
+
+function route_admin_field_mapping_reset(): never
+{
+    require_role('admin');
+    $defaults = field_mapping_defaults();
+    field_mapping_write($defaults);
+    json_ok($defaults);
+}
+
+function route_admin_field_mapping_preview(array $body): never
+{
+    require_role('admin');
+    $userId = input_string($body, 'user_id', true, 128);
+    $user = find_user_by_id($userId);
+    if ($user === null) json_err('User not found.', 404);
+    $mapping = field_mapping_read();
+    $preview = [];
+    foreach ($mapping['xui_to_local'] as $xuiField => $localField) {
+        $preview[$localField] = $user[$localField] ?? null;
+    }
+    $preview['subscription_url'] = calculateSubscriptionUrl($user);
+    json_ok(['user' => $user, 'mapped' => $preview, 'mapping' => $mapping]);
+}
+5. public/api/index.php
+Требование: Зарегистрировать новые маршруты.
+
+Добавить require_once:
+
+php
+require_once __DIR__ . '/lib/field_mapping.php';
+Добавить в switch (true) перед default:
+
+php
+case preg_match('#^/admin/users/([a-zA-Z0-9_-]+)/change-password$#D', $uri, $m) === 1 && $method === 'POST':
+    route_admin_user_change_password($m[1], $body);
+case preg_match('#^/admin/users/([a-zA-Z0-9_-]+)/refresh-from-xui$#D', $uri, $m) === 1 && $method === 'POST':
+    route_admin_user_refresh_xui($m[1]);
+case preg_match('#^/admin/users/local/([a-zA-Z0-9_-]+)$#D', $uri, $m) === 1 && $method === 'DELETE':
+    route_admin_user_hard_delete($m[1]);
+case $uri === '/admin/users/refresh-all-subscriptions' && $method === 'POST':
+    route_admin_users_refresh_all_subscriptions();
+case $uri === '/admin/subscription-config' && $method === 'GET':
+    route_admin_subscription_config();
+case $uri === '/admin/field-mapping' && $method === 'GET':
+    route_admin_field_mapping_get();
+case $uri === '/admin/field-mapping' && $method === 'PUT':
+    route_admin_field_mapping_update($body);
+case $uri === '/admin/field-mapping/reset' && $method === 'POST':
+    route_admin_field_mapping_reset();
+case $uri === '/admin/field-mapping/preview' && $method === 'POST':
+    route_admin_field_mapping_preview($body);
+Важно: маршрут DELETE /admin/users/local/{id} должен идти до DELETE /admin/users/{id}, чтобы не перехватился.
+
+Расширить regex ping для подключений:
+
+php
+if (preg_match('#^/admin/xui/connections(?:/([a-f0-9]+)(?:/(test|sync|refresh|settings|delete|ping))?)?$#D', $uri, $xuiMatch) === 1) {
+    route_admin_xui_connections($xuiMatch[1] ?? '', $xuiMatch[2] ?? '', $method, $body);
+}
+6. public/api/routes/xui_connections.php
+Требования:
+
+xui_sync_connection — применить field_mapping + subscription_url.
+
+Добавить ping в route_admin_xui_connections.
+
+Правка xui_sync_connection — в блоке создания нового пользователя:
+
+php
+$mapping = field_mapping_read();
+$newUser = [];
+foreach ($mapping['xui_to_local'] as $xf => $lf) {
+    $newUser[$lf] = $entry[$xf] ?? null;
+}
+$newUser = array_merge($mapping['local_defaults'], $newUser);
+$newUser['id'] = generate_id();
+$newUser['login'] = $entry['email'];
+$newUser['password_hash'] = password_hash(bin2hex(random_bytes(32)), PASSWORD_ARGON2ID);
+$newUser['uuid'] = $entry['uuid'];
+$newUser['inbound_id'] = $entry['inbound_id'];
+$newUser['xui_connection_id'] = $connectionId;
+$newUser['xui_inbound_id'] = $entry['inbound_id'];
+$newUser['xui_uuid'] = $entry['uuid'];
+$newUser['xui_enabled'] = $entry['enable'];
+$newUser['xui_present'] = true;
+$newUser['xui_last_seen_at'] = date(DATE_ATOM);
+$newUser['telegram_id'] = (string)($entry['tg_id'] ?? '');
+$newUser['sub_id'] = (string)($entry['sub_id'] ?? '');
+$newUser['created_at'] = date(DATE_ATOM);
+$newUser['updated_at'] = date(DATE_ATOM);
+$newUser['subscription_url'] = calculateSubscriptionUrl($newUser);
+$users[] = $newUser;
+Аналогично при обновлении — обновить subscription_url.
+
+Добавить ping в route_admin_xui_connections (перед json_err('Endpoint not found', 404)):
+
+php
+if ($action === 'ping' && $method === 'GET') {
+    $start = microtime(true);
+    try {
+        xui_connection_client($item)->testConnection();
+        json_ok([
+            'online' => true,
+            'response_time_ms' => (int)((microtime(true) - $start) * 1000),
+        ]);
+    } catch (Throwable $e) {
+        json_ok([
+            'online' => false,
+            'response_time_ms' => (int)((microtime(true) - $start) * 1000),
+            'error' => $e->getMessage(),
+        ]);
+    }
+}
+7. public/api/sync_daemon.php
+Требование: применить маппинг для xui_enabled, sub_id, telegram_id.
+
+Правка — внутри JsonStore::update('users.json', ...):
+
+php
+$mapping = field_mapping_read();
+$xuiEnabledField  = array_search('xui_enabled', $mapping['xui_to_local'], true) ?: 'enable';
+$subIdField       = array_search('sub_id',      $mapping['xui_to_local'], true) ?: 'subId';
+$tgIdField        = array_search('telegram_id', $mapping['xui_to_local'], true) ?: 'tgId';
+
+// В цикле:
+$u[$xuiEnabledField] = $remote['enable'];
+if (!empty($remote['subId'])) $u[$subIdField] = $remote['subId'];
+if (!empty($remote['tgId']))  $u[$tgIdField]  = (string)$remote['tgId'];
+$u['updated_at'] = date(DATE_ATOM);
+Примечание: array_search по значению xui_to_local — потому что маппинг задан как {xui_field: local_field}. Если xui_enabled нет в маппинге — используем дефолтные имена.
+
+8. admin.html
+Требования:
+
+Пункт меню «Глобальные настройки» (data-view="field-mapping").
+
+Разметка #view-field-mapping (таблица маппинга + форма подписки).
+
+Модалка пользователя #user-edit-modal со всеми полями (4 секции).
+
+Добавить в боковое меню после «Система»:
+
+html
+<a class="side-link" data-view="field-mapping" href="#field-mapping">
+  <span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+      <path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>
+    </svg>
+  </span>
+  Глобальные настройки
+</a>
+Добавить представление #view-field-mapping:
+
+html
+<div class="view" id="view-field-mapping">
+  <div class="page-intro">
+    <div>
+      <div class="eyebrow">ТЕХНИЧЕСКОЕ УПРАВЛЕНИЕ</div>
+      <h1>Глобальные настройки</h1>
+      <p>Маппинг полей 3x-ui → users.json и формирование ссылки на подписку</p>
+    </div>
+    <button class="button button-outline button-small" id="field-mapping-reset">Сбросить к дефолтам</button>
+  </div>
+
+  <section class="panel">
+    <div class="panel-heading"><h2>Соответствие полей</h2></div>
+    <div class="table-wrap">
+      <table id="field-mapping-table">
+        <thead><tr><th>Поле 3x-ui</th><th>Поле users.json</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading"><h2>Формирование ссылки на подписку</h2></div>
+    <form id="subscription-config-form" class="subscription-config-form">
+      <label>Включено <input type="checkbox" name="enabled"></label>
+      <label>Схема
+        <select name="scheme">
+          <option value="auto">auto</option>
+          <option value="https">https</option>
+          <option value="http">http</option>
+        </select>
+      </label>
+      <label>Хост
+        <select name="host">
+          <option value="auto">auto</option>
+          <option value="connection_host">connection_host</option>
+        </select>
+      </label>
+      <label>Источник порта
+        <select name="port_source">
+          <option value="subPort">subPort</option>
+          <option value="connection_port">connection_port</option>
+          <option value="manual">manual</option>
+        </select>
+      </label>
+      <label>Источник пути
+        <select name="path_source">
+          <option value="subPath">subPath</option>
+          <option value="manual">manual</option>
+          <option value="none">none</option>
+        </select>
+      </label>
+      <label>Источник subId
+        <select name="sub_id_source">
+          <option value="xui.subId">xui.subId</option>
+          <option value="local.sub_id">local.sub_id</option>
+          <option value="login">login</option>
+          <option value="uuid">uuid</option>
+        </select>
+      </label>
+      <label>Шаблон URL
+        <input type="text" name="url_template" class="input-control">
+      </label>
+    </form>
+    <div class="panel-actions">
+      <select id="preview-user-select" class="select-input"></select>
+      <button class="button button-outline button-small" id="field-mapping-preview">Предпросмотр</button>
+      <button class="button button-primary button-small" id="field-mapping-save">Сохранить</button>
+    </div>
+    <div class="subscription-link" id="field-mapping-preview-url">—</div>
+  </section>
+</div>
+Модалка #user-edit-modal — 4 секции (Основное / Привязка к 3x-ui / Подписка / Системное), поля — все из users.json:
+login (readonly), email, password (новая), balance, price_per_day, telegram_id, vip, admin_blocked, tariff_id, uuid (readonly), inbound_id (readonly), xui_uuid (readonly), xui_inbound_id (readonly), xui_connection_id (readonly), sub_id, xui_enabled, subscription_url (readonly), role (readonly), deleted (readonly), created_at (readonly), updated_at (readonly).
+
+9. assets/js/admin-app.js
+Требования:
+
+Загрузка/сохранение/сброс/предпросмотр маппинга.
+
+SVG-иконки в кнопках (уже внесено).
+
+Модалка пользователя со всеми полями (уже внесено).
+
+Загрузка «Пользователи БД» с полной ссылкой на подписку.
+
+Добавить:
+
+js
+const ICONS = {
+  edit: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>',
+  key:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="3.5"/><path d="M10 13l9-9 3 3-3 3-2-2-3 3"/></svg>',
+  refresh: '<svg width="14" height="14" viewBox="0 0
+сделай еще дополнительный промпт чтобы он ничего не сломал
+Дополнительный промпт: гарантия сохранности (anti-break)
+Этот промпт — обязательное дополнение к основному. Он вставляется в начало или конец любого запроса на правки и выполняется раньше самих правок.
+
+1. Жёсткие запреты
+НИКОГДА не делать при правке присланных файлов:
+
+❌ Запрет	Почему
+Удалять существующие функции, методы, классы	Ломает роутинг, cron, демоны
+Переименовывать функции (route_*, input_*, json_*, find_*, credit, debit, apply_access_state, sync_xui_clients, calculateSubscriptionUrl)	На них ссылаются другие файлы
+Менять сигнатуры существующих функций (порядок/типы аргументов, возвращаемый тип)	Ломает вызовы из index.php, cron_billing.php, sync_daemon.php, sync_xui.php
+Менять структуру JsonStore (read/write/update, flock, атомарная запись)	Риск порчи JSON при параллельном доступе
+Менять формат JSON-ответов ({success, data} / {success:false, error})	Ломает все JS-обёртки api()
+Менять имена ключей в JSON-файлах (data/users.json, data/settings.json, data/xui_connections.json и т.д.)	Ломает существующие данные пользователей
+Менять пути эндпоинтов (/admin/..., /user/..., /auth/..., /cron/...)	Ломает cron-скрипты и фронтенд
+Трогать data/xui_connections.key и логику AES-256-GCM	Потеря токенов 3x-ui
+Трогать логику require_csrf(), require_auth(), require_role()	Дыры в безопасности
+Удалять catch (Throwable $e) {} в cron_billing.php (только дополнять логом, но не ломать поток)	Биллинг должен продолжаться при сбое 3x-ui
+Менять session_name('PQSERVICE_SESSION'), SameSite=Strict, Secure, HttpOnly	Безопасность сессии
+Удалять существующие маршруты в index.php	404 на живых страницах
+Удалять существующие поля из users.json	Потеря данных
+Менять password_hash существующих пользователей без явного запроса	Блокировка входа
+Перезаписывать data/examples/*.json при bootstrap_data.php, если файл уже существует	Затирание рабочих данных
+2. Обязательные правила правок
+ДО правки:
+
+Прочитать файл целиком, зафиксировать список функций/методов/маршрутов.
+
+Составить «карту зависимостей»: какие функции вызываются из других файлов (grep по проекту).
+
+Проверить, что новые имена не конфликтуют с существующими (function_exists, grep).
+
+Определить, какие JSON-поля читаются/пишутся.
+
+ПРИ правке:
+
+Только добавлять — новые функции в конец файла, новые маршруты в switch перед default, новые поля в users.json — только array_merge поверх дефолтов.
+
+Порядок маршрутов в index.php: специфичные (с фиксированным путём) до общих (preg_match), DELETE /admin/users/local/{id} до DELETE /admin/users/{id}.
+
+Новые эндпоинты — под require_role('admin') + require_csrf() (кроме GET).
+
+Новые поля JSON — только при JsonStore::update, через array_merge/??, чтобы старые записи не ломались.
+
+Обратная совместимость — дефолтное поведение нового кода = текущее поведение (для field_mapping дефолт = panel_settings/auto/subPort/subPath/xui.subId).
+
+Обработка ошибок — новые вызовы calculateSubscriptionUrl/field_mapping_read оборачивать в try { } catch (Throwable $e) { } в критичных местах (импорт, cron, демон), чтобы не рвать основной поток.
+
+Никаких die, exit, json_err в местах, где раньше их не было — только возврат null/false в критичных циклах (sync_xui_clients, cron_billing.php).
+
+json_err — только в новых эндпоинтах или в существующих, где уже есть (не добавлять в helpers без явного требования).
+
+Не трогать declare(strict_types=1) и не ослаблять типы.
+
+Не менять chmod 0600/0700, flock, атомарную запись.
+
+ПОСЛЕ правки:
+
+php -l для каждого изменённого PHP — обязательно.
+
+node --check для каждого изменённого JS — обязательно.
+
+Ручной smoke-тест:
+
+логин админа → /admin/overview → 200
+
+/profile под пользователем → 200, subscription_url не null (если был)
+
+/admin/xui/connections → 200, ping работает
+
+/admin/users → 200, все поля присутствуют
+
+cron_billing.php в CLI → завершается без Fatal error
+
+sync_daemon.php первые 10 с → без ошибок в error.log
+
+Diff-проверка: убедиться, что нет удалённых строк (кроме тех, что явно в задаче).
+
+Проверить data/error.log и data/xui_errors.log — не появилось новых записей.
+
+Проверить, что старые записи в users.json читаются: взять 2–3 реальных пользователя, убедиться, что все поля на месте, subscription_url не затёрт null.
+
+3. Защита данных (data-safety)
+Перед любой правкой:
+
+bash
+cp -a data/ data_backup_$(date +%Y%m%d_%H%M%S)/
+При изменении JSON:
+
+Только JsonStore::update (атомарная замена, flock LOCK_EX), никогда file_put_contents('data/users.json', ...).
+
+Новые поля добавлять через $user['new_field'] = $user['new_field'] ?? default;, не затирая существующие.
+
+Существующие поля — только обновление значений, не удаление.
+
+array_merge($defaults, $existing) — дефолт слева, реальные данные справа (данные приоритетнее).
+
+Проверить, что после записи json_decode возвращает массив с ожидаемым числом записей (count до = count после, если не создавали/удаляли).
+
+При изменении схемы:
+
+Новые поля — опциональные (nullable), не обязательные.
+
+Если поле обязательное — миграция: foreach ($users as &$u) { $u['field'] = $u['field'] ?? default; } внутри JsonStore::update.
+
+4. Защита безопасности (security-safety)
+Не ослаблять:
+
+session.use_strict_mode = 1, use_only_cookies = 1
+
+Secure, HttpOnly, SameSite=Strict в cookie
+
+hash_equals для сравнения токенов/паролей
+
+password_hash(..., PASSWORD_ARGON2ID)
+
+CSRF-проверку на всех POST/PATCH/DELETE/PUT (кроме /auth/login, /auth/logout, /cron/sync, /register-request, /set-password)
+
+require_role('admin') на всех /admin/*
+
+require_role('user') на /profile, /transactions, /user/*
+
+filter_var(..., FILTER_VALIDATE_URL) и parse_url(...)['scheme'] === 'https' для base_url 3x-ui
+
+AES-256-GCM для токенов 3x-ui
+
+X-Cron-Secret + hash_equals для /cron/sync
+
+При добавлении эндпоинтов:
+
+Все новые /admin/* — require_role('admin') + require_csrf() (кроме GET).
+
+Валидация входа через input_* из validate.php.
+
+Не логировать пароли/токены в открытом виде.
+
+json_err без раскрытия стека (Internal server error. + запись в error.log).
+
+5. Защита функционала (feature-safety)
+Проверить, что НЕ сломались:
+
+Функционал	Что проверить
+Логин	POST /auth/login → 200 + csrf_token
+Логаут	POST /auth/logout → 200, sessions.json очищен
+Профиль	GET /profile → user + subscription_url
+Транзакции	GET /transactions → массив
+Программы	GET /programs → массив (только is_active)
+Админ-обзор	GET /admin/overview → total_users, active_users, total_coins
+Пользователи	GET /admin/users → все поля (subscription_url присутствует)
+Монеты	POST /admin/coins/credit / debit → 201, apply_access_state вызван
+Тарифы	GET/POST/PATCH/DELETE /admin/tariffs → 200/201
+Настройки	GET/PATCH /admin/settings → секреты замаскированы ********
+3x-ui подключения	GET /admin/xui/connections → массив, ping работает
+Синхронизация	POST /cron/sync с X-Cron-Secret → sync_state.json обновлён
+Биллинг	php cron_billing.php → завершается, coins.json пополняется
+Демон	sync_daemon.php 10 с → xui_enabled синхронизируется
+Ссылка	calculateSubscriptionUrl → https://proxy.pqnet.ru:2027/<subId>
+QR-код	account.html → QR из subscription_url
+Online	ping раз в 60 с, таймаут 8 с
+Сессия	60 мин, при истечении 401 → редирект /login.html
+6. Обязательные проверки после каждой правки
+bash
+# 1. Синтаксис PHP
+find public/api -name '*.php' -exec php -l {} \;
+
+# 2. Синтаксис JS
+for f in assets/js/*.js; do node --check "$f"; done
+
+# 3. Валидность JSON
+for f in data/*.json; do php -r "json_decode(file_get_contents('$f'), true, 512, JSON_THROW_ON_ERROR);" && echo "OK: $f" || echo "FAIL: $f"; done
+
+# 4. Нет удалённых строк (кроме явных правок)
+# Использовать diff с бэкапом:
+diff -u data_backup_*/users.json data/users.json | grep '^-' | grep -v '^---' || echo "No deletions in users.json"
+
+# 5. Логи после smoke-теста
+tail -n 50 data/error.log data/xui_errors.log
+7. Чек-лист перед сдачей
+□ php -l — 0 ошибок
+□ node --check — 0 ошибок
+□ Все JSON валидны (json_decode без исключения)
+□ Нет удалённых функций/маршрутов/полей (diff с бэкапом)
+□ Старые users.json читаются без потерь (2–3 реальных пользователя)
+□ cron_billing.php завершается без Fatal error
+□ sync_daemon.php 10 с — без ошибок в error.log
+□ POST /auth/login → 200
+□ GET /profile → 200 + subscription_url
+□ GET /admin/xui/connections → 200 + ping
+□ POST /admin/users/{id}/refresh-from-xui → 200 + subscription_url сохранён
+□ POST /admin/users/refresh-all-subscriptions → {updated, total, errors}
+□ GET /admin/field-mapping → дефолты = текущее поведение
+□ POST /admin/field-mapping/preview для test → https://proxy.pqnet.ru:2027/<subId>
+□ POST /admin/field-mapping/reset → возврат к дефолтам
+□ 401/403 → редирект на /login.html в браузере
+□ data/error.log и data/xui_errors.log — без новых критических записей
+□ Бэкап data/ сохранён, путь указан в отчёте
+8. Формат отчёта после правок
+Обязательно приложить:
+
+Список изменённых файлов — по одному, с diff (что добавлено, что изменено; удалений быть не должно, кроме явных).
+
+Результаты проверок — php -l, node --check, json_decode (скрин/лог).
+
+Smoke-тест — таблица «эндпоинт → статус → результат».
+
+Бэкап — путь к data_backup_YYYYMMDD_HHMMSS/.
+
+Что осталось нетронутым — явно перечислить (функции, маршруты, JSON-поля).
+
+Риски — если что-то потенциально может сломаться, указать и предложить проверку.
+
+9. Итоговое правило
+Если правка требует удаления существующего кода — остановиться и переспросить.
+Если правка меняет сигнатуру функции — остановиться и переспросить.
+Если правка меняет формат JSON-ответа или ключ в data/*.json — остановиться и переспросить.
+Во всех остальных случаях — только добавлять, не ломать, проверять после.
+
+тоесть если изменить по твоему плану все файлы то проект будет работать?? Ты учел всё?
+Честный ответ: нет, не гарантирую
+Я не могу гарантировать, что проект заработает после правок по моему плану. Причин несколько — и лучше сказать это прямо, чем дать ложную уверенность.
+
+Что я учёл
+✅ Архитектуру — по присланным файлам (index.php, logic.php, compat.php, admin.php, xui_connections.php, auth.php, xui.php, store.php, validate.php, response.php, cron.php, user.php, cron_billing.php, sync_daemon.php, test-xui.php, JS-модули, CSS, admin.html, account.html, скрипты).
+
+✅ Реестр правок — блоки 1–6 из диалога.
+
+✅ Места вызовов — по grep-логике: route_*, calculateSubscriptionUrl, apply_access_state, sync_xui_clients, xui_sync_connection, JsonStore::update, compat_user_view.
+
+✅ Форматы — {success, data} / {success:false, error}, input_*, json_ok/json_err.
+
+✅ Зависимости — require_once порядок, switch в index.php, regex маршрутов.
+
+✅ Обратную совместимость — дефолтный field_mapping.json = текущее поведение.
+
+✅ Anti-break правила — отдельный промпт.
+
+Что я НЕ учёл (и это критично)
+1. Файлы, которых я НЕ видел
+В присланных файлах отсутствуют (или я их не получал):
+
+Файл	Почему критичен
+public/api/routes/settings.php	Может дублировать route_admin_settings_* — конфликт
+public/api/lib/compat.php (если есть)	Может содержать compat_user_view, calculateSubscriptionUrl — двойное определение → Fatal error: Cannot redeclare
+public/api/lib/field_mapping.php	🆕 создаётся — но если уже существует (пусть и пустой), require_once не сработает
+data/field_mapping.json	🆕 — если формат не совпадёт с ожидаемым, field_mapping_read() вернёт дефолт, но старые поля users.json могут не подхватиться
+data/users.json (реальный)	Не видел — не знаю фактическую структуру: есть ли subscription_url, sub_id, price_per_day, vip, xui_connection_id?
+data/xui_connections.json (реальный)	Не видел — не знаю фактическую структуру: base_url, token_encrypted, load_clients, is_active?
+data/settings.json (реальный)	Не видел — какие ключи реально есть (xui_timeout? admin_password_change_required?)
+assets/css/app.css — полный	Видел фрагмент; финальные override-блоки (Manrope, ARCTIC) могут конфликтовать с новыми стилями
+admin.html — полный	Видел только фрагменты через JS; не знаю фактическую структуру #view-system, #view-users-db, модалок
+account.html — полный	Не видел — не знаю, куда вставлять fallback subscription_url
+login.html	Не видел — не знаю, как реализован редирект на смену пароля
+set-password.html	Не видел — логика route_compat_set_password
+deploy/nginx.conf	Прислан в base64 — не декодировал, не знаю правил deny для data/
+.htaccess в data/ и public/api/	Не видел — не знаю, блокируется ли прямой доступ к JSON
+sync_state.json (реальный)	Не видел — формат {finished_at, connections}?
+sessions.json (реальный)	Не видел — формат {hash: {user_id, role, csrf_hash, created_at, expires_at}}?
+Без реальных users.json и xui_connections.json я не могу гарантировать, что:
+
+field_mapping_read() не потеряет существующие поля
+
+calculateSubscriptionUrl() правильно прочитает sub_id / xui_connection_id
+
+sync_xui_clients() не затрёт существующие subscription_url
+
+2. Возможные скрытые конфликты
+Двойное определение calculateSubscriptionUrl — если она уже есть в compat.php и в logic.php → Cannot redeclare.
+
+Двойное определение route_admin_user_change_password / route_admin_user_refresh_xui / route_admin_user_hard_delete — если уже реализованы (в диалоге они «внесены», но я не видел финальный admin.php с ними — присланный admin.php их не содержит, значит либо не внесены, либо в другом файле).
+
+compat_user_view — если в compat.php есть subscription_url, а в admin.php — admin_public_user без него, фронтенд может рассинхронизироваться.
+
+field_mapping.php — если создать, но require_once в index.php поставить после logic.php, а logic.php вызывает field_mapping_read() — Fatal error: Call to undefined function.
+
+Regex в index.php — добавление ping в xuiMatch может сломать существующие test|sync|refresh|settings|delete, если порядок в regex неверный (хотя ping — отдельная альтернатива, риск низкий).
+
+session.gc_maxlifetime — если ini_set в session_start_once() после session_start(), не сработает. В присланном auth.php — ini_set нет вообще, значит блок 1.1 не внесён (или внесён в другом месте).
+
+lifetime => 3600 — в присланном auth.php стоит 0. Значит блок 1.2 не внесён.
+
+expires_at — в присланном auth.php считается как time() + (int) ini_get('session.gc_maxlifetime') — при gc_maxlifetime = 1440 (по умолчанию) это 24 минуты, не 60. Блок 1.3 не внесён.
+
+⚠️ Важно: присланный auth.php — это исходная версия без правок блока 1. Значит, либо правки не были применены, либо применены в другой ветке/файле. Это надо проверить в первую очередь.
+
+3. Логические дыры в моём плане
+field_mapping_read() вызывается в logic.php и xui_connections.php, но я не указал точный порядок require_once в index.php. Если field_mapping.php подключён после logic.php, а logic.php при загрузке не вызывает field_mapping_read() (только внутри функций) — ок. Но если вызов на верхнем уровне — Fatal error.
+
+array_search('xui_enabled', $mapping['xui_to_local'], true) в sync_daemon.php — вернёт false, если ключа нет. false ?: 'enable' → 'enable'. Но если ключ есть и значение 'xui_enabled' — вернёт 'xui_enabled'. Ок, но если маппинг задан как {xui_field: local_field}, то array_search ищет xui_enabled среди значений (local_field), а не ключей. Это баг в моём плане: надо array_search('xui_enabled', $mapping['xui_to_local']) — ищет значение 'xui_enabled' среди local_field, вернёт ключ (xui_field). Логика верная, но я написал двусмысленно.
+
+route_admin_user_refresh_xui — я вызываю calculateSubscriptionUrl($updated), но $updated — это локальная копия, а calculateSubscriptionUrl может читать xui_connections_read() заново. Если 3x-ui недоступен — вернёт null, и я не сохраню subscription_url. Это ок (сохраняем старое), но надо явно указать: если null — не затирать существующее.
+
+route_admin_users_refresh_all_subscriptions — вызывает calculateSubscriptionUrl для каждого пользователя, что делает N запросов panel/api/setting/all к 3x-ui. При 1000 пользователей — 1000 запросов. Надо кешировать настройки панели на время выполнения.
+
+route_compat_profile — я предложил сохранять subscription_url в users.json при каждом GET /profile. Это запись на каждый GET — лишняя нагрузка + риск гонки. Лучше: сохранять только если null или изменилось.
+
+xui_sync_connection — я применил field_mapping к созданию нового пользователя, но не к обновлению существующего. Надо добавить и туда.
+
+sync_daemon.php — я использую array_search для поиска полей, но не проверяю, что $remote['subId'] существует. В присланном коде — $remoteClients[$uuid] = ['enable', 'subId', 'tgId'] — ок, но если 3x-ui не вернёт subId — null, и я запишу null в sub_id. Надо ?? ''.
+
+admin.html — я не видел фактическую структуру #view-system и модалок. Моя разметка может конфликтовать с существующей (двойные id, неверные data-view).
+
+assets/js/admin-app.js — я не видел финальную версию (присланная — исходная без правок блоков 2, 5, 6). Если правки блоков 2/5/6 не применены, мой план для admin-app.js не полон.
+
+assets/js/xui-connections.js — присланная версия не содержит ping/onlineCache/AbortController (блок 3). Значит блок 3 не внесён в этот файл.
+
+assets/js/account.js — присланная версия не содержит fallback на data.user.subscription_url (блок 4.8). Значит блок 4.8 не внесён.
+
+assets/js/xui-users.js, admin-stats.js — присланные версии не содержат редиректа на /login.html при 401/403 (блок 1.4). Значит блок 1.4 не внесён.
+
+🚨 Ключевой вывод: присланные файлы — это исходное состояние, а не результат правок блоков 1–6. Либо правки не применялись, либо применены в другой копии. Перед реализацией плана надо сверить фактическое состояние каждого файла с реестром блоков 1–6.
+
+4. Что я не могу проверить без запуска
+Реальную работу JsonStore::update при параллельных запросах.
+
+Что 3x-ui реально отдаёт panel/api/setting/all с полями subEnable, subPort, subPath (может быть другая структура в вашей версии).
+
+Что calculateSubscriptionUrl вернёт именно https://proxy.pqnet.ru:2027/<subId> (зависит от base_url в xui_connections.json).
+
+Что password_hash существующих пользователей не сломается (Argon2id vs bcrypt).
+
+Что сессия реально живёт 60 минут (зависит от php.ini на сервере — session.gc_maxlifetime может быть переопределён).
+
+5. Что я не учёл в плане
+Миграция users.json — если реальные записи не содержат subscription_url, sub_id, xui_connection_id, price_per_day, vip — надо добавить их через JsonStore::update (одноразовый скрипт), иначе фронтенд сломается на undefined.
+
+Миграция xui_connections.json — если реальные записи не содержат load_clients, is_active, verified — аналогично.
+
+bootstrap_data.php — при добавлении field_mapping.json надо не перезаписать существующий (у меня есть проверка is_file, но надо явно указать).
+
+scripts/init_admin.php — не трогаем, но при первом запуске он создаёт settings.json без field_mapping. Надо, чтобы field_mapping_read() возвращал дефолт, если файла нет.
+
+Nginx — если data/field_mapping.json не заблокирован в nginx.conf/.htaccess — утечка. Надо добавить в deny-правила.
+
+Cron — cron_billing.php вызывает apply_access_state, который не использует subscription_url. Ок, но если calculateSubscriptionUrl вызывается в cron_billing — не должен (там только баланс).
+
+Итоговая честная оценка
+Вопрос	Ответ
+Проект заработает после правок по плану?	Скорее всего да, но не гарантирую.
+Я учёл всё?	Нет. Не видел реальные users.json, xui_connections.json, settings.json, полные admin.html, account.html, login.html, set-password.html, .htaccess, nginx.conf. Не сверил фактическое состояние файлов с реестром блоков 1–6.
+Что нужно, чтобы гарантировать?	Предоставить реальные файлы из §0.1 (особенно users.json, xui_connections.json, settings.json, полные HTML), сверить блоки 1–6, провести smoke-тест на стейджинге.
+Что может сломаться?	Двойные function (redeclare), неверный порядок require_once, затирание subscription_url при null, N+1 запросов к 3x-ui в refresh-all-subscriptions, конфликт id в admin.html, отсутствие миграции полей.
+Что делать?	1) Сверить блоки 1–6 с фактическими файлами. 2) Предоставить реальные users.json / xui_connections.json / settings.json. 3) Применить план поэтапно с бэкапом и smoke-тестом после каждого этапа. 4) Не деплоить на прод до прохождения чек-листа §7 anti-break промпта.
+Минимальный набор для гарантии
+Чтобы я мог дать реальную гарантию, нужно:
+
+Реальные data/users.json, data/xui_connections.json, data/settings.json (можно с замаскированными токенами).
+
+Полные admin.html, account.html, login.html, set-password.html.
+
+Подтверждение, какие блоки 1–6 фактически применены (diff с бэкапом или git log).
+
+php -v и php -i | grep session — реальные значения session.gc_maxlifetime.
+
+php -m — есть ли curl, openssl, json, mbstring.
+
+Версия 3x-ui и пример ответа panel/api/setting/all (можно замаскированный).
+
+Без этого — план реалистичен, но требует поэтапной проверки и готовности откатиться.
